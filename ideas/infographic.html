@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infographic: Music Festival Discovery Service Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .flow-card {
+            border: 2px solid #3E92CC;
+            background-color: #FEFAE0;
+            color: #0A2463;
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #D8315B;
+        }
+        .flow-connector {
+            background-color: #3E92CC;
+            height: 2px;
+            width: 100%;
+        }
+        .flow-connector-v {
+            background-color: #3E92CC;
+            width: 2px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body class="bg-[#FEFAE0] text-[#0A2463]">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12 md:mb-20">
+            <h1 class="text-4xl md:text-6xl font-black text-[#0A2463] mb-2">The Anatomy of Instant Music Discovery</h1>
+            <p class="text-lg md:text-xl text-[#3E92CC] max-w-3xl mx-auto">A visual guide to the stateless, AI-powered architecture for discovering your next favorite festival artist.</p>
+        </header>
+
+        <main class="space-y-16 md:space-y-24">
+
+            <section id="user-quest" class="text-center">
+                 <h2 class="text-3xl font-bold text-[#0A2463] mb-4">1. The User's Quest Begins</h2>
+                 <p class="max-w-2xl mx-auto text-base text-[#3E92CC] mb-8">The journey starts with a simple goal: to cut through the noise of a massive festival lineup. The user provides two key pieces of information to the service.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <div class="text-5xl mb-4">🔗</div>
+                        <h3 class="text-2xl font-bold mb-2">Festival URL</h3>
+                        <p class="text-gray-600">The link to the official festival website, containing the full artist program.</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <div class="text-5xl mb-4">🎵</div>
+                        <h3 class="text-2xl font-bold mb-2">Music Preferences</h3>
+                        <p class="text-gray-600">A simple text description of their tastes, like "funky jazz and minimal electronic".</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="architecture-flow">
+                <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-4">2. The Architectural Data Flow</h2>
+                <p class="max-w-2xl mx-auto text-base text-[#3E92CC] mb-12 text-center">Once the request is sent, it travels through a series of specialized, stateless services. This flowchart illustrates the main journey of the data, designed for speed and simplicity.</p>
+                
+                <div class="flex flex-col items-center">
+                    <div class="flow-card p-4 rounded-lg w-full md:w-1/2 text-center">
+                        <p class="font-bold">START: User Interaction</p>
+                        <p class="text-sm">Provides URL & Preferences</p>
+                    </div>
+                    <div class="flow-connector-v"></div>
+
+                    <div class="flow-card p-6 rounded-lg w-full md:w-3/4 text-center">
+                        <p class="font-bold">Frontend (Vercel)</p>
+                        <p class="text-sm">Sends request to Backend API</p>
+                    </div>
+                    <div class="flow-connector-v"></div>
+
+                    <div class="flow-card p-6 rounded-lg w-full md:w-3/4 text-center">
+                        <p class="font-bold">Backend API (Vercel Serverless)</p>
+                        <p class="text-sm">Orchestrates AI & Data Calls</p>
+                    </div>
+                    <div class="flow-connector-v"></div>
+
+                    <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="flex flex-col items-center">
+                             <div class="flow-card p-4 rounded-lg text-center w-full">
+                                <p class="font-bold">A. Web Parser Service</p>
+                                <p class="text-sm">Scrapes site & sends HTML to LLM</p>
+                            </div>
+                            <div class="flow-connector-v"></div>
+                             <div class="flow-card p-4 rounded-lg text-center w-full bg-[#D8315B] text-white">
+                                <p class="font-bold">External LLM API</p>
+                                <p class="text-sm">Returns Structured JSON Program</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                             <div class="flow-card p-4 rounded-lg text-center w-full">
+                                <p class="font-bold">B. Recommendation Engine</p>
+                                <p class="text-sm">Sends Program + Prefs to LLM</p>
+                            </div>
+                            <div class="flow-connector-v"></div>
+                             <div class="flow-card p-4 rounded-lg text-center w-full bg-[#D8315B] text-white">
+                                <p class="font-bold">External LLM API</p>
+                                <p class="text-sm">Returns Curated Artist List</p>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="flow-connector-v"></div>
+                     <div class="flow-card p-6 rounded-lg w-full md:w-3/4 text-center">
+                        <p class="font-bold">Frontend (Vercel)</p>
+                        <p class="text-sm">Receives recommendations & displays results</p>
+                    </div>
+                     <div class="flow-connector-v"></div>
+                     <div class="flow-card p-4 rounded-lg w-full md:w-1/2 text-center">
+                        <p class="font-bold">END: Curated Lineup & Sync</p>
+                        <p class="text-sm">User explores previews and syncs to calendar</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="ai-brain">
+                <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-4">3. The AI-Powered Brain</h2>
+                <p class="max-w-2xl mx-auto text-base text-[#3E92CC] mb-12 text-center">The core logic is handled by an external Large Language Model (LLM). It performs two critical tasks in sequence without storing any personal data.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#0A2463]">Step 1: Intelligent Parsing</h3>
+                        <p class="text-gray-600 mb-6">The LLM receives the raw, messy HTML from the festival website. With a specific prompt, it identifies and extracts key information, converting chaos into clean, structured data.</p>
+                        <div class="flex items-center justify-around text-center">
+                            <div class="text-4xl">📄</div>
+                            <div class="text-4xl text-[#D8315B]">→</div>
+                            <div class="text-4xl">🧠</div>
+                            <div class="text-4xl text-[#D8315B]">→</div>
+                            <div class="text-4xl">📋</div>
+                        </div>
+                         <p class="text-xs text-center text-gray-500 mt-2">Raw HTML → LLM → Structured JSON</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#0A2463]">Step 2: On-the-Fly Recommendations</h3>
+                        <p class="text-gray-600 mb-6">Next, the LLM takes the structured program and the user's stated preferences. It uses its vast musical knowledge to filter and rank the artists, providing personalized suggestions for the current session.</p>
+                        <div class="flex items-center justify-around text-center">
+                            <div>
+                                <div class="text-4xl">📋</div>
+                                <p class="text-xs text-gray-500">Program</p>
+                            </div>
+                            <div class="text-2xl">+</div>
+                            <div>
+                                <div class="text-4xl">🎵</div>
+                                <p class="text-xs text-gray-500">Preferences</p>
+                            </div>
+                            <div class="text-4xl text-[#D8315B]">→</div>
+                             <div class="text-4xl">🧠</div>
+                            <div class="text-4xl text-[#D8315B]">→</div>
+                            <div class="text-4xl">⭐</div>
+                        </div>
+                        <p class="text-xs text-center text-gray-500 mt-2">Data + Prefs → LLM → Recommended List</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="results">
+                <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-4">4. Delivering the Experience</h2>
+                <p class="max-w-2xl mx-auto text-base text-[#3E92CC] mb-12 text-center">The final output drastically simplifies the user's decision-making process, narrowing hundreds of artists down to a manageable, relevant list.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+                        <h3 class="text-2xl font-bold mb-4">From Overwhelming to Actionable</h3>
+                         <p class="text-gray-600 mb-6">The service transforms a long list of artists into a small, highly relevant selection, complete with audio previews to confirm interest.</p>
+                        <div class="chart-container">
+                            <canvas id="lineupChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">Your Curated Playlist</h3>
+                         <ul class="space-y-4">
+                            <li class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                <span class="text-2xl mr-4">🔊</span>
+                                <div>
+                                    <p class="font-bold">Artist One (9/10 Match)</p>
+                                    <p class="text-sm text-gray-500">Recommended because of their funky basslines, similar to Vincen Garcia.</p>
+                                </div>
+                            </li>
+                             <li class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                <span class="text-2xl mr-4">🔊</span>
+                                <div>
+                                    <p class="font-bold">Artist Two (8/10 Match)</p>
+                                    <p class="text-sm text-gray-500">Features minimal electronic soundscapes with live percussion.</p>
+                                </div>
+                            </li>
+                             <li class="flex items-center p-3 bg-gray-50 rounded-lg">
+                                <span class="text-2xl mr-4">🔊</span>
+                                <div>
+                                    <p class="font-bold">Artist Three (8/10 Match)</p>
+                                    <p class="text-sm text-gray-500">Known for authentic, high-energy live jazz performances.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+             <section id="tech-stack">
+                <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-4">5. The Technology Stack</h2>
+                <p class="max-w-2xl mx-auto text-base text-[#3E92CC] mb-12 text-center">The service is built on a modern, scalable, and serverless foundation, prioritizing developer experience and performance.</p>
+                <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="border-b-2 border-[#3E92CC]">
+                            <tr>
+                                <th class="p-3 text-lg font-bold">Component</th>
+                                <th class="p-3 text-lg font-bold">Technology</th>
+                                <th class="p-3 text-lg font-bold">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="p-3 font-semibold">Frontend & Deployment</td>
+                                <td class="p-3">React & Vercel</td>
+                                <td class="p-3">Interactive UI and seamless, scalable hosting.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Backend API</td>
+                                <td class="p-3">Node.js/Python on Vercel</td>
+                                <td class="p-3">Serverless functions to orchestrate the backend logic.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">AI & Machine Learning</td>
+                                <td class="p-3">External LLM API (Gemini/OpenAI)</td>
+                                <td class="p-3">Handles all parsing and recommendation intelligence.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Temporary Data/Cache</td>
+                                <td class="p-3">Firestore</td>
+                                <td class="p-3">Caches parsed festival programs to improve speed.</td>
+                            </tr>
+                             <tr>
+                                <td class="p-3 font-semibold">External Services</td>
+                                <td class="p-3">Spotify & Calendar APIs</td>
+                                <td class="p-3">Provides public artist data, audio previews, and agenda sync.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 md:mt-24 pt-8 border-t border-[#3E92CC]">
+            <p class="text-sm text-gray-500">Infographic based on the Music Festival Discovery Service Architecture. No SVGs or Mermaid JS were used in this document.</p>
+        </footer>
+    </div>
+
+    <script>
+        function wrapLabels(label) {
+            const max_width = 16;
+            if (label.length <= max_width) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > max_width) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) {
+                lines.push(currentLine.trim());
+            }
+            return lines;
+        }
+
+        const ctx = document.getElementById('lineupChart').getContext('2d');
+        const lineupChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Total Artists', 'Recommended For You'],
+                datasets: [{
+                    data: [200, 15],
+                    backgroundColor: [
+                        '#3E92CC',
+                        '#D8315B'
+                    ],
+                    borderColor: '#FEFAE0',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#0A2463',
+                            font: {
+                                size: 14,
+                                family: 'Inter'
+                            }
+                        }
+                    },
+                    tooltip: {
+                         callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
