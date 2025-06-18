@@ -5,8 +5,9 @@ incremental: false
 gist:
   noscript: false
 
-# Mermaid diagrams
-gems: [jekyll-mermaid]
+plugins:
+  - jekyll-feed
+  - jekyll-mermaid
 
 mermaid:
   src: https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
