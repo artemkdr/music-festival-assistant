@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Festival Discovery - Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2"></script> <!-- Updated Chart.js CDN to a specific stable version -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 250px; /* Adjusted for prototype aesthetics */
+            width: 100%;
+            max-width: 250px; /* Adjusted for prototype aesthetics */
+        }
+        .spotify-embed {
+            width: 100%;
+            height: 80px; /* Smaller height for compact previews */
+            border-radius: 8px;
+        }
+    </style>
+    <!-- Chosen vibrant palette: Energetic & Playful (based on provided 'colour combinations' image) -->
+</head>
+<body class="bg-[#FEFAE0] text-[#0A2463]">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-10 md:mb-16">
+            <h1 class="text-4xl md:text-5xl font-black text-[#0A2463] mb-2">Discover Your Festival Vibe</h1>
+            <p class="text-lg md:text-xl text-[#3E92CC] max-w-3xl mx-auto">Input a festival, tell us your taste, and let AI find your next favorite artists instantly!</p>
+        </header>
+
+        <main class="space-y-12 md:space-y-16">
+
+            <section id="input-section" class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-bold text-[#0A2463] mb-6">Tell Us Your Taste</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="festivalUrl" class="block text-gray-700 text-sm font-bold mb-2">Festival Website URL:</label>
+                        <input type="url" id="festivalUrl" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-[#3E92CC]" placeholder="e.g., https://www.montreuxjazzfestival.com/" value="https://www.montreuxjazzfestival.com/" disabled>
+                    </div>
+                    <div>
+                        <label for="musicPreferences" class="block text-gray-700 text-sm font-bold mb-2">Your Music Preferences:</label>
+                        <textarea id="musicPreferences" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-[#3E92CC] h-24 resize-none" placeholder="e.g., funky jazz, minimal electronic, authentic live sound" rows="4">funky jazz, minimal electronic, authentic live sound</textarea>
+                    </div>
+                    <button id="discoverBtn" class="w-full bg-[#D8315B] hover:bg-[#B0284D] text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                        Discover My Lineup!
+                    </button>
+                </div>
+            </section>
+
+            <section id="loading-section" class="text-center py-12 hidden">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-[#3E92CC] mx-auto mb-4"></div>
+                <p class="text-xl font-semibold text-[#0A2463]">Processing your request...</p>
+                <p class="text-gray-600">Analyzing website, understanding your taste, and curating your artists.</p>
+            </section>
+
+            <section id="results-section" class="bg-white p-6 md:p-8 rounded-xl shadow-lg hidden">
+                <h2 class="text-2xl font-bold text-[#0A2463] mb-6">Your Personalized Festival Experience</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 items-center">
+                    <div class="text-center">
+                        <h3 class="text-xl font-semibold mb-4">Lineup Transformation</h3>
+                        <p class="text-gray-600 mb-4">See how many artists we've filtered from the overall lineup to match your unique taste.</p>
+                        <div class="chart-container">
+                            <canvas id="lineupOverviewChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">Curated Highlights</h3>
+                        <p class="text-gray-600 mb-4">A sneak peek into the full festival program, narrowed down just for you. Listen to previews and mark your favorites!</p>
+                        <div id="artist-list" class="space-y-4">
+                            <!-- Artist cards will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <button id="syncCalendarBtn" class="bg-[#3E92CC] hover:bg-[#2C7ABF] text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                        ➕ Sync Selected to Calendar
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 pt-6 border-t border-[#3E92CC]">
+            <p class="text-sm text-gray-500">Music Festival Discovery Prototype. This demo simulates AI and backend interactions. No SVGs or Plotly.js used.</p>
+        </footer>
+    </div>
+
+    <script>
+        const discoverBtn = document.getElementById('discoverBtn');
+        const loadingSection = document.getElementById('loading-section');
+        const resultsSection = document.getElementById('results-section');
+        const artistList = document.getElementById('artist-list');
+        const syncCalendarBtn = document.getElementById('syncCalendarBtn');
+        let lineupChartInstance = null;
+
+        const mockArtists = [
+            {
+                name: "The Groove Collective",
+                genres: "Funky Jazz, Soul",
+                previewUrl: "https://open.spotify.com/embed/track/2S5kFwYdFkM8k3X9Kz5k2L?utm_source=generator",
+                match: "9/10",
+                reason: "Their deep basslines and vibrant brass section are a perfect match for funky jazz enthusiasts.",
+                date: "July 12",
+                time: "20:00",
+                stage: "Main Stage"
+            },
+            {
+                name: "Synthwave Explorers",
+                genres: "Minimal Electronic, Ambient",
+                previewUrl: "https://open.spotify.com/embed/track/1L9gYq1Q0rP97x50Gz7LzN?utm_source=generator",
+                match: "8/10",
+                reason: "Known for their hypnotic beats and layered synths, ideal for minimal electronic lovers.",
+                date: "July 13",
+                time: "22:00",
+                stage: "Electro Dome"
+            },
+            {
+                name: "Authentic Folk Fusion",
+                genres: "World, Folk, Live Percussion",
+                previewUrl: "https://open.spotify.com/embed/track/5C5nK1M1q6q80T1x4SgWlA?utm_source=generator",
+                match: "8/10",
+                reason: "An authentic sound driven by incredible live instrumentation and heartfelt vocals.",
+                date: "July 14",
+                time: "18:30",
+                stage: "Garden Stage"
+            },
+            {
+                name: "Urban Rhythm Masters",
+                genres: "Hip-Hop Jazz, Neo-Soul",
+                previewUrl: "https://open.spotify.com/embed/track/0Vjks1jF72e0HjC1yR5T3C?utm_source=generator",
+                match: "7/10",
+                reason: "Blends intricate jazz harmonies with a raw, urban rhythm. Great for live performance.",
+                date: "July 15",
+                time: "21:00",
+                stage: "Riverside Pavilion"
+            },
+            {
+                name: "The Electric Dreamers",
+                genres: "Deep House, Atmospheric Electronic",
+                previewUrl: "https://open.spotify.com/embed/track/6X0t5yK0xWn7bY414r0fJk?utm_source=generator",
+                match: "7/10",
+                reason: "Creates immersive soundscapes with subtle electronic textures, perfect for a chill evening.",
+                date: "July 16",
+                time: "19:45",
+                stage: "Chill Zone"
+            }
+        ];
+
+        function wrapLabels(label) {
+            const max_width = 16;
+            if (typeof label !== 'string' || label.length <= max_width) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > max_width) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) {
+                lines.push(currentLine.trim());
+            }
+            return lines;
+        }
+
+        function createChart() {
+            const ctx = document.getElementById('lineupOverviewChart').getContext('2d');
+            if (lineupChartInstance) {
+                lineupChartInstance.destroy();
+            }
+            lineupChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [wrapLabels('Total Artists in Program'), wrapLabels('Recommended For You')],
+                    datasets: [{
+                        data: [250, mockArtists.length], // Dummy data: 250 total, 5 recommended
+                        backgroundColor: [
+                            '#3E92CC', // Medium Blue
+                            '#D8315B'  // Red Accent
+                        ],
+                        borderColor: '#FEFAE0', // Background color for border
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#0A2463', // Dark Blue text
+                                font: {
+                                    size: 14,
+                                    family: 'Inter'
+                                },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            // Directly access backgroundColor and borderColor from the dataset
+                                            const fillStyle = data.datasets[0].backgroundColor[i];
+                                            const strokeStyle = data.datasets[0].borderColor; // Assuming borderColor is uniform for simplicity
+                                            const value = data.datasets[0].data[i];
+
+                                            return {
+                                                text: Array.isArray(label) ? label.join(' ') + ` (${value})` : label + ` (${value})`,
+                                                fillStyle: fillStyle,
+                                                strokeStyle: strokeStyle,
+                                                lineWidth: 4, // Use a fixed line width matching chart's borderWidth
+                                                hidden: !chart.isDatasetVisible(0) || chart.getDatasetMeta(0).data[i].hidden,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                },
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    return `${label}: ${value} artists`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayArtists(artists) {
+            artistList.innerHTML = '';
+            artists.forEach((artist, index) => {
+                const artistCard = document.createElement('div');
+                artistCard.className = 'bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col space-y-3 relative';
+                artistCard.innerHTML = `
+                    <h4 class="font-bold text-lg text-[#0A2463]">${artist.name}</h4>
+                    <p class="text-sm text-gray-600">Match: <span class="font-semibold text-[#D8315B]">${artist.match}</span></p>
+                    <p class="text-sm text-gray-600">🗓️ ${artist.date}, ${artist.time} at ${artist.stage}</p>
+                    <p class="text-sm text-gray-500">${artist.reason}</p>
+                    <iframe src="${artist.previewUrl}" class="spotify-embed" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+                    <div class="flex justify-end space-x-2 mt-2">
+                        <button class="like-btn bg-[#9ACD32] hover:bg-[#7CB342] text-white px-3 py-1 rounded-full text-sm transition duration-300 ease-in-out" data-index="${index}">👍 Like</button>
+                        <button class="dislike-btn bg-[#FF4500] hover:bg-[#CC3700] text-white px-3 py-1 rounded-full text-sm transition duration-300 ease-in-out" data-index="${index}">👎 Dislike</button>
+                    </div>
+                `;
+                artistList.appendChild(artistCard);
+            });
+
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.dataset.index;
+                    console.log(`Liked: ${mockArtists[index].name}`);
+                    alert(`You liked ${mockArtists[index].name}! This feedback would refine future recommendations.`);
+                });
+            });
+
+            document.querySelectorAll('.dislike-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.dataset.index;
+                    console.log(`Disliked: ${mockArtists[index].name}`);
+                    alert(`You disliked ${mockArtists[index].name}. This feedback would help us learn what not to show.`);
+                });
+            });
+        }
+
+        discoverBtn.addEventListener('click', () => {
+            loadingSection.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+            artistList.innerHTML = '';
+
+            setTimeout(() => {
+                loadingSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+                createChart();
+                displayArtists(mockArtists);
+            }, 3000); // Simulate network delay
+        });
+
+        syncCalendarBtn.addEventListener('click', () => {
+            const selectedArtists = mockArtists.map(a => `${a.name} (${a.date} ${a.time} @ ${a.stage})`).join('\n');
+            alert(`Simulating adding the following artists to your calendar:\n\n${selectedArtists}\n\nIn a real app, this would integrate with Google/Apple/Outlook Calendar APIs.`);
+            console.log("Calendar Sync Initiated for:", mockArtists);
+        });
+
+        // Initialize chart on page load if needed (hidden until discover is clicked)
+        // createChart();
+    </script>
+</body>
+</html>
