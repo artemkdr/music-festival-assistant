@@ -1,0 +1,17 @@
+lsi: false
+safe: true
+source: /docs
+incremental: false
+gist:
+  noscript: false
+
+# Enable Mermaid diagrams
+mermaid:
+  enabled: true
+
+# Theme settings for dark/light mode (using jekyll-theme-primer as an example)
+theme: jekyll-theme-primer
+
+# Add custom variables for dark/light mode if your theme supports it
+# If using a different theme, refer to its documentation for dark mode support
+# You may also need to add custom CSS for full dark/light toggle functionality

@@ -38,7 +38,7 @@ Deployment: Vercel is an excellent choice for hosting the frontend application, 
 
 Key Responsibilities:
 
-- **Input**: Allow users to paste or type a festival website URL and explicitly provide their music preferences (e.g., "funky jazz, minimal electronic, authentic sound, live bands" or a selection of genres/artists).
+- **Input**: Allow users to paste or type a festival website URL and explicitly provide their music preferences (e.g., "funky jazz, minimal electronic, authentic sound, live bands" or a selection of genres/artists). Optionally, users can authorize access to their Spotify or Apple Music accounts, allowing the app to fetch their music preferences directly from these services via their APIs.
 
 - **Display**: Render the parsed festival program, recommended artist lists, and audio previews (Spotify/Apple Music widgets).
 
@@ -93,26 +93,29 @@ Technologies: Python.
 
 ### External LLM Integration:
 
-- This service receives the user's explicit preferences (e.g., "funky jazz, minimal electronic") and the parsed festival program data.
+- This service receives the user's explicit preferences (e.g., "funky jazz, minimal electronic") and the parsed festival program data. If the user has authorized access to their Spotify or Apple Music account, the service can also retrieve and use their actual listening history or top genres/artists from these APIs to further personalize recommendations.
 
-- It then sends a prompt to the External LLM API asking it to filter and rank artists from the program based on the provided preferences. The LLM's vast knowledge base of music genres and artists would be utilized for this task.
+- It then sends a prompt to the External LLM API asking it to filter and rank artists from the program based on the provided preferences and/or fetched music profile. The LLM's vast knowledge base of music genres and artists would be utilized for this task.
 
-- Example Prompt Concept: "Given this list of artists and their known genres from a festival program, and a user who likes [user preferences], recommend the top 10 artists, explaining why each is recommended. Format the output as JSON."
+- Example Prompt Concept: "Given this list of artists and their known genres from a festival program, and a user who likes [user preferences or Spotify/Apple profile], recommend the top 10 artists, explaining why each is recommended. Format the output as JSON."
 
 - Output: A filtered and ranked list of recommended artists, potentially with a brief explanation for each.
 
 ## 6. External Music Service Integrations (Spotify, Apple Music)
-These APIs are used solely for retrieving public artist/track data for audio previews.
+- APIs are used to fetch user's music preferences (if the user authorizes access).
+- APIs are used for retrieving public artist/track data for audio previews.
 
 APIs: Spotify Web API, Apple Music API.
 
 ### Usage:
 
+- User Profile Fetch: If authorized, fetch the user's top artists, genres, or tracks from Spotify/Apple Music to use as input for the recommendation engine.
+
 - Artist Lookup: Used to find canonical artist IDs and retrieve track information for generating audio previews.
 
 - Audio Previews: Generate embeddable widgets or direct audio URLs.
 
-- No User Data Access: Explicitly, this architecture does not fetch user listening history or preferences from these services.
+- No User Data Access Without Consent: User listening history or preferences are only accessed if the user explicitly authorizes via OAuth. Otherwise, only explicit preferences provided in the session are used.
 
 ## 7. Calendar Sync Service
 This service handles the one-time integration with user calendars.

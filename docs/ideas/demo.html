@@ -50,6 +50,10 @@
                         <label for="musicPreferences" class="block text-gray-700 text-sm font-bold mb-2">Your Music Preferences:</label>
                         <textarea id="musicPreferences" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-[#3E92CC] h-24 resize-none" placeholder="e.g., funky jazz, minimal electronic, authentic live sound" rows="4">funky jazz, minimal electronic, authentic live sound</textarea>
                     </div>
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="spotifyAuth" class="h-5 w-5 text-[#3E92CC] border-gray-300 rounded focus:ring-[#3E92CC]">
+                        <label for="spotifyAuth" class="text-gray-700 text-sm">Use my Spotify/Apple Music profile for recommendations (requires authorization)</label>
+                    </div>
                     <button id="discoverBtn" class="w-full bg-[#D8315B] hover:bg-[#B0284D] text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
                         Discover My Lineup!
                     </button>
@@ -59,7 +63,7 @@
             <section id="loading-section" class="text-center py-12 hidden">
                 <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-[#3E92CC] mx-auto mb-4"></div>
                 <p class="text-xl font-semibold text-[#0A2463]">Processing your request...</p>
-                <p class="text-gray-600">Analyzing website, understanding your taste, and curating your artists.</p>
+                <p class="text-gray-600">Analyzing website, understanding your taste, and curating your artists.<br>If you authorized, we are also fetching your Spotify/Apple Music profile for deeper personalization.</p>
             </section>
 
             <section id="results-section" class="bg-white p-6 md:p-8 rounded-xl shadow-lg hidden">
@@ -294,6 +298,7 @@
         }
 
         discoverBtn.addEventListener('click', () => {
+            const useSpotify = document.getElementById('spotifyAuth').checked;
             loadingSection.classList.remove('hidden');
             resultsSection.classList.add('hidden');
             artistList.innerHTML = '';
@@ -303,6 +308,9 @@
                 resultsSection.classList.remove('hidden');
                 createChart();
                 displayArtists(mockArtists);
+                if (useSpotify) {
+                    alert('In a real app, your Spotify/Apple Music profile would be securely accessed (with your permission) to personalize these recommendations.');
+                }
             }, 3000); // Simulate network delay
         });
 

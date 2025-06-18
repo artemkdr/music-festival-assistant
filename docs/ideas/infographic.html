@@ -55,7 +55,7 @@
             <section id="user-quest" class="text-center">
                  <h2 class="text-3xl font-bold text-[#0A2463] mb-4">1. The User's Quest Begins</h2>
                  <p class="max-w-2xl mx-auto text-base text-[#3E92CC] mb-8">The journey starts with a simple goal: to cut through the noise of a massive festival lineup. The user provides two key pieces of information to the service.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
                     <div class="bg-white p-8 rounded-xl shadow-lg">
                         <div class="text-5xl mb-4">🔗</div>
                         <h3 class="text-2xl font-bold mb-2">Festival URL</h3>
@@ -65,6 +65,11 @@
                         <div class="text-5xl mb-4">🎵</div>
                         <h3 class="text-2xl font-bold mb-2">Music Preferences</h3>
                         <p class="text-gray-600">A simple text description of their tastes, like "funky jazz and minimal electronic".</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <div class="text-5xl mb-4">🔑</div>
+                        <h3 class="text-2xl font-bold mb-2">Spotify/Apple Profile (Optional)</h3>
+                        <p class="text-gray-600">If the user authorizes, the service can fetch their music preferences directly from Spotify or Apple Music for even more personalized recommendations.</p>
                     </div>
                 </div>
             </section>
@@ -159,12 +164,17 @@
                                 <div class="text-4xl">🎵</div>
                                 <p class="text-xs text-gray-500">Preferences</p>
                             </div>
+                            <div class="text-2xl">+</div>
+                            <div>
+                                <div class="text-4xl">🔑</div>
+                                <p class="text-xs text-gray-500">Spotify/Apple (if authorized)</p>
+                            </div>
                             <div class="text-4xl text-[#D8315B]">→</div>
                              <div class="text-4xl">🧠</div>
                             <div class="text-4xl text-[#D8315B]">→</div>
                             <div class="text-4xl">⭐</div>
                         </div>
-                        <p class="text-xs text-center text-gray-500 mt-2">Data + Prefs → LLM → Recommended List</p>
+                        <p class="text-xs text-center text-gray-500 mt-2">Data + Prefs + (Spotify/Apple) → LLM → Recommended List</p>
                     </div>
                 </div>
             </section>
@@ -244,8 +254,8 @@
                             </tr>
                              <tr>
                                 <td class="p-3 font-semibold">External Services</td>
-                                <td class="p-3">Spotify & Calendar APIs</td>
-                                <td class="p-3">Provides public artist data, audio previews, and agenda sync.</td>
+                                <td class="p-3">Spotify & Apple Music & Calendar APIs</td>
+                                <td class="p-3">Provides public artist data, audio previews, agenda sync, and (if authorized) user music preferences for deeper personalization.</td>
                             </tr>
                         </tbody>
                     </table>
