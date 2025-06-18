@@ -5,9 +5,11 @@ incremental: false
 gist:
   noscript: false
 
-# Enable Mermaid diagrams
+# Mermaid diagrams
+gems: [jekyll-mermaid]
+
 mermaid:
-  enabled: true
+  src: https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
 
 # Theme settings for dark/light mode (using jekyll-theme-primer as an example)
 theme: jekyll-theme-primer
