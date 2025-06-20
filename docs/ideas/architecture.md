@@ -32,7 +32,7 @@ graph TD
 ## 1. Frontend (User Interface)
 This is the client-facing application.
 
-Technologies: React (for web), React Native or native mobile development (iOS/Android). Tailwind CSS for styling.
+Technologies: Simple React (minimum dependencies) + Tailwind CSS for styling.
 
 Deployment: Vercel is an excellent choice for hosting the frontend application, providing seamless deployment for React apps and efficient content delivery.
 
@@ -49,7 +49,7 @@ Key Responsibilities:
 ## 2. Backend API Gateway
 This acts as the central hub, orchestrating calls to external LLM APIs and music services.
 
-Technologies: Node.js (with Express/NestJS), Python (with FastAPI/Django), or Go. Vercel can also host serverless functions (like Next.js API Routes for Node.js, or serverless Python functions) that can serve as your Backend API Gateway, simplifying deployment and scaling.
+Technologies: Next.js / Vercel.
 
 Key Responsibilities:
 
@@ -76,8 +76,6 @@ Collections (Examples):
 ## 4. Web Parser Service (Uses External LLM API)
 This service focuses on extracting and structuring festival program data using an external LLM.
 
-Technologies: Python.
-
 ### External LLM Integration:
 
 - The service would take the festival website's HTML content (fetched via a simple HTTP request, or potentially by browsing the site if the LLM has that capability) and send it to an External LLM API (e.g., Gemini API, OpenAI's GPT-4o with vision) with a prompt instructing it to extract artist names, stages, dates, and times into a structured format (e.g., JSON schema).
@@ -88,8 +86,6 @@ Technologies: Python.
 
 ## 5. Recommendation Engine (Uses External LLM API)
 The core intelligence for matching users to artists, now fully powered by an external LLM.
-
-Technologies: Python.
 
 ### External LLM Integration:
 

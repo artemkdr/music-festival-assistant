@@ -1,0 +1,193 @@
+/**
+ * Dependency injection container
+ * Central place to configure and wire up all services following SOLID principles
+ */
+import { createLogger, type ILogger } from '@/lib/logger';
+import type { 
+  IFestivalRepository, 
+  IArtistRepository, 
+  IPerformanceRepository, 
+  IUserFeedbackRepository 
+} from '@/repositories/interfaces';
+import { 
+  MockFestivalRepository, 
+  MockArtistRepository, 
+  MockPerformanceRepository, 
+  MockUserFeedbackRepository 
+} from '@/repositories/mock-repositories';
+import type { 
+  IFestivalDiscoveryService, 
+  IRecommendationService, 
+  IUserFeedbackService 
+} from '@/services/interfaces';
+import { FestivalDiscoveryService } from '@/services/festival-discovery-service';
+import { RecommendationService } from '@/services/recommendation-service';
+import { UserFeedbackService } from '@/services/user-feedback-service';
+import { FestivalDiscoveryController, UserFeedbackController } from '@/controllers';
+
+/**
+ * Dependency injection container class
+ */
+export class DIContainer {
+  private static instance: DIContainer;
+  
+  // Singletons
+  private _logger: ILogger | null = null;
+  private _festivalRepository: IFestivalRepository | null = null;
+  private _artistRepository: IArtistRepository | null = null;
+  private _performanceRepository: IPerformanceRepository | null = null;
+  private _userFeedbackRepository: IUserFeedbackRepository | null = null;
+  private _recommendationService: IRecommendationService | null = null;
+  private _festivalDiscoveryService: IFestivalDiscoveryService | null = null;
+  private _userFeedbackService: IUserFeedbackService | null = null;
+  private _festivalDiscoveryController: FestivalDiscoveryController | null = null;
+  private _userFeedbackController: UserFeedbackController | null = null;
+
+  /**
+   * Get singleton instance
+   */
+  public static getInstance(): DIContainer {
+    if (!DIContainer.instance) {
+      DIContainer.instance = new DIContainer();
+    }
+    return DIContainer.instance;
+  }
+
+  /**
+   * Get logger instance
+   */
+  public getLogger(): ILogger {
+    if (!this._logger) {
+      this._logger = createLogger('MusicFestivalAssistant');
+    }
+    return this._logger;
+  }
+
+  /**
+   * Get festival repository
+   */
+  public getFestivalRepository(): IFestivalRepository {
+    if (!this._festivalRepository) {
+      this._festivalRepository = new MockFestivalRepository(this.getLogger());
+    }
+    return this._festivalRepository;
+  }
+
+  /**
+   * Get artist repository
+   */
+  public getArtistRepository(): IArtistRepository {
+    if (!this._artistRepository) {
+      this._artistRepository = new MockArtistRepository(this.getLogger());
+    }
+    return this._artistRepository;
+  }
+
+  /**
+   * Get performance repository
+   */
+  public getPerformanceRepository(): IPerformanceRepository {
+    if (!this._performanceRepository) {
+      this._performanceRepository = new MockPerformanceRepository(this.getLogger());
+    }
+    return this._performanceRepository;
+  }
+
+  /**
+   * Get user feedback repository
+   */
+  public getUserFeedbackRepository(): IUserFeedbackRepository {
+    if (!this._userFeedbackRepository) {
+      this._userFeedbackRepository = new MockUserFeedbackRepository(this.getLogger());
+    }
+    return this._userFeedbackRepository;
+  }
+
+  /**
+   * Get recommendation service
+   */
+  public getRecommendationService(): IRecommendationService {
+    if (!this._recommendationService) {
+      this._recommendationService = new RecommendationService(
+        this.getArtistRepository(),
+        this.getPerformanceRepository(),
+        this.getLogger()
+      );
+    }
+    return this._recommendationService;
+  }
+
+  /**
+   * Get festival discovery service
+   */
+  public getFestivalDiscoveryService(): IFestivalDiscoveryService {
+    if (!this._festivalDiscoveryService) {
+      this._festivalDiscoveryService = new FestivalDiscoveryService(
+        this.getFestivalRepository(),
+        this.getRecommendationService(),
+        this.getLogger()
+      );
+    }
+    return this._festivalDiscoveryService;
+  }
+
+  /**
+   * Get user feedback service
+   */
+  public getUserFeedbackService(): IUserFeedbackService {
+    if (!this._userFeedbackService) {
+      this._userFeedbackService = new UserFeedbackService(
+        this.getUserFeedbackRepository(),
+        this.getLogger()
+      );
+    }
+    return this._userFeedbackService;
+  }
+
+  /**
+   * Get festival discovery controller
+   */
+  public getFestivalDiscoveryController(): FestivalDiscoveryController {
+    if (!this._festivalDiscoveryController) {
+      this._festivalDiscoveryController = new FestivalDiscoveryController(
+        this.getFestivalDiscoveryService(),
+        this.getLogger()
+      );
+    }
+    return this._festivalDiscoveryController;
+  }
+
+  /**
+   * Get user feedback controller
+   */
+  public getUserFeedbackController(): UserFeedbackController {
+    if (!this._userFeedbackController) {
+      this._userFeedbackController = new UserFeedbackController(
+        this.getUserFeedbackService(),
+        this.getLogger()
+      );
+    }
+    return this._userFeedbackController;
+  }
+
+  /**
+   * Reset all singletons (useful for testing)
+   */
+  public reset(): void {
+    this._logger = null;
+    this._festivalRepository = null;
+    this._artistRepository = null;
+    this._performanceRepository = null;
+    this._userFeedbackRepository = null;
+    this._recommendationService = null;
+    this._festivalDiscoveryService = null;
+    this._userFeedbackService = null;
+    this._festivalDiscoveryController = null;
+    this._userFeedbackController = null;
+  }
+}
+
+/**
+ * Convenience function to get DI container instance
+ */
+export const container = (): DIContainer => DIContainer.getInstance();
