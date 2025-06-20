@@ -16,7 +16,7 @@ const CrawlFestivalRequestSchema = z.object({
             aiEnhanced: z.boolean().default(true),
             parseImages: z.boolean().default(true),
             parseSchedule: z.boolean().default(true),
-            saveToDB: z.boolean().default(false), // Whether to save the result to the festivals repository
+            saveToDB: z.boolean().default(true), // Whether to save the result to the festivals repository
         })
         .optional()
         .default({}),

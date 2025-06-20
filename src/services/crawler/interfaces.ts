@@ -1,7 +1,7 @@
 /**
  * Festival web crawler service interfaces
  */
-import { ParsedLineupData } from '@/services/crawler/schemas';
+import { ParsedLineupData } from '@/services/ai/schemas';
 import type { Festival } from '@/types';
 
 /**

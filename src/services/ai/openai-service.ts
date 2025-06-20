@@ -2,8 +2,38 @@
  * OpenAI AI service implementation
  */
 import type { ILogger } from '@/lib/logger';
+import { chunkText } from '@/services/ai/utils/chunk';
+import { mergeResults } from '@/services/ai/utils/merge';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { AIProviderConfig, AIRequest, AIResponse, ArtistMatchingRequest, FestivalParsingRequest, IAIService, RecommendationRequest, StructuredExtractionRequest } from './interfaces';
-import { zodToJsonSchema } from "zod-to-json-schema";
+import { ArtistMatchingResponseSchema, RecommendationsResponseSchema } from './schemas';
+
+/**
+ * Configuration constants for chunking large data
+ */
+const CHUNKING_CONFIG = {
+    // Approximate token estimation (characters to tokens ratio)
+    CHARS_PER_TOKEN: 4,
+    // Maximum tokens per chunk (leaving room for system prompt and response)
+    MAX_CHUNK_TOKENS: 3000,
+    // Maximum characters per chunk
+    MAX_CHUNK_CHARS: 12000,
+    // Overlap between chunks to maintain context
+    CHUNK_OVERLAP_CHARS: 500,
+    // Minimum chunk size to process
+    MIN_CHUNK_CHARS: 1000,
+} as const;
+
+/**
+ * Interface for chunking results
+ */
+interface ChunkResult<T> {
+    chunkIndex: number;
+    totalChunks: number;
+    data: Partial<T>;
+    success: boolean;
+    error?: string;
+}
 
 /**
  * OpenAI API response types
@@ -144,7 +174,7 @@ Schema requirements:
         systemPrompt += `\n\nJSON schema: ${JSON.stringify(zodToJsonSchema(request.schema), null, 2)}`;
         if (request.examples) {
             systemPrompt += `\n\nExamples of structured data to guide your extraction:\n${JSON.stringify(request.examples, null, 2)}`;
-        }        
+        }
         const aiRequest: AIRequest = {
             ...request,
             systemPrompt,
@@ -167,7 +197,7 @@ Schema requirements:
     }
 
     /**
-     * Parse festival data from various sources
+     * Parse festival data from various sources (robust to large data via chunking)
      */
     async parseFestivalData<T>(request: FestivalParsingRequest<T>): Promise<T> {
         const systemPrompts = {
@@ -177,22 +207,86 @@ Schema requirements:
             venue_info: 'Extract venue and stage information including names, locations, and capacities.',
         };
 
-        const aiRequest: AIRequest = {
-            ...request,
-            systemPrompt: `${systemPrompts[request.expectedFormat]}\n\nJSON schema: ${JSON.stringify(zodToJsonSchema(request.schema), null, 2)}`,
-            prompt: `Parse the following festival data and extract ${request.expectedFormat}:\n\n${request.festivalData}`,
-        };
+        // --- Helper: Estimate token count ---
+        const estimateTokens = (text: string) => Math.ceil(text.length / CHUNKING_CONFIG.CHARS_PER_TOKEN);
+                
+        // --- Main logic ---
+        const systemPrompt = `${systemPrompts[request.expectedFormat]}
 
-        const response = await this.generateCompletion(aiRequest);
+Return your response as valid JSON that matches this exact schema:\n${JSON.stringify(zodToJsonSchema(request.schema), null, 2)}\n\nIMPORTANT: Return only valid JSON, no additional text or explanations.`;
 
-        try {
-            const parsedData = JSON.parse(response.content) as T;
-            // Validate against schema if Zod schema is provided
-            return request.schema.parse(parsedData) as T;
-        } catch (error) {
-            this.logger.warn('Failed to parse festival data as JSON, returning raw text', { error });
-            return { rawData: response.content } as T;
+        const data = request.festivalData;
+        const maxChunkChars = CHUNKING_CONFIG.MAX_CHUNK_CHARS;
+        const overlap = CHUNKING_CONFIG.CHUNK_OVERLAP_CHARS;
+        const needsChunking = estimateTokens(data) > CHUNKING_CONFIG.MAX_CHUNK_TOKENS;
+
+        if (!needsChunking) {
+            // --- Single chunk processing ---
+            const aiRequest: AIRequest = {
+                ...request,
+                systemPrompt,
+                prompt: `Parse the following festival data and extract ${request.expectedFormat}:\n\n${data}`,
+            };
+            const response = await this.generateCompletion(aiRequest);
+            try {
+                const parsedData = JSON.parse(response.content);
+                const validatedData = request.schema.parse(parsedData) as T;
+                this.logger.debug('Festival data parsed with schema validation', {
+                    expectedFormat: request.expectedFormat,
+                    dataSize: data.length,
+                    parsedFields: Object.keys(validatedData || {}),
+                });
+                return validatedData;
+            } catch (error) {
+                this.logger.error('Failed to parse or validate festival data', error instanceof Error ? error : new Error(String(error)), {
+                    rawResponse: response.content,
+                    expectedFormat: request.expectedFormat,
+                    schema: zodToJsonSchema(request.schema),
+                });
+                return { rawData: response.content } as T;
+            }
         }
+
+        // --- Chunked processing ---
+        const chunks = chunkText(data, maxChunkChars, overlap);
+        this.logger.info('Festival data is large, using chunked AI parsing', {
+            totalLength: data.length,
+            chunkCount: chunks.length,
+            chunkSize: maxChunkChars,
+        });
+        const results: Partial<T>[] = [];
+        for (let i = 0; i < Math.min(30, chunks.length); i++) {
+            const chunk = chunks[i];
+            const aiRequest: AIRequest = {
+                ...request,
+                systemPrompt,
+                prompt: `Parse the following festival data (chunk ${i + 1} of ${chunks.length}) and extract ${request.expectedFormat}:\n\n${chunk}`,
+            };
+            try {
+                const response = await this.generateCompletion(aiRequest);
+                const parsedData = JSON.parse(response.content);
+                const validatedData = request.schema.parse(parsedData) as Partial<T>;
+                results.push(validatedData);
+                this.logger.debug('Chunk parsed successfully', { chunk: i + 1, totalChunks: chunks.length });
+            } catch (error) {
+                this.logger.error('Failed to parse/validate chunk', error instanceof Error ? error : new Error(String(error)), {
+                    chunk: i + 1,
+                    totalChunks: chunks.length,
+                });
+                // Optionally push partial/fallback data
+            }
+        }
+        if (results.length === 0) {
+            this.logger.error('All chunks failed to parse, returning empty result');
+            return { rawData: '' } as T;
+        }
+        // Merge all chunked results
+        const merged = mergeResults(results);
+        this.logger.info('Merged chunked festival data', {
+            chunkCount: chunks.length,
+            mergedKeys: Object.keys(merged as object),
+        });
+        return merged;
     }
 
     /**
@@ -205,18 +299,16 @@ Schema requirements:
     }> {
         const systemPrompt = `You are an expert in music artist name matching and normalization. Your task is to find the best match for an artist name from a list of existing artists, or suggest the most likely correct name.
 
-Return your response as JSON with this structure:
-{
-  "matchedArtist": "exact match if found, null if no good match",
-  "confidence": 0.0-1.0,
-  "suggestions": ["list", "of", "possible", "matches"]
-}
+Return your response as valid JSON that matches this exact schema:
+${JSON.stringify(zodToJsonSchema(ArtistMatchingResponseSchema), null, 2)}
 
 Consider:
 - Alternative spellings and capitalization
 - Stage names vs real names
 - Common abbreviations
-- Regional variations`;
+- Regional variations
+
+IMPORTANT: Return only valid JSON, no additional text or explanations.`;
 
         const prompt = `Artist to match: "${request.artistName}"
 
@@ -233,14 +325,28 @@ ${request.contextData ? `Additional context:\n${request.contextData}` : ''}`;
         const response = await this.generateCompletion(aiRequest);
 
         try {
-            const result = JSON.parse(response.content);
+            const parsedData = JSON.parse(response.content);
+            const validatedResult = ArtistMatchingResponseSchema.parse(parsedData);
+
+            this.logger.debug('Artist matching completed with schema validation', {
+                artistName: request.artistName,
+                matchedArtist: validatedResult.matchedArtist,
+                confidence: validatedResult.confidence,
+                suggestionsCount: validatedResult.suggestions.length,
+            });
+
             return {
-                matchedArtist: result.matchedArtist || undefined,
-                confidence: Math.max(0, Math.min(1, result.confidence || 0)),
-                suggestions: Array.isArray(result.suggestions) ? result.suggestions : [],
+                ...(validatedResult.matchedArtist && { matchedArtist: validatedResult.matchedArtist }),
+                confidence: validatedResult.confidence,
+                suggestions: validatedResult.suggestions,
             };
         } catch (error) {
-            this.logger.error('Failed to parse artist matching response', error instanceof Error ? error : new Error(String(error)));
+            this.logger.error('Failed to parse or validate artist matching response', error instanceof Error ? error : new Error(String(error)), {
+                rawResponse: response.content,
+                schema: zodToJsonSchema(ArtistMatchingResponseSchema),
+            });
+
+            // Return safe fallback
             return {
                 confidence: 0,
                 suggestions: [],
@@ -254,21 +360,16 @@ ${request.contextData ? `Additional context:\n${request.contextData}` : ''}`;
     async generateRecommendations(request: RecommendationRequest): Promise<unknown[]> {
         const systemPrompt = `You are a music recommendation expert. Analyze user preferences and available artists to generate personalized recommendations.
 
-Return your response as JSON array with this structure:
-[
-  {
-    "artistId": "string",
-    "reason": "why this artist is recommended",
-    "confidence": 0.0-1.0,
-    "tags": ["genre", "mood", "style"]
-  }
-]
+Return your response as valid JSON that matches this exact schema:
+${JSON.stringify(zodToJsonSchema(RecommendationsResponseSchema), null, 2)}
 
 Consider:
 - User's preferred genres and artists
 - Discovery preferences (conservative/balanced/adventurous)
 - Previous feedback and listening history
-- Musical similarities and connections`;
+- Musical similarities and connections
+
+IMPORTANT: Return only valid JSON array, no additional text or explanations.`;
 
         const prompt = `User preferences: ${JSON.stringify(request.userPreferences, null, 2)}
 
@@ -285,10 +386,23 @@ ${request.userHistory ? `User history: ${JSON.stringify(request.userHistory, nul
         const response = await this.generateCompletion(aiRequest);
 
         try {
-            const recommendations = JSON.parse(response.content);
-            return Array.isArray(recommendations) ? recommendations : [];
+            const parsedData = JSON.parse(response.content);
+            const validatedRecommendations = RecommendationsResponseSchema.parse(parsedData);
+
+            this.logger.debug('Recommendations generated with schema validation', {
+                userPreferences: request.userPreferences,
+                recommendationCount: validatedRecommendations.length,
+                averageConfidence: validatedRecommendations.reduce((sum, rec) => sum + rec.confidence, 0) / validatedRecommendations.length,
+            });
+
+            return validatedRecommendations;
         } catch (error) {
-            this.logger.error('Failed to parse recommendations response', error instanceof Error ? error : new Error(String(error)));
+            this.logger.error('Failed to parse or validate recommendations response', error instanceof Error ? error : new Error(String(error)), {
+                rawResponse: response.content,
+                schema: zodToJsonSchema(RecommendationsResponseSchema),
+            });
+
+            // Return empty array as safe fallback
             return [];
         }
     }

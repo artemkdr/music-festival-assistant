@@ -5,8 +5,8 @@ import type { ILogger } from '@/lib/logger';
 import type { IAIService } from '@/services/ai';
 import type { Festival, Artist, Performance } from '@/types';
 import type { IFestivalCrawlerService, RawFestivalData, FestivalCrawlResult, CrawlerConfig } from './interfaces';
+import { FestivalInfoSchema, ParsedLineupData, ParsedLineupDataSchema, type FestivalInfo } from '@/services/ai/schemas';
 import { z } from 'zod';
-import { FestivalInfo, FestivalInfoSchema, ParsedLineupData, ParsedLineupDataSchema } from '@/services/crawler/schemas';
 
 /**
  * Default crawler configuration
@@ -207,7 +207,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             const extractedInfo = await this.aiService.extractStructuredData({
                 prompt: `Extract festival information from this HTML. Focus on festival name, location, dates, and description.
 
-HTML Content: ${html.substring(0, 10000)}`, // Limit content size                
+HTML Content: ${html.substring(0, 10000)}`, // Limit content size
                 schema: FestivalInfoSchema, // We'll accept any object structure
             });
 
@@ -419,7 +419,7 @@ HTML Content: ${html.substring(0, 10000)}`, // Limit content size
         const cleanedStages = [...new Set(rawData.stages?.filter(stage => stage && stage.trim()) || [])];
 
         // Clean schedule
-        const cleanedSchedule = rawData.schedule?.filter(item => item.artistName && item.stage && item.startTime && item.endTime) || [];
+        const cleanedSchedule = rawData.schedule?.filter(item => item.artistName) || [];
 
         return {
             artists: cleanedArtists,

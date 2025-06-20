@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/lib/container';
 import { getAIConfigStatus } from '@/lib/ai-config';
 import { z } from 'zod';
-import { ParsedLineupDataSchema } from '@/services/crawler/schemas';
+import { ParsedLineupDataSchema } from '@/services/ai/schemas';
 
 /**
  * GET /api/ai/status - Get AI service configuration status
