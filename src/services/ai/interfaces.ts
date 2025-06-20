@@ -2,6 +2,8 @@
  * AI service abstractions for festival parsing, matching, and recommendations
  */
 
+import { ZodSchema } from 'zod';
+
 /**
  * Configuration for AI provider
  */
@@ -41,14 +43,14 @@ export interface AIResponse {
  * Structured data extraction request
  */
 export interface StructuredExtractionRequest<T> extends AIRequest {
-    schema: unknown; // Zod schema or other validation schema
+    schema: ZodSchema; // Zod schema or other validation schema
     examples?: T[];
 }
 
 /**
  * Festival parsing specific requests
  */
-export interface FestivalParsingRequest extends AIRequest {
+export interface FestivalParsingRequest<T> extends StructuredExtractionRequest<T> {
     festivalData: string; // Raw HTML, JSON, or text data
     expectedFormat: 'lineup' | 'schedule' | 'artist_info' | 'venue_info';
 }
@@ -88,7 +90,7 @@ export interface IAIService {
     /**
      * Parse festival data from various sources
      */
-    parseFestivalData(request: FestivalParsingRequest): Promise<unknown>;
+    parseFestivalData<T>(request: FestivalParsingRequest<T>): Promise<T>;
 
     /**
      * Match and normalize artist names

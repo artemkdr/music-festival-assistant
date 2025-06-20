@@ -66,6 +66,13 @@ export interface IArtistRepository {
      * @returns Promise resolving to array of all artists
      */
     getAllArtists(): Promise<Artist[]>;
+
+    /**
+     * Save artist data
+     * @param artist Artist data to save
+     * @returns Promise resolving to saved artist
+     */
+    saveArtist(artist: Artist): Promise<Artist>;
 }
 
 /**
@@ -93,6 +100,13 @@ export interface IPerformanceRepository {
      * @returns Promise resolving to array of performances
      */
     getPerformancesByDay(festivalId: string, day: number): Promise<Performance[]>;
+
+    /**
+     * Save performance data
+     * @param performance Performance data to save
+     * @returns Promise resolving to saved performance
+     */
+    savePerformance(performance: Performance): Promise<Performance>;
 }
 
 /**

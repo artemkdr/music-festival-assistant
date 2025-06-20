@@ -40,11 +40,8 @@ export async function POST(request: NextRequest) {
                     },
                     { status: 404 }
                 );
-            }            // Generate AI-enhanced recommendations
-            const aiRecommendations = await recommendationService.generateAIEnhancedRecommendations(
-                festival,
-                validatedData.userPreferences as UserPreferences
-            );
+            } // Generate AI-enhanced recommendations
+            const aiRecommendations = await recommendationService.generateAIEnhancedRecommendations(festival, validatedData.userPreferences as UserPreferences);
 
             response = {
                 status: 'success' as const,
@@ -58,12 +55,10 @@ export async function POST(request: NextRequest) {
                     enhancedCount: aiRecommendations.filter(r => r.aiEnhanced).length,
                 },
             };
-        } else if (validatedData.festivalUrl) {            // Use traditional URL-based discovery for now
+        } else if (validatedData.festivalUrl) {
+            // Use traditional URL-based discovery for now
             // TODO: Implement AI-powered web scraping
-            response = await festivalDiscoveryService.discoverArtistsFromUrl(
-                validatedData.festivalUrl,
-                validatedData.userPreferences as UserPreferences
-            );
+            response = await festivalDiscoveryService.discoverArtistsFromUrl(validatedData.festivalUrl, validatedData.userPreferences as UserPreferences);
         } else {
             return NextResponse.json(
                 {

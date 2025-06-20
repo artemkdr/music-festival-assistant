@@ -2,7 +2,8 @@
  * OpenAI AI service implementation
  */
 import type { ILogger } from '@/lib/logger';
-import type { IAIService, AIProviderConfig, AIRequest, AIResponse, StructuredExtractionRequest, FestivalParsingRequest, ArtistMatchingRequest, RecommendationRequest } from './interfaces';
+import type { AIProviderConfig, AIRequest, AIResponse, ArtistMatchingRequest, FestivalParsingRequest, IAIService, RecommendationRequest, StructuredExtractionRequest } from './interfaces';
+import { zodToJsonSchema } from "zod-to-json-schema";
 
 /**
  * OpenAI API response types
@@ -130,16 +131,20 @@ export class OpenAIService implements IAIService {
      * Extract structured data using AI with JSON schema validation
      */
     async extractStructuredData<T>(request: StructuredExtractionRequest<T>): Promise<T> {
-        const systemPrompt = `You are a data extraction expert. Extract structured data from the provided text and return it as valid JSON that matches the given schema. Be precise and accurate.
+        let systemPrompt =
+            request.systemPrompt ??
+            `You are a data extraction expert. Extract structured data from the provided text and return it as valid JSON that matches the given schema. Be precise and accurate.
 
 Schema requirements:
 - Return only valid JSON
 - Follow the exact structure specified
 - Include all required fields
-- Use appropriate data types
+- Use appropriate data types`;
 
-${request.examples ? `Examples of expected output:\n${JSON.stringify(request.examples, null, 2)}` : ''}`;
-
+        systemPrompt += `\n\nJSON schema: ${JSON.stringify(zodToJsonSchema(request.schema), null, 2)}`;
+        if (request.examples) {
+            systemPrompt += `\n\nExamples of structured data to guide your extraction:\n${JSON.stringify(request.examples, null, 2)}`;
+        }        
         const aiRequest: AIRequest = {
             ...request,
             systemPrompt,
@@ -152,11 +157,7 @@ ${request.examples ? `Examples of expected output:\n${JSON.stringify(request.exa
             const parsedData = JSON.parse(response.content);
 
             // Validate against schema if Zod schema is provided
-            if (request.schema && typeof request.schema === 'object' && 'parse' in request.schema) {
-                return (request.schema as { parse: (data: unknown) => T }).parse(parsedData);
-            }
-
-            return parsedData;
+            return request.schema.parse(parsedData) as T;
         } catch (error) {
             this.logger.error('Failed to parse structured data', error instanceof Error ? error : new Error(String(error)), {
                 rawResponse: response.content,
@@ -168,7 +169,7 @@ ${request.examples ? `Examples of expected output:\n${JSON.stringify(request.exa
     /**
      * Parse festival data from various sources
      */
-    async parseFestivalData(request: FestivalParsingRequest): Promise<unknown> {
+    async parseFestivalData<T>(request: FestivalParsingRequest<T>): Promise<T> {
         const systemPrompts = {
             lineup: 'Extract artist lineup information from festival data. Return structured data with artist names, genres, and any available metadata.',
             schedule: 'Extract performance schedule information. Return structured data with artists, times, stages, and dates.',
@@ -178,17 +179,19 @@ ${request.examples ? `Examples of expected output:\n${JSON.stringify(request.exa
 
         const aiRequest: AIRequest = {
             ...request,
-            systemPrompt: systemPrompts[request.expectedFormat],
+            systemPrompt: `${systemPrompts[request.expectedFormat]}\n\nJSON schema: ${JSON.stringify(zodToJsonSchema(request.schema), null, 2)}`,
             prompt: `Parse the following festival data and extract ${request.expectedFormat}:\n\n${request.festivalData}`,
         };
 
         const response = await this.generateCompletion(aiRequest);
 
         try {
-            return JSON.parse(response.content);
+            const parsedData = JSON.parse(response.content) as T;
+            // Validate against schema if Zod schema is provided
+            return request.schema.parse(parsedData) as T;
         } catch (error) {
             this.logger.warn('Failed to parse festival data as JSON, returning raw text', { error });
-            return { rawData: response.content };
+            return { rawData: response.content } as T;
         }
     }
 

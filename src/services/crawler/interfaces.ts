@@ -1,7 +1,8 @@
 /**
  * Festival web crawler service interfaces
  */
-import type { Festival, Artist, Performance } from '@/types';
+import { ParsedLineupData } from '@/services/crawler/schemas';
+import type { Festival } from '@/types';
 
 /**
  * Raw festival data extracted from web pages
@@ -17,39 +18,6 @@ export interface RawFestivalData {
         contentType?: string;
         size?: number;
     };
-}
-
-/**
- * Parsed festival lineup data
- */
-export interface ParsedLineupData {
-    artists: {
-        name: string;
-        genres?: string[];
-        description?: string;
-        imageUrl?: string;
-        socialLinks?: {
-            website?: string;
-            instagram?: string;
-            twitter?: string;
-            facebook?: string;
-        };
-        streamingLinks?: {
-            spotify?: string;
-            appleMusic?: string;
-            youtube?: string;
-            soundcloud?: string;
-            bandcamp?: string;
-        };
-    }[];
-    stages?: string[];
-    schedule?: {
-        artistName: string;
-        stage: string;
-        startTime: string;
-        endTime: string;
-        day?: number;
-    }[];
 }
 
 /**
@@ -87,12 +55,12 @@ export interface IFestivalCrawlerService {
     /**
      * Crawl festival website and extract lineup data
      * @param url Festival website URL
-     * @param festivalInfo Basic festival information (name, location, dates)
+     * @param festivalInfo Optional basic festival information (will be extracted from HTML if not provided)
      * @returns Promise resolving to crawl result
      */
     crawlFestival(
         url: string,
-        festivalInfo: {
+        festivalInfo?: {
             name: string;
             location: string;
             startDate: string;

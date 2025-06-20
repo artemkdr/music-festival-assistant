@@ -12,17 +12,17 @@ export interface Artist {
     description: string;
     imageUrl?: string;
     streamingLinks?: {
-        spotify?: string;
-        appleMusic?: string;
-        youtube?: string;
-        soundcloud?: string;
-        bandcamp?: string;
+        spotify?: string | undefined;
+        appleMusic?: string | undefined;
+        youtube?: string | undefined;
+        soundcloud?: string | undefined;
+        bandcamp?: string | undefined;
     };
     socialLinks?: {
-        website?: string;
-        instagram?: string;
-        twitter?: string;
-        facebook?: string;
+        website?: string | undefined;
+        instagram?: string | undefined;
+        twitter?: string | undefined;
+        facebook?: string | undefined;
     };
     popularity: number; // 1-100 scale
 }

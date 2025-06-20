@@ -11,22 +11,18 @@ import { DIContainer } from '@/lib/container';
  */
 const CrawlFestivalRequestSchema = z.object({
     url: z.string().url('Must be a valid URL'),
-    festivalInfo: z.object({
-        name: z.string().min(1, 'Festival name is required'),
-        location: z.string().min(1, 'Location is required'),
-        startDate: z.string().min(1, 'Start date is required'),
-        endDate: z.string().min(1, 'End date is required'),
-        description: z.string().optional(),
-    }),
-    options: z.object({
-        aiEnhanced: z.boolean().default(true),
-        parseImages: z.boolean().default(true),
-        parseSchedule: z.boolean().default(true),
-        saveToDB: z.boolean().default(false), // Whether to save the result to the festivals repository
-    }).optional().default({}),
+    options: z
+        .object({
+            aiEnhanced: z.boolean().default(true),
+            parseImages: z.boolean().default(true),
+            parseSchedule: z.boolean().default(true),
+            saveToDB: z.boolean().default(false), // Whether to save the result to the festivals repository
+        })
+        .optional()
+        .default({}),
 });
 
-type CrawlFestivalRequest = z.infer<typeof CrawlFestivalRequestSchema>;
+//type CrawlFestivalRequest = z.infer<typeof CrawlFestivalRequestSchema>;
 
 /**
  * POST /api/admin/crawl-festival
@@ -44,10 +40,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // Parse and validate request body
         const body = await request.json();
         const validatedRequest = CrawlFestivalRequestSchema.parse(body);
-
         logger.info('Starting festival crawl', {
             url: validatedRequest.url,
-            festivalName: validatedRequest.festivalInfo.name,
             options: validatedRequest.options,
         });
 
@@ -60,19 +54,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 parseImages: validatedRequest.options.parseImages,
                 parseSchedule: validatedRequest.options.parseSchedule,
             });
-        }        // Perform the crawl
-        const festivalInfoForCrawl = {
-            name: validatedRequest.festivalInfo.name,
-            location: validatedRequest.festivalInfo.location,
-            startDate: validatedRequest.festivalInfo.startDate,
-            endDate: validatedRequest.festivalInfo.endDate,
-            ...(validatedRequest.festivalInfo.description && { description: validatedRequest.festivalInfo.description }),
-        };
-        
-        const crawlResult = await crawlerService.crawlFestival(
-            validatedRequest.url,
-            festivalInfoForCrawl
-        );
+        }
+
+        const crawlResult = await crawlerService.crawlFestival(validatedRequest.url);
 
         // Save to database if requested and crawl was successful
         if (validatedRequest.options.saveToDB && crawlResult.success && crawlResult.festival) {
@@ -82,7 +66,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                     festivalId: savedFestival.id,
                     festivalName: savedFestival.name,
                 });
-                
+
                 return NextResponse.json({
                     status: 'success',
                     message: 'Festival crawled and saved successfully',
@@ -101,7 +85,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 });
             } catch (saveError) {
                 logger.error('Failed to save festival to repository', saveError instanceof Error ? saveError : new Error(String(saveError)));
-                
+
                 return NextResponse.json({
                     status: 'partial_success',
                     message: 'Festival crawled successfully but failed to save to database',
@@ -116,32 +100,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // Return crawl result without saving
         return NextResponse.json({
             status: crawlResult.success ? 'success' : 'error',
-            message: crawlResult.success 
-                ? 'Festival crawled successfully' 
-                : 'Festival crawl failed',
+            message: crawlResult.success ? 'Festival crawled successfully' : 'Festival crawl failed',
             data: {
                 crawlResult,
             },
         });
-
     } catch (error) {
         logger.error('Admin festival crawl failed', error instanceof Error ? error : new Error(String(error)));
 
         if (error instanceof z.ZodError) {
-            return NextResponse.json({
-                status: 'error',
-                message: 'Invalid request data',
-                errors: error.errors.map(err => ({
-                    field: err.path.join('.'),
-                    message: err.message,
-                })),
-            }, { status: 400 });
+            return NextResponse.json(
+                {
+                    status: 'error',
+                    message: 'Invalid request data',
+                    errors: error.errors.map(err => ({
+                        field: err.path.join('.'),
+                        message: err.message,
+                    })),
+                },
+                { status: 400 }
+            );
         }
 
-        return NextResponse.json({
-            status: 'error',
-            message: error instanceof Error ? error.message : 'Festival crawl failed',
-        }, { status: 500 });
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Festival crawl failed',
+            },
+            { status: 500 }
+        );
     }
 }
 
@@ -156,7 +143,7 @@ export async function GET(): Promise<NextResponse> {
 
     try {
         const config = crawlerService.getConfig();
-        
+
         return NextResponse.json({
             status: 'success',
             message: 'Crawler service status',
@@ -168,11 +155,11 @@ export async function GET(): Promise<NextResponse> {
                 exampleRequest: {
                     url: 'https://example-festival.com',
                     festivalInfo: {
-                        name: 'Example Festival 2024',
-                        location: 'Austin, Texas',
-                        startDate: '2024-06-15T00:00:00Z',
-                        endDate: '2024-06-17T23:59:59Z',
-                        description: 'A great music festival',
+                        name: 'Example Festival 2024', // Optional - will be extracted if not provided
+                        location: 'Austin, Texas', // Optional - will be extracted if not provided
+                        startDate: '2024-06-15T00:00:00Z', // Optional - will be extracted if not provided
+                        endDate: '2024-06-17T23:59:59Z', // Optional - will be extracted if not provided
+                        description: 'A great music festival', // Optional - will be extracted if not provided
                     },
                     options: {
                         aiEnhanced: true,
@@ -183,13 +170,15 @@ export async function GET(): Promise<NextResponse> {
                 },
             },
         });
-
     } catch (error) {
         logger.error('Failed to get crawler status', error instanceof Error ? error : new Error(String(error)));
-        
-        return NextResponse.json({
-            status: 'error',
-            message: 'Failed to get crawler status',
-        }, { status: 500 });
+
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Failed to get crawler status',
+            },
+            { status: 500 }
+        );
     }
 }

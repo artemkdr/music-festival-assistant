@@ -4,13 +4,9 @@
 import type { ILogger } from '@/lib/logger';
 import type { IAIService } from '@/services/ai';
 import type { Festival, Artist, Performance } from '@/types';
-import type {
-    IFestivalCrawlerService,
-    RawFestivalData,
-    ParsedLineupData,
-    FestivalCrawlResult,
-    CrawlerConfig,
-} from './interfaces';
+import type { IFestivalCrawlerService, RawFestivalData, FestivalCrawlResult, CrawlerConfig } from './interfaces';
+import { z } from 'zod';
+import { FestivalInfo, FestivalInfoSchema, ParsedLineupData, ParsedLineupDataSchema } from '@/services/crawler/schemas';
 
 /**
  * Default crawler configuration
@@ -41,47 +37,50 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             aiEnabled: !!this.aiService,
             config: this.config,
         });
-    }
-
-    /**
+    } /**
      * Crawl festival website and extract lineup data
      */
-    async crawlFestival(
-        url: string,
-        festivalInfo: {
-            name: string;
-            location: string;
-            startDate: string;
-            endDate: string;
-            description?: string;
-        }
-    ): Promise<FestivalCrawlResult> {
+    async crawlFestival(url: string, festivalInfo?: FestivalInfo): Promise<FestivalCrawlResult> {
         const startTime = Date.now();
-        this.logger.info('Starting festival crawl', { url, festivalName: festivalInfo.name });
+        this.logger.info('Starting festival crawl', {
+            url,
+            festivalName: festivalInfo?.name || 'Unknown Festival',
+        });
 
         try {
             // Step 1: Fetch HTML content
             const rawData = await this.fetchHtmlContent(url);
 
-            // Step 2: Parse HTML content
+            // Step 2: Extract festival metadata from HTML if not provided
+            const extractedFestivalInfo = await this.extractFestivalInfo(rawData.html, url);
+            const finalFestivalInfo = {
+                name: festivalInfo?.name || extractedFestivalInfo.name || 'Unknown Festival',
+                location: festivalInfo?.location || extractedFestivalInfo.location || 'Unknown Location',
+                startDate: festivalInfo?.startDate || extractedFestivalInfo.startDate || new Date().toISOString(),
+                endDate: festivalInfo?.endDate || extractedFestivalInfo.endDate || new Date(Date.now() + 86400000 * 3).toISOString(), // Default to 3 days
+                description: festivalInfo?.description || extractedFestivalInfo.description,
+            };
+
+            // Step 3: Parse HTML content for lineup
             const aiProcessingStart = Date.now();
             const parsedData = await this.parseHtmlContent(rawData.html, url);
             const aiProcessingTime = Date.now() - aiProcessingStart;
 
-            // Step 3: Validate and clean data
-            const cleanedData = await this.validateAndCleanData(parsedData);
-
-            // Step 4: Convert to festival format
+            // Step 4: Validate and clean data
+            const cleanedData = await this.validateAndCleanData(parsedData); // Step 5: Convert to festival format
             const festival = await this.convertToFestival(cleanedData, {
-                ...festivalInfo,
+                name: finalFestivalInfo.name,
+                location: finalFestivalInfo.location,
+                startDate: finalFestivalInfo.startDate,
+                endDate: finalFestivalInfo.endDate,
+                ...(finalFestivalInfo.description && { description: finalFestivalInfo.description }),
                 website: url,
             });
 
             const totalProcessingTime = Date.now() - startTime;
-
             this.logger.info('Festival crawl completed successfully', {
                 url,
-                festivalName: festivalInfo.name,
+                festivalName: finalFestivalInfo.name,
                 artistCount: cleanedData.artists.length,
                 stageCount: cleanedData.stages?.length || 0,
                 scheduleItemCount: cleanedData.schedule?.length || 0,
@@ -155,7 +154,8 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
                     size: html.length,
                     contentType,
                     attempt,
-                });                const lastModified = response.headers.get('last-modified');
+                });
+                const lastModified = response.headers.get('last-modified');
                 const title = this.extractTitle(html);
                 return {
                     url,
@@ -183,14 +183,117 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
         }
 
         throw new Error(`Failed to fetch content after ${this.config.maxRetries} attempts: ${lastError?.message}`);
-    }
-
-    /**
+    } /**
      * Extract page title from HTML
      */
     private extractTitle(html: string): string | undefined {
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
         return titleMatch ? titleMatch[1]?.trim() : undefined;
+    }
+
+    /**
+     * Extract festival information from HTML
+     */
+    private async extractFestivalInfo(html: string, url: string): Promise<FestivalInfo> {
+        this.logger.debug('Extracting festival info from HTML', { url });
+
+        if (!this.aiService || !this.config.aiEnhanced) {
+            // Fallback to basic extraction without AI
+            return this.extractFestivalInfoBasic(html);
+        }
+
+        try {
+            // Use AI to extract festival metadata
+            const extractedInfo = await this.aiService.extractStructuredData({
+                prompt: `Extract festival information from this HTML. Focus on festival name, location, dates, and description.
+
+HTML Content: ${html.substring(0, 10000)}`, // Limit content size                
+                schema: FestivalInfoSchema, // We'll accept any object structure
+            });
+
+            if (typeof extractedInfo === 'object' && extractedInfo) {
+                return extractedInfo as FestivalInfo;
+            }
+
+            // If AI extraction fails, fall back to basic extraction
+            this.logger.warn('AI festival info extraction returned unexpected format, falling back to basic extraction');
+            return this.extractFestivalInfoBasic(html);
+        } catch (error) {
+            this.logger.error('AI festival info extraction failed, falling back to basic extraction', error instanceof Error ? error : new Error(String(error)));
+            return this.extractFestivalInfoBasic(html);
+        }
+    }
+
+    /**
+     * Basic festival info extraction without AI (fallback)
+     */
+    private extractFestivalInfoBasic(html: string): z.infer<typeof FestivalInfoSchema> {
+        this.logger.debug('Using basic festival info extraction');
+
+        const result: z.infer<typeof FestivalInfoSchema> = {
+            name: 'Unknown Festival',
+            location: 'Unknown Location',
+            startDate: new Date().toISOString(),
+            endDate: new Date(Date.now() + 86400000 * 3).toISOString(), // Default to 3 days
+            description: '',
+        };
+
+        // Extract title as potential festival name
+        const title = this.extractTitle(html);
+        if (title) {
+            result.name = title.replace(/\s*-\s*.*$/, '').trim(); // Remove subtitle after dash
+        }
+
+        // Look for date patterns
+        const datePatterns = [
+            /(\d{1,2})\s*[-–]\s*(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*,?\s*(\d{4})/gi,
+            /(\w+)\s+(\d{1,2})\s*[-–]\s*(\d{1,2})\s*,?\s*(\d{4})/gi,
+            /(\d{4})\s*[-–]\s*(\d{2})\s*[-–]\s*(\d{2})/g,
+        ];
+
+        for (const pattern of datePatterns) {
+            const match = pattern.exec(html);
+            if (match) {
+                // Try to construct dates from the match
+                try {
+                    const year = match[4] || match[1];
+                    if (year && year.length === 4) {
+                        // This is a simplified approach - real implementation would be more sophisticated
+                        result.startDate = `${year}-07-01T00:00:00Z`; // Default to July
+                        result.endDate = `${year}-07-03T23:59:59Z`;
+                        break;
+                    }
+                } catch {
+                    // Continue to next pattern
+                }
+            }
+        }
+
+        // Look for location patterns
+        const locationPatterns = [
+            /<[^>]*>\s*([^<]*(?:park|arena|venue|center|centre|field|grounds)[^<]*)\s*</gi,
+            /<[^>]*>\s*([^<]*,\s*[A-Z]{2}[^<]*)\s*</gi, // US state pattern
+            /<[^>]*>\s*([^<]*,\s*[A-Za-z\s]+)\s*</gi, // General location pattern
+        ];
+
+        for (const pattern of locationPatterns) {
+            let match;
+            while ((match = pattern.exec(html)) !== null) {
+                const location = match[1]?.trim();
+                if (location && location.length > 5 && location.length < 100) {
+                    result.location = location;
+                    break;
+                }
+            }
+            if (result.location) break;
+        } // Look for description in meta tags
+        const metaDescMatch = html.match(/<meta[^>]*name="description"[^>]*content="([^"]+)"/i);
+        if (metaDescMatch && metaDescMatch[1]) {
+            result.description = metaDescMatch[1].trim();
+        }
+
+        this.logger.debug('Basic festival info extraction completed', result);
+        return result;
     }
 
     /**
@@ -206,37 +309,12 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
 
         try {
             // Use AI to parse the HTML content
-            const parsedData = await this.aiService.parseFestivalData({
-                prompt: `Parse this festival website HTML and extract lineup information. Focus on artist names, performance schedule, and stage information.`,
+            const parsedData = await this.aiService.parseFestivalData<ParsedLineupData>({
+                // create scheam from interface
+                schema: ParsedLineupDataSchema,
                 festivalData: html,
                 expectedFormat: 'lineup',
-                systemPrompt: `You are an expert at parsing music festival websites. Extract structured data from HTML content and return it as JSON.
-                
-                Return data in this format:
-                {
-                  "artists": [
-                    {
-                      "name": "Artist Name",
-                      "genres": ["Genre1", "Genre2"],
-                      "description": "Artist description if available",
-                      "imageUrl": "Image URL if found",
-                      "socialLinks": {"website": "url", "instagram": "url", etc},
-                      "streamingLinks": {"spotify": "url", "appleMusic": "url", etc}
-                    }
-                  ],
-                  "stages": ["Stage Name 1", "Stage Name 2"],
-                  "schedule": [
-                    {
-                      "artistName": "Artist Name",
-                      "stage": "Stage Name",
-                      "startTime": "2024-07-20T20:00:00Z",
-                      "endTime": "2024-07-20T21:30:00Z",
-                      "day": 1
-                    }
-                  ]
-                }
-                
-                Be thorough but conservative - only include data you're confident about.`,
+                prompt: `Parse this festival website HTML and extract lineup information. Focus on artist names, performance schedule, and stage information.`,
             });
 
             if (typeof parsedData === 'object' && parsedData && 'artists' in parsedData) {
@@ -247,8 +325,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             this.logger.warn('AI parsing returned unexpected format, falling back to basic parsing');
             return this.parseHtmlBasic(html);
         } catch (error) {
-            this.logger.error('AI parsing failed, falling back to basic parsing', 
-                error instanceof Error ? error : new Error(String(error)));
+            this.logger.error('AI parsing failed, falling back to basic parsing', error instanceof Error ? error : new Error(String(error)));
             return this.parseHtmlBasic(html);
         }
     }
@@ -264,13 +341,9 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
 
         // Very basic pattern matching for common festival website structures
         // This is a simplified implementation - real-world parsing would be more sophisticated
-        
+
         // Extract potential artist names from headings and lists
-        const artistPatterns = [
-            /<h[1-6][^>]*>([^<]+)</gi,
-            /<li[^>]*>([^<]+)</gi,
-            /<div[^>]*class="[^"]*artist[^"]*"[^>]*>([^<]+)</gi,
-        ];
+        const artistPatterns = [/<h[1-6][^>]*>([^<]+)</gi, /<li[^>]*>([^<]+)</gi, /<div[^>]*class="[^"]*artist[^"]*"[^>]*>([^<]+)</gi];
 
         const foundNames = new Set<string>();
 
@@ -284,14 +357,14 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
                         foundNames.add(name);
                         artists.push({
                             name,
-                            genres: ['Unknown'], // Will be enhanced by AI if available
+                            genre: ['Unknown'], // Will be enhanced by AI if available
                         });
                     }
                 }
             }
         }
 
-        this.logger.debug('Basic parsing completed', { 
+        this.logger.debug('Basic parsing completed', {
             artistCount: artists.length,
             stageCount: stages.length,
         });
@@ -334,23 +407,19 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             .map(artist => ({
                 ...artist,
                 name: artist.name.trim(),
-                genres: artist.genres || ['Unknown'],
+                genres: artist.genre || ['Unknown'],
             }))
-            .filter((artist, index, array) => 
-                // Remove duplicates
-                array.findIndex(a => a.name.toLowerCase() === artist.name.toLowerCase()) === index
+            .filter(
+                (artist, index, array) =>
+                    // Remove duplicates
+                    array.findIndex(a => a.name.toLowerCase() === artist.name.toLowerCase()) === index
             );
 
         // Clean stages
         const cleanedStages = [...new Set(rawData.stages?.filter(stage => stage && stage.trim()) || [])];
 
         // Clean schedule
-        const cleanedSchedule = rawData.schedule?.filter(item => 
-            item.artistName && 
-            item.stage && 
-            item.startTime && 
-            item.endTime
-        ) || [];
+        const cleanedSchedule = rawData.schedule?.filter(item => item.artistName && item.stage && item.startTime && item.endTime) || [];
 
         return {
             artists: cleanedArtists,
@@ -376,11 +445,11 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
         this.logger.debug('Converting parsed data to festival format');
 
         const festivalId = `festival-${Date.now()}`;
-          // Create artists with IDs
+        // Create artists with IDs
         const artists: Artist[] = parsedData.artists.map((artistData, index) => ({
             id: `artist-${festivalId}-${index + 1}`,
             name: artistData.name,
-            genre: artistData.genres || ['Unknown'],
+            genre: artistData.genre || ['Unknown'],
             description: artistData.description || `${artistData.name} performing at ${festivalInfo.name}`,
             ...(artistData.imageUrl && { imageUrl: artistData.imageUrl }),
             ...(artistData.streamingLinks && { streamingLinks: artistData.streamingLinks }),
@@ -390,14 +459,12 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
 
         // Create performances
         const performances: Performance[] = [];
-        
+
         if (parsedData.schedule && parsedData.schedule.length > 0) {
             // Use provided schedule
             parsedData.schedule.forEach((scheduleItem, index) => {
-                const artist = artists.find(a => 
-                    a.name.toLowerCase() === scheduleItem.artistName.toLowerCase()
-                );
-                
+                const artist = artists.find(a => a.name.toLowerCase() === scheduleItem.artistName.toLowerCase());
+
                 if (artist) {
                     performances.push({
                         id: `perf-${festivalId}-${index + 1}`,
@@ -415,11 +482,11 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             artists.forEach((artist, index) => {
                 const day = Math.floor(index / 10) + 1; // Distribute across days
                 const hour = 14 + (index % 8); // Distribute across hours
-                
+
                 const startDate = new Date(festivalInfo.startDate);
                 startDate.setDate(startDate.getDate() + day - 1);
                 startDate.setHours(hour, 0, 0, 0);
-                
+
                 const endDate = new Date(startDate);
                 endDate.setHours(hour + 1, 30, 0, 0);
 
@@ -433,7 +500,8 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
                     day,
                 });
             });
-        }        const festival: Festival = {
+        }
+        const festival: Festival = {
             id: festivalId,
             name: festivalInfo.name,
             description: festivalInfo.description || `${festivalInfo.name} - Music Festival`,

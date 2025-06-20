@@ -72,9 +72,7 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                     <div className="flex items-center gap-3 mb-2">
                                         <h3 className="text-xl font-bold text-gray-900">{recommendation.artist.name}</h3>
                                         {recommendation.aiEnhanced && (
-                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
-                                                🤖 AI Enhanced
-                                            </span>
+                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">🤖 AI Enhanced</span>
                                         )}
                                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getScoreColor(recommendation.score)}`}>{getScoreLabel(recommendation.score)}</span>
                                     </div>
@@ -85,14 +83,12 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                                 {genre}
                                             </span>
                                         ))}
-                                        {recommendation.aiTags && recommendation.aiTags.map((tag) => (
-                                            <span
-                                                key={tag}
-                                                className="px-2 py-1 text-xs bg-purple-50 text-purple-600 rounded-md border border-purple-200"
-                                            >
-                                                ✨ {tag}
-                                            </span>
-                                        ))}
+                                        {recommendation.aiTags &&
+                                            recommendation.aiTags.map(tag => (
+                                                <span key={tag} className="px-2 py-1 text-xs bg-purple-50 text-purple-600 rounded-md border border-purple-200">
+                                                    ✨ {tag}
+                                                </span>
+                                            ))}
                                     </div>
 
                                     <p className="text-gray-600 mb-4">{recommendation.artist.description}</p>

@@ -101,7 +101,7 @@ export class RecommendationService implements IRecommendationService {
                     stage: p.stage,
                     startTime: p.startTime,
                     endTime: p.endTime,
-                }
+                },
             }));
 
             // Generate AI recommendations
@@ -118,11 +118,7 @@ export class RecommendationService implements IRecommendationService {
             });
 
             // Merge AI recommendations with traditional ones
-            const enhancedRecommendations = await this.mergeAIRecommendations(
-                traditionalRecommendations,
-                aiRecommendations,
-                festival
-            );
+            const enhancedRecommendations = await this.mergeAIRecommendations(traditionalRecommendations, aiRecommendations, festival);
 
             this.logger.info('AI-enhanced recommendations generated', {
                 festivalId: festival.id,
@@ -133,8 +129,7 @@ export class RecommendationService implements IRecommendationService {
 
             return enhancedRecommendations;
         } catch (error) {
-            this.logger.error('AI recommendation generation failed, falling back to traditional', 
-                error instanceof Error ? error : new Error(String(error)));
+            this.logger.error('AI recommendation generation failed, falling back to traditional', error instanceof Error ? error : new Error(String(error)));
             return traditionalRecommendations;
         }
     }
@@ -142,11 +137,7 @@ export class RecommendationService implements IRecommendationService {
     /**
      * Merge AI-generated recommendations with traditional ones
      */
-    private async mergeAIRecommendations(
-        traditionalRecommendations: Recommendation[],
-        aiRecommendations: unknown,
-        festival: Festival
-    ): Promise<Recommendation[]> {
+    private async mergeAIRecommendations(traditionalRecommendations: Recommendation[], aiRecommendations: unknown, festival: Festival): Promise<Recommendation[]> {
         if (!Array.isArray(aiRecommendations)) {
             return traditionalRecommendations;
         }
@@ -157,11 +148,11 @@ export class RecommendationService implements IRecommendationService {
         for (const aiRec of aiRecommendations) {
             if (typeof aiRec === 'object' && aiRec && 'artistId' in aiRec) {
                 const aiRecObj = aiRec as { artistId: string; reason?: string; confidence?: number; tags?: string[] };
-                
+
                 if (!existingArtistIds.has(aiRecObj.artistId)) {
                     // Find the performance for this artist
                     const performance = festival.performances.find(p => p.artist.id === aiRecObj.artistId);
-                    
+
                     if (performance) {
                         // Create AI-enhanced recommendation
                         const enhancedRecommendation: Recommendation = {

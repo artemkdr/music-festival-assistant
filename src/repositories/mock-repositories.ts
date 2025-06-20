@@ -95,6 +95,21 @@ export class MockArtistRepository implements IArtistRepository {
         this.logger.info('Retrieved all artists', { count: this.artists.length });
         return [...this.artists];
     }
+
+    async saveArtist(artist: Artist): Promise<Artist> {
+        this.logger.debug('Saving artist', { artistId: artist.id });
+        const existingIndex = this.artists.findIndex(a => a.id === artist.id);
+
+        if (existingIndex >= 0) {
+            this.artists[existingIndex] = artist;
+            this.logger.info('Updated existing artist', { artistId: artist.id });
+        } else {
+            this.artists.push(artist);
+            this.logger.info('Created new artist', { artistId: artist.id });
+        }
+
+        return artist;
+    }
 }
 
 /**
@@ -135,6 +150,21 @@ export class MockPerformanceRepository implements IPerformanceRepository {
             foundCount: performances.length,
         });
         return performances;
+    }
+
+    async savePerformance(performance: Performance): Promise<Performance> {
+        this.logger.debug('Saving performance', { performanceId: performance.id });
+        const existingIndex = this.performances.findIndex(p => p.id === performance.id);
+
+        if (existingIndex >= 0) {
+            this.performances[existingIndex] = performance;
+            this.logger.info('Updated existing performance', { performanceId: performance.id });
+        } else {
+            this.performances.push(performance);
+            this.logger.info('Created new performance', { performanceId: performance.id });
+        }
+
+        return performance;
     }
 }
 

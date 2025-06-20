@@ -137,12 +137,7 @@ export class DIContainer {
      */
     public getRecommendationService(): IRecommendationService {
         if (!this._recommendationService) {
-            this._recommendationService = new RecommendationService(
-                this.getArtistRepository(), 
-                this.getPerformanceRepository(), 
-                this.getLogger(),
-                this.getAIService()
-            );
+            this._recommendationService = new RecommendationService(this.getArtistRepository(), this.getPerformanceRepository(), this.getLogger(), this.getAIService());
         }
         return this._recommendationService;
     }

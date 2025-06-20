@@ -13,7 +13,7 @@ import type { ILogger } from '@/lib/logger';
  */
 abstract class BaseJsonRepository {
     protected readonly dataDir: string;
-    
+
     constructor(
         protected readonly logger: ILogger,
         dataSubDir: string
@@ -141,12 +141,7 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         this.logger.debug('Getting artists by genres from local storage', { genres });
         const artists = await this.readJsonFile<Artist>(this.filename);
         const matchingArtists = artists.filter(artist =>
-            artist.genre.some(artistGenre => 
-                genres.some(userGenre => 
-                    artistGenre.toLowerCase().includes(userGenre.toLowerCase()) || 
-                    userGenre.toLowerCase().includes(artistGenre.toLowerCase())
-                )
-            )
+            artist.genre.some(artistGenre => genres.some(userGenre => artistGenre.toLowerCase().includes(userGenre.toLowerCase()) || userGenre.toLowerCase().includes(artistGenre.toLowerCase())))
         );
         this.logger.info('Local genre-based artist lookup result', {
             genres,
@@ -159,9 +154,7 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         this.logger.debug('Searching artists by name in local storage', { name });
         const searchTerm = name.toLowerCase();
         const artists = await this.readJsonFile<Artist>(this.filename);
-        const matchingArtists = artists.filter(artist => 
-            artist.name.toLowerCase().includes(searchTerm)
-        );
+        const matchingArtists = artists.filter(artist => artist.name.toLowerCase().includes(searchTerm));
         this.logger.info('Local name-based artist search result', {
             name,
             foundCount: matchingArtists.length,
@@ -214,6 +207,7 @@ export class LocalJsonPerformanceRepository extends BaseJsonRepository implement
         // For now, we'll use the mock logic or implement based on the festival's performances
         const festivalPerformances = performances.filter(p => {
             // This is a simplified approach - in a real app, you'd have a festivalId field
+            this.logger.debug('Checking performance for festival', { performanceId: p.id, festivalId });
             return true; // Return all for now, or implement proper filtering
         });
         this.logger.info('Local festival performances lookup result', {
@@ -275,12 +269,13 @@ export class LocalJsonUserFeedbackRepository extends BaseJsonRepository implemen
 
     constructor(logger: ILogger) {
         super(logger, 'feedback');
-    }    async saveFeedback(feedback: UserFeedback): Promise<UserFeedback> {
+    }
+    async saveFeedback(feedback: UserFeedback): Promise<UserFeedback> {
         this.logger.debug('Saving user feedback to local storage', {
             artistId: feedback.artistId,
             rating: feedback.rating,
         });
-        
+
         const allFeedback = await this.readJsonFile<UserFeedback>(this.filename);
         allFeedback.push(feedback);
         await this.writeJsonFile(this.filename, allFeedback);
