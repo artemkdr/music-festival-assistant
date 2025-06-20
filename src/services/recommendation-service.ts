@@ -6,6 +6,7 @@ import type { ILogger } from '@/lib/logger';
 import type { IArtistRepository, IPerformanceRepository } from '@/repositories/interfaces';
 import type { Artist, Festival, Recommendation, UserPreferences } from '@/types';
 import type { IRecommendationService } from './interfaces';
+import type { IAIService } from '@/services/ai';
 
 /**
  * Recommendation engine implementation using collaborative filtering and content-based approaches
@@ -14,7 +15,8 @@ export class RecommendationService implements IRecommendationService {
     constructor(
         private artistRepository: IArtistRepository,
         private performanceRepository: IPerformanceRepository,
-        private logger: ILogger
+        private logger: ILogger,
+        private aiService?: IAIService | null
     ) {}
 
     /**
@@ -63,6 +65,124 @@ export class RecommendationService implements IRecommendationService {
         });
 
         return sortedRecommendations;
+    }
+
+    /**
+     * Generate AI-enhanced recommendations using both traditional and AI approaches
+     * @param festival Festival data
+     * @param userPreferences User music preferences
+     * @returns Promise resolving to array of recommendations
+     */
+    async generateAIEnhancedRecommendations(festival: Festival, userPreferences: UserPreferences): Promise<Recommendation[]> {
+        this.logger.info('Generating AI-enhanced recommendations', {
+            festivalId: festival.id,
+            userGenres: userPreferences.genres,
+            aiEnabled: !!this.aiService,
+        });
+
+        // Get traditional recommendations first
+        const traditionalRecommendations = await this.generateRecommendations(festival, userPreferences);
+
+        // If AI service is not available, return traditional recommendations
+        if (!this.aiService) {
+            this.logger.info('AI service not available, using traditional recommendations');
+            return traditionalRecommendations;
+        }
+
+        try {
+            // Prepare data for AI processing
+            const festivalArtists = festival.performances.map(p => ({
+                id: p.artist.id,
+                name: p.artist.name,
+                genres: p.artist.genre,
+                popularity: p.artist.popularity,
+                description: p.artist.description,
+                performance: {
+                    stage: p.stage,
+                    startTime: p.startTime,
+                    endTime: p.endTime,
+                }
+            }));
+
+            // Generate AI recommendations
+            const aiRecommendations = await this.aiService.generateRecommendations({
+                prompt: `Generate personalized music recommendations for a festival`,
+                userPreferences: {
+                    genres: userPreferences.genres,
+                    preferredArtists: userPreferences.preferredArtists || [],
+                    dislikedArtists: userPreferences.dislikedArtists || [],
+                    discoveryMode: userPreferences.discoveryMode,
+                    timePreferences: userPreferences.timePreferences,
+                },
+                availableArtists: festivalArtists,
+            });
+
+            // Merge AI recommendations with traditional ones
+            const enhancedRecommendations = await this.mergeAIRecommendations(
+                traditionalRecommendations,
+                aiRecommendations,
+                festival
+            );
+
+            this.logger.info('AI-enhanced recommendations generated', {
+                festivalId: festival.id,
+                traditionalCount: traditionalRecommendations.length,
+                aiRecommendationsCount: Array.isArray(aiRecommendations) ? aiRecommendations.length : 0,
+                finalCount: enhancedRecommendations.length,
+            });
+
+            return enhancedRecommendations;
+        } catch (error) {
+            this.logger.error('AI recommendation generation failed, falling back to traditional', 
+                error instanceof Error ? error : new Error(String(error)));
+            return traditionalRecommendations;
+        }
+    }
+
+    /**
+     * Merge AI-generated recommendations with traditional ones
+     */
+    private async mergeAIRecommendations(
+        traditionalRecommendations: Recommendation[],
+        aiRecommendations: unknown,
+        festival: Festival
+    ): Promise<Recommendation[]> {
+        if (!Array.isArray(aiRecommendations)) {
+            return traditionalRecommendations;
+        }
+
+        const mergedRecommendations = [...traditionalRecommendations];
+        const existingArtistIds = new Set(traditionalRecommendations.map(r => r.artist.id));
+
+        for (const aiRec of aiRecommendations) {
+            if (typeof aiRec === 'object' && aiRec && 'artistId' in aiRec) {
+                const aiRecObj = aiRec as { artistId: string; reason?: string; confidence?: number; tags?: string[] };
+                
+                if (!existingArtistIds.has(aiRecObj.artistId)) {
+                    // Find the performance for this artist
+                    const performance = festival.performances.find(p => p.artist.id === aiRecObj.artistId);
+                    
+                    if (performance) {
+                        // Create AI-enhanced recommendation
+                        const enhancedRecommendation: Recommendation = {
+                            artist: performance.artist,
+                            performance,
+                            score: (aiRecObj.confidence || 0.5) * 0.9, // Slightly lower than traditional to balance
+                            reasons: aiRecObj.reason ? [aiRecObj.reason] : ['AI-recommended based on your preferences'],
+                            similarArtists: await this.getSimilarArtistsObjects(performance.artist.id),
+                            aiEnhanced: true,
+                            aiTags: aiRecObj.tags || [],
+                        };
+
+                        mergedRecommendations.push(enhancedRecommendation);
+                        existingArtistIds.add(aiRecObj.artistId);
+                    }
+                }
+            }
+        }
+
+        // Sort merged recommendations by score
+        return mergedRecommendations.sort((a, b) => b.score - a.score);
     }
 
     /**

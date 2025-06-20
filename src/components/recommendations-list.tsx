@@ -71,6 +71,11 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h3 className="text-xl font-bold text-gray-900">{recommendation.artist.name}</h3>
+                                        {recommendation.aiEnhanced && (
+                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                                                🤖 AI Enhanced
+                                            </span>
+                                        )}
                                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getScoreColor(recommendation.score)}`}>{getScoreLabel(recommendation.score)}</span>
                                     </div>
 
@@ -78,6 +83,14 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                         {recommendation.artist.genre.map(genre => (
                                             <span key={genre} className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">
                                                 {genre}
+                                            </span>
+                                        ))}
+                                        {recommendation.aiTags && recommendation.aiTags.map((tag) => (
+                                            <span
+                                                key={tag}
+                                                className="px-2 py-1 text-xs bg-purple-50 text-purple-600 rounded-md border border-purple-200"
+                                            >
+                                                ✨ {tag}
                                             </span>
                                         ))}
                                     </div>
@@ -151,14 +164,34 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                 </div>
 
                                 <div className="flex gap-2">
-                                    {recommendation.artist.spotifyUrl && (
+                                    {recommendation.artist.streamingLinks?.spotify && (
                                         <a
-                                            href={recommendation.artist.spotifyUrl}
+                                            href={recommendation.artist.streamingLinks.spotify}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
                                         >
                                             🎵 Spotify
+                                        </a>
+                                    )}
+                                    {recommendation.artist.streamingLinks?.appleMusic && (
+                                        <a
+                                            href={recommendation.artist.streamingLinks.appleMusic}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-3 py-2 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
+                                        >
+                                            🍎 Apple Music
+                                        </a>
+                                    )}
+                                    {recommendation.artist.streamingLinks?.youtube && (
+                                        <a
+                                            href={recommendation.artist.streamingLinks.youtube}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-3 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                        >
+                                            📺 YouTube
                                         </a>
                                     )}
                                     {recommendation.artist.socialLinks?.website && (

@@ -14,7 +14,10 @@ export const mockArtists: Artist[] = [
         genre: ['Alternative Rock', 'Indie Rock'],
         description: 'British rock band known for their energetic live performances and catchy melodies.',
         imageUrl: 'https://example.com/arctic-monkeys.jpg',
-        spotifyUrl: 'https://open.spotify.com/artist/7Ln80lUS6He07XvHI8qqHH',
+        streamingLinks: {
+            spotify: 'https://open.spotify.com/artist/7Ln80lUS6He07XvHI8qqHH',
+            youtube: 'https://www.youtube.com/c/ArcticMonkeys',
+        },
         socialLinks: {
             website: 'https://arcticmonkeys.com',
             instagram: 'https://instagram.com/arcticmonkeys',
@@ -27,7 +30,10 @@ export const mockArtists: Artist[] = [
         genre: ['Electronic', 'Deep House', 'UK Garage'],
         description: 'Electronic music duo from Surrey, England, pioneers of the UK garage revival.',
         imageUrl: 'https://example.com/disclosure.jpg',
-        spotifyUrl: 'https://open.spotify.com/artist/6nS5roXSAGhTGr34W6n7Et',
+        streamingLinks: {
+            spotify: 'https://open.spotify.com/artist/6nS5roXSAGhTGr34W6n7Et',
+            appleMusic: 'https://music.apple.com/artist/disclosure/476995421',
+        },
         socialLinks: {
             website: 'https://disclosure.co.uk',
             twitter: 'https://twitter.com/disclosure',
@@ -40,7 +46,10 @@ export const mockArtists: Artist[] = [
         genre: ['Psychedelic Rock', 'Electronic', 'Dream Pop'],
         description: 'Australian psychedelic music project led by Kevin Parker, known for dreamy soundscapes.',
         imageUrl: 'https://example.com/tame-impala.jpg',
-        spotifyUrl: 'https://open.spotify.com/artist/5INjqkS1o8h1imAzPqGZBb',
+        streamingLinks: {
+            spotify: 'https://open.spotify.com/artist/5INjqkS1o8h1imAzPqGZBb',
+            soundcloud: 'https://soundcloud.com/tame-impala',
+        },
         socialLinks: {
             website: 'https://tameimpala.com',
             instagram: 'https://instagram.com/tameimpala',
@@ -53,7 +62,10 @@ export const mockArtists: Artist[] = [
         genre: ['Alternative R&B', 'Art Pop', 'Electronic'],
         description: 'British singer-songwriter known for her ethereal vocals and innovative music videos.',
         imageUrl: 'https://example.com/fka-twigs.jpg',
-        spotifyUrl: 'https://open.spotify.com/artist/6nB0iY1cjSY1KyhYyuIIKH',
+        streamingLinks: {
+            spotify: 'https://open.spotify.com/artist/6nB0iY1cjSY1KyhYyuIIKH',
+            appleMusic: 'https://music.apple.com/artist/fka-twigs/639977049',
+        },
         socialLinks: {
             website: 'https://fkatwigs.com',
             instagram: 'https://instagram.com/fkatwigs',
@@ -66,7 +78,10 @@ export const mockArtists: Artist[] = [
         genre: ['Indie Pop', 'Electronic', 'Alternative'],
         description: 'British indie rock band known for their unique sound and viral hit "Heat Waves".',
         imageUrl: 'https://example.com/glass-animals.jpg',
-        spotifyUrl: 'https://open.spotify.com/artist/4yvcSjfu4PC0CYQyLy4wSq',
+        streamingLinks: {
+            spotify: 'https://open.spotify.com/artist/4yvcSjfu4PC0CYQyLy4wSq',
+            bandcamp: 'https://glassanimals.bandcamp.com',
+        },
         socialLinks: {
             website: 'https://glassanimals.com',
             twitter: 'https://twitter.com/GlassAnimals',
@@ -79,7 +94,10 @@ export const mockArtists: Artist[] = [
         genre: ['Electronic', 'Ambient', 'Techno'],
         description: 'Northern Irish electronic music duo known for their emotional electronic music.',
         imageUrl: 'https://example.com/bicep.jpg',
-        spotifyUrl: 'https://open.spotify.com/artist/73A3bLnfnz5BoQjb4gNCga',
+        streamingLinks: {
+            spotify: 'https://open.spotify.com/artist/73A3bLnfnz5BoQjb4gNCga',
+            youtube: 'https://www.youtube.com/c/BicepMusic',
+        },
         socialLinks: {
             website: 'https://bicepmusic.co.uk',
             instagram: 'https://instagram.com/bicepmusic',

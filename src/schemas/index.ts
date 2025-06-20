@@ -10,8 +10,15 @@ export const artistSchema = z.object({
     genre: z.array(z.string()).min(1),
     description: z.string().max(1000),
     imageUrl: z.string().url().optional(),
-    spotifyUrl: z.string().url().optional(),
-    appleMusicUrl: z.string().url().optional(),
+    streamingLinks: z
+        .object({
+            spotify: z.string().url().optional(),
+            appleMusic: z.string().url().optional(),
+            youtube: z.string().url().optional(),
+            soundcloud: z.string().url().optional(),
+            bandcamp: z.string().url().optional(),
+        })
+        .optional(),
     socialLinks: z
         .object({
             website: z.string().url().optional(),
@@ -31,7 +38,7 @@ export const performanceSchema = z.object({
     startTime: z.string().datetime(),
     endTime: z.string().datetime(),
     stage: z.string().min(1),
-    day: z.number().min(1).max(10),
+    day: z.number().min(1).max(30),
 });
 
 // Festival schema

@@ -24,7 +24,7 @@ export default function HomePage(): ReactElement {
         setError(null);
 
         try {
-            const response = await fetch('/api/festivals/discover', {
+            const response = await fetch('/api/festivals/discover-ai', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

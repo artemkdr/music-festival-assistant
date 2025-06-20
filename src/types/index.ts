@@ -11,8 +11,13 @@ export interface Artist {
     genre: string[];
     description: string;
     imageUrl?: string;
-    spotifyUrl?: string;
-    appleMusicUrl?: string;
+    streamingLinks?: {
+        spotify?: string;
+        appleMusic?: string;
+        youtube?: string;
+        soundcloud?: string;
+        bandcamp?: string;
+    };
     socialLinks?: {
         website?: string;
         instagram?: string;
@@ -74,6 +79,8 @@ export interface Recommendation {
     score: number; // 0-1 confidence score
     reasons: string[]; // Why this artist is recommended
     similarArtists?: Artist[];
+    aiEnhanced?: boolean; // Whether this recommendation was enhanced by AI
+    aiTags?: string[]; // AI-generated tags for this recommendation
 }
 
 /**

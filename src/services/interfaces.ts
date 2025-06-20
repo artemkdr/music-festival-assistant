@@ -46,6 +46,14 @@ export interface IRecommendationService {
     generateRecommendations(festival: Festival, userPreferences: UserPreferences): Promise<Recommendation[]>;
 
     /**
+     * Generate AI-enhanced recommendations using both traditional and AI approaches
+     * @param festival Festival data
+     * @param userPreferences User music preferences
+     * @returns Promise resolving to array of AI-enhanced recommendations
+     */
+    generateAIEnhancedRecommendations(festival: Festival, userPreferences: UserPreferences): Promise<Recommendation[]>;
+
+    /**
      * Calculate similarity score between user preferences and artist
      * @param userPreferences User music preferences
      * @param artistId Artist identifier

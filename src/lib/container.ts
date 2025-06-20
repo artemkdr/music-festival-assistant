@@ -3,13 +3,18 @@
  * Central place to configure and wire up all services following SOLID principles
  */
 import { createLogger, type ILogger } from '@/lib/logger';
+import { getAIConfig, validateAIConfig } from '@/lib/ai-config';
 import type { IFestivalRepository, IArtistRepository, IPerformanceRepository, IUserFeedbackRepository } from '@/repositories/interfaces';
-import { MockFestivalRepository, MockArtistRepository, MockPerformanceRepository, MockUserFeedbackRepository } from '@/repositories/mock-repositories';
+import { LocalJsonFestivalRepository, LocalJsonArtistRepository, LocalJsonPerformanceRepository, LocalJsonUserFeedbackRepository } from '@/repositories/local-json-repositories';
 import type { IFestivalDiscoveryService, IRecommendationService, IUserFeedbackService } from '@/services/interfaces';
 import { FestivalDiscoveryService } from '@/services/festival-discovery-service';
 import { RecommendationService } from '@/services/recommendation-service';
 import { UserFeedbackService } from '@/services/user-feedback-service';
 import { FestivalDiscoveryController, UserFeedbackController } from '@/controllers';
+import type { IAIService } from '@/services/ai';
+import { AIServiceFactory } from '@/services/ai';
+import type { IFestivalCrawlerService } from '@/services/crawler/interfaces';
+import { FestivalCrawlerService } from '@/services/crawler/festival-crawler-service';
 
 /**
  * Dependency injection container class
@@ -19,6 +24,8 @@ export class DIContainer {
 
     // Singletons
     private _logger: ILogger | null = null;
+    private _aiService: IAIService | null = null;
+    private _festivalCrawlerService: IFestivalCrawlerService | null = null;
     private _festivalRepository: IFestivalRepository | null = null;
     private _artistRepository: IArtistRepository | null = null;
     private _performanceRepository: IPerformanceRepository | null = null;
@@ -44,9 +51,45 @@ export class DIContainer {
      */
     public getLogger(): ILogger {
         if (!this._logger) {
-            this._logger = createLogger('MusicFestivalAssistant');
+            this._logger = createLogger();
         }
         return this._logger;
+    }
+
+    /**
+     * Get AI service instance (optional - may return null if disabled or not configured)
+     */
+    public getAIService(): IAIService | null {
+        if (!this._aiService) {
+            try {
+                const aiConfig = getAIConfig();
+                if (aiConfig.enabled) {
+                    validateAIConfig(aiConfig);
+                    const factory = new AIServiceFactory(this.getLogger());
+                    this._aiService = factory.createAIService(aiConfig.provider, aiConfig.config);
+                    this.getLogger().info('AI service initialized', { provider: aiConfig.provider, model: aiConfig.config.model });
+                } else {
+                    this.getLogger().info('AI service is disabled');
+                }
+            } catch (error) {
+                this.getLogger().error('Failed to initialize AI service', error instanceof Error ? error : new Error(String(error)));
+                // Return null instead of throwing to allow the app to continue without AI features
+            }
+        }
+        return this._aiService;
+    }
+
+    /**
+     * Get festival crawler service
+     */
+    public getFestivalCrawlerService(): IFestivalCrawlerService {
+        if (!this._festivalCrawlerService) {
+            const logger = this.getLogger();
+            const aiService = this.getAIService(); // This can return null if AI is disabled
+            this._festivalCrawlerService = new FestivalCrawlerService(logger, aiService);
+            logger.info('Festival crawler service initialized', { aiEnabled: !!aiService });
+        }
+        return this._festivalCrawlerService;
     }
 
     /**
@@ -54,7 +97,7 @@ export class DIContainer {
      */
     public getFestivalRepository(): IFestivalRepository {
         if (!this._festivalRepository) {
-            this._festivalRepository = new MockFestivalRepository(this.getLogger());
+            this._festivalRepository = new LocalJsonFestivalRepository(this.getLogger());
         }
         return this._festivalRepository;
     }
@@ -64,7 +107,7 @@ export class DIContainer {
      */
     public getArtistRepository(): IArtistRepository {
         if (!this._artistRepository) {
-            this._artistRepository = new MockArtistRepository(this.getLogger());
+            this._artistRepository = new LocalJsonArtistRepository(this.getLogger());
         }
         return this._artistRepository;
     }
@@ -74,7 +117,7 @@ export class DIContainer {
      */
     public getPerformanceRepository(): IPerformanceRepository {
         if (!this._performanceRepository) {
-            this._performanceRepository = new MockPerformanceRepository(this.getLogger());
+            this._performanceRepository = new LocalJsonPerformanceRepository(this.getLogger());
         }
         return this._performanceRepository;
     }
@@ -84,7 +127,7 @@ export class DIContainer {
      */
     public getUserFeedbackRepository(): IUserFeedbackRepository {
         if (!this._userFeedbackRepository) {
-            this._userFeedbackRepository = new MockUserFeedbackRepository(this.getLogger());
+            this._userFeedbackRepository = new LocalJsonUserFeedbackRepository(this.getLogger());
         }
         return this._userFeedbackRepository;
     }
@@ -94,7 +137,12 @@ export class DIContainer {
      */
     public getRecommendationService(): IRecommendationService {
         if (!this._recommendationService) {
-            this._recommendationService = new RecommendationService(this.getArtistRepository(), this.getPerformanceRepository(), this.getLogger());
+            this._recommendationService = new RecommendationService(
+                this.getArtistRepository(), 
+                this.getPerformanceRepository(), 
+                this.getLogger(),
+                this.getAIService()
+            );
         }
         return this._recommendationService;
     }
@@ -144,6 +192,7 @@ export class DIContainer {
      */
     public reset(): void {
         this._logger = null;
+        this._aiService = null;
         this._festivalRepository = null;
         this._artistRepository = null;
         this._performanceRepository = null;
