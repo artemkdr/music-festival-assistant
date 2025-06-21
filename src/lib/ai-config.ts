@@ -7,7 +7,6 @@ import type { AIProvider, AIProviderConfig } from '@/services/ai';
  * AI service configuration
  */
 export interface AIConfig {
-    enabled: boolean;
     provider: AIProvider;
     config: AIProviderConfig;
 }
@@ -16,7 +15,6 @@ export interface AIConfig {
  * Get AI service configuration from environment variables
  */
 export function getAIConfig(): AIConfig {
-    const enabled = process.env.AI_ENABLED === 'true';
     const provider = (process.env.AI_PROVIDER as AIProvider) || 'openai';
 
     // Base configuration
@@ -40,8 +38,11 @@ export function getAIConfig(): AIConfig {
             break;
 
         case 'google':
-            config.apiKey = process.env.GOOGLE_API_KEY || '';
-            config.model = process.env.GOOGLE_MODEL || 'gemini-pro';
+            // use api key json file for other props
+            config.model = process.env.GOOGLE_VERTEX_MODEL || 'gemini-2.5-flash';
+            config.projectId = process.env.GOOGLE_VERTEX_PROJECT_ID || '';
+            config.maxTokens = process.env.GOOGLE_VERTEX_MAX_TOKENS ? parseInt(process.env.GOOGLE_VERTEX_MAX_TOKENS, 10) : 4000;
+            config.temperature = process.env.GOOGLE_VERTEX_TEMPERATURE ? parseFloat(process.env.GOOGLE_VERTEX_TEMPERATURE) : 0.7;
             break;
 
         case 'azure':
@@ -55,7 +56,6 @@ export function getAIConfig(): AIConfig {
     }
 
     return {
-        enabled,
         provider,
         config,
     };
@@ -65,14 +65,6 @@ export function getAIConfig(): AIConfig {
  * Validate AI configuration
  */
 export function validateAIConfig(aiConfig: AIConfig): void {
-    if (!aiConfig.enabled) {
-        return; // Skip validation if AI is disabled
-    }
-
-    if (!aiConfig.config.apiKey) {
-        throw new Error(`AI service API key is required for provider: ${aiConfig.provider}`);
-    }
-
     if (!aiConfig.config.model) {
         throw new Error(`AI service model is required for provider: ${aiConfig.provider}`);
     }
@@ -80,8 +72,23 @@ export function validateAIConfig(aiConfig: AIConfig): void {
     // Provider-specific validation
     switch (aiConfig.provider) {
         case 'azure':
+            if (!aiConfig.config.apiKey) {
+                throw new Error(`AI service API key is required for provider: ${aiConfig.provider}`);
+            }
             if (!aiConfig.config.baseUrl) {
                 throw new Error('Azure OpenAI endpoint is required');
+            }
+            break;
+
+        case 'openai':
+            if (!aiConfig.config.apiKey) {
+                throw new Error(`AI service API key is required for provider: ${aiConfig.provider}`);
+            }
+            break;
+
+        case 'google':
+            if (!aiConfig.config.projectId) {
+                throw new Error('Google Vertex AI project ID is required');
             }
             break;
     }
@@ -91,24 +98,23 @@ export function validateAIConfig(aiConfig: AIConfig): void {
  * Get current AI configuration status
  */
 export function getAIConfigStatus(): {
-    enabled: boolean;
     provider?: AIProvider;
     model?: string;
     hasApiKey: boolean;
+    projectId?: string;
+    location?: string;
 } {
     try {
         const aiConfig = getAIConfig();
         validateAIConfig(aiConfig);
 
         return {
-            enabled: aiConfig.enabled,
             provider: aiConfig.provider,
             model: aiConfig.config.model,
             hasApiKey: !!aiConfig.config.apiKey,
         };
     } catch {
         return {
-            enabled: false,
             hasApiKey: false,
         };
     }

@@ -28,20 +28,15 @@ export const RecommendationItemSchema = z.object({
 export const RecommendationsResponseSchema = z.array(RecommendationItemSchema);
 
 /**
- * Schema for festival information extraction
- */
-export const FestivalInfoSchema = z.object({
-    name: z.string().optional(),
-    location: z.string().optional(),
-    startDate: z.string().optional(),
-    endDate: z.string().optional(),
-    description: z.string().optional(),
-});
-
-/**
  * Schema for parsed lineup data
  */
-export const ParsedLineupDataSchema = z.object({
+export const ParsedFestivalDataSchema = z.object({
+    name: z.string(),
+    location: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    description: z.string().optional(),
+    website: z.string().optional(),
     artists: z.array(
         z.object({
             name: z.string(),
@@ -87,5 +82,4 @@ export const ParsedLineupDataSchema = z.object({
 export type ArtistMatchingResponse = z.infer<typeof ArtistMatchingResponseSchema>;
 export type RecommendationItem = z.infer<typeof RecommendationItemSchema>;
 export type RecommendationsResponse = z.infer<typeof RecommendationsResponseSchema>;
-export type FestivalInfo = z.infer<typeof FestivalInfoSchema>;
-export type ParsedLineupData = z.infer<typeof ParsedLineupDataSchema>;
+export type ParsedFestivalData = z.infer<typeof ParsedFestivalDataSchema>;

@@ -1,10 +1,10 @@
 /**
  * Chunks a text into smaller parts with a specified maximum character length and overlap.
- * 
- * @param text 
- * @param maxChunkChars 
- * @param overlap 
- * @returns 
+ *
+ * @param text
+ * @param maxChunkChars
+ * @param overlap
+ * @returns
  */
 
 export function chunkText(text: string, maxChunkChars: number, overlap: number): string[] {

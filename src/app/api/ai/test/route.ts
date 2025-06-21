@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/lib/container';
 import { getAIConfigStatus } from '@/lib/ai-config';
 import { z } from 'zod';
-import { ParsedLineupDataSchema } from '@/services/ai/schemas';
+import { ParsedFestivalDataSchema } from '@/services/ai/schemas';
 
 /**
  * GET /api/ai/status - Get AI service configuration status
@@ -82,10 +82,8 @@ export async function POST(request: NextRequest) {
 
             case 'festival_parsing':
                 result = await aiService.parseFestivalData({
-                    prompt: validatedData.prompt,
-                    festivalData: validatedData.prompt,
-                    expectedFormat: 'lineup',
-                    schema: ParsedLineupDataSchema,
+                    content: validatedData.prompt,
+                    schema: ParsedFestivalDataSchema,
                 });
                 break;
 

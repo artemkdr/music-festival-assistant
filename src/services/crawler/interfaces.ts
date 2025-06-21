@@ -1,7 +1,7 @@
 /**
  * Festival web crawler service interfaces
  */
-import { ParsedLineupData } from '@/services/ai/schemas';
+import { ParsedFestivalData } from '@/services/ai/schemas';
 import type { Festival } from '@/types';
 
 /**
@@ -27,7 +27,7 @@ export interface FestivalCrawlResult {
     success: boolean;
     festival?: Festival;
     rawData: RawFestivalData;
-    parsedData?: ParsedLineupData;
+    parsedData?: ParsedFestivalData;
     errors?: string[];
     warnings?: string[];
     aiProcessingTime?: number;
@@ -45,7 +45,6 @@ export interface CrawlerConfig {
     respectRobotsTxt: boolean;
     parseImages: boolean;
     parseSchedule: boolean;
-    aiEnhanced: boolean; // Whether to use AI for parsing
 }
 
 /**
@@ -53,36 +52,12 @@ export interface CrawlerConfig {
  */
 export interface IFestivalCrawlerService {
     /**
-     * Crawl festival website and extract lineup data
-     * @param url Festival website URL
-     * @param festivalInfo Optional basic festival information (will be extracted from HTML if not provided)
+     * Crawl festival using a list of URLs (HTML, PDF, etc.) and extract lineup data via AI service
+     * @param urls List of URLs to crawl (HTML, PDF, etc.)
+     * @param festivalInfo Optional basic festival information
      * @returns Promise resolving to crawl result
      */
-    crawlFestival(
-        url: string,
-        festivalInfo?: {
-            name: string;
-            location: string;
-            startDate: string;
-            endDate: string;
-            description?: string;
-        }
-    ): Promise<FestivalCrawlResult>;
-
-    /**
-     * Parse raw HTML content to extract festival data
-     * @param html Raw HTML content
-     * @param url Source URL for context
-     * @returns Promise resolving to parsed lineup data
-     */
-    parseHtmlContent(html: string, url: string): Promise<ParsedLineupData>;
-
-    /**
-     * Validate and clean extracted festival data
-     * @param rawData Raw parsed data
-     * @returns Promise resolving to cleaned data
-     */
-    validateAndCleanData(rawData: ParsedLineupData): Promise<ParsedLineupData>;
+    crawlFestival(urls: string[]): Promise<FestivalCrawlResult>;
 
     /**
      * Convert parsed data to festival format
@@ -91,7 +66,7 @@ export interface IFestivalCrawlerService {
      * @returns Promise resolving to festival object
      */
     convertToFestival(
-        parsedData: ParsedLineupData,
+        parsedData: ParsedFestivalData,
         festivalInfo: {
             name: string;
             location: string;
@@ -101,14 +76,4 @@ export interface IFestivalCrawlerService {
             website?: string;
         }
     ): Promise<Festival>;
-
-    /**
-     * Get crawler configuration
-     */
-    getConfig(): CrawlerConfig;
-
-    /**
-     * Update crawler configuration
-     */
-    updateConfig(config: Partial<CrawlerConfig>): void;
 }

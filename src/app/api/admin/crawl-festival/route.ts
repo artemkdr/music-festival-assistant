@@ -2,24 +2,15 @@
  * Admin endpoint for crawling festival websites
  * This endpoint is for admin use only to add new festivals to the system
  */
+import { DIContainer } from '@/lib/container';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { DIContainer } from '@/lib/container';
 
 /**
  * Request schema for festival crawling
  */
 const CrawlFestivalRequestSchema = z.object({
     url: z.string().url('Must be a valid URL'),
-    options: z
-        .object({
-            aiEnhanced: z.boolean().default(true),
-            parseImages: z.boolean().default(true),
-            parseSchedule: z.boolean().default(true),
-            saveToDB: z.boolean().default(true), // Whether to save the result to the festivals repository
-        })
-        .optional()
-        .default({}),
 });
 
 //type CrawlFestivalRequest = z.infer<typeof CrawlFestivalRequestSchema>;
@@ -42,24 +33,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const validatedRequest = CrawlFestivalRequestSchema.parse(body);
         logger.info('Starting festival crawl', {
             url: validatedRequest.url,
-            options: validatedRequest.options,
         });
 
-        // Update crawler config if needed
-        if (validatedRequest.options) {
-            const currentConfig = crawlerService.getConfig();
-            crawlerService.updateConfig({
-                ...currentConfig,
-                aiEnhanced: validatedRequest.options.aiEnhanced,
-                parseImages: validatedRequest.options.parseImages,
-                parseSchedule: validatedRequest.options.parseSchedule,
-            });
-        }
-
-        const crawlResult = await crawlerService.crawlFestival(validatedRequest.url);
+        const crawlResult = await crawlerService.crawlFestival([validatedRequest.url]);
 
         // Save to database if requested and crawl was successful
-        if (validatedRequest.options.saveToDB && crawlResult.success && crawlResult.festival) {
+        if (crawlResult.success && crawlResult.festival) {
             try {
                 const savedFestival = await festivalRepository.saveFestival(crawlResult.festival);
                 logger.info('Festival saved to repository', {
@@ -126,57 +105,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             {
                 status: 'error',
                 message: error instanceof Error ? error.message : 'Festival crawl failed',
-            },
-            { status: 500 }
-        );
-    }
-}
-
-/**
- * GET /api/admin/crawl-festival
- * Get crawler service status and configuration
- */
-export async function GET(): Promise<NextResponse> {
-    const container = DIContainer.getInstance();
-    const logger = container.getLogger();
-    const crawlerService = container.getFestivalCrawlerService();
-
-    try {
-        const config = crawlerService.getConfig();
-
-        return NextResponse.json({
-            status: 'success',
-            message: 'Crawler service status',
-            data: {
-                config,
-                endpoints: {
-                    crawl: 'POST /api/admin/crawl-festival',
-                },
-                exampleRequest: {
-                    url: 'https://example-festival.com',
-                    festivalInfo: {
-                        name: 'Example Festival 2024', // Optional - will be extracted if not provided
-                        location: 'Austin, Texas', // Optional - will be extracted if not provided
-                        startDate: '2024-06-15T00:00:00Z', // Optional - will be extracted if not provided
-                        endDate: '2024-06-17T23:59:59Z', // Optional - will be extracted if not provided
-                        description: 'A great music festival', // Optional - will be extracted if not provided
-                    },
-                    options: {
-                        aiEnhanced: true,
-                        parseImages: true,
-                        parseSchedule: true,
-                        saveToDB: false,
-                    },
-                },
-            },
-        });
-    } catch (error) {
-        logger.error('Failed to get crawler status', error instanceof Error ? error : new Error(String(error)));
-
-        return NextResponse.json(
-            {
-                status: 'error',
-                message: 'Failed to get crawler status',
             },
             { status: 500 }
         );

@@ -1,10 +1,12 @@
 /**
- * OpenAI AI service implementation
+ * Google Vertex AI service implementation
  */
 import type { ILogger } from '@/lib/logger';
 import { chunkText } from '@/services/ai/utils/chunk';
 import { mergeResults } from '@/services/ai/utils/merge';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { VertexAI, HarmCategory, HarmBlockThreshold, Part } from '@google-cloud/vertexai';
+import path from 'path';
 import type { AIProviderConfig, AIRequest, AIResponse, ArtistMatchingRequest, IAIService, RecommendationRequest, StructuredExtractionRequest } from './interfaces';
 import { ArtistMatchingResponseSchema, RecommendationsResponseSchema } from './schemas';
 
@@ -25,52 +27,13 @@ const CHUNKING_CONFIG = {
 } as const;
 
 /**
- * Interface for chunking results
+ * Google Vertex AI service implementation
  */
-/*interface ChunkResult<T> {
-    chunkIndex: number;
-    totalChunks: number;
-    data: Partial<T>;
-    success: boolean;
-    error?: string;
-}*/
-
-/**
- * OpenAI API response types
- */
-interface OpenAIMessage {
-    role: 'system' | 'user' | 'assistant';
-    content: string;
-}
-
-interface OpenAIChoice {
-    message: OpenAIMessage;
-    finish_reason: 'stop' | 'length' | 'content_filter' | 'function_call';
-    index: number;
-}
-
-interface OpenAIUsage {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-}
-
-interface OpenAIResponse {
-    id: string;
-    object: string;
-    created: number;
-    model: string;
-    choices: OpenAIChoice[];
-    usage: OpenAIUsage;
-}
-
-/**
- * OpenAI service implementation
- */
-export class OpenAIService implements IAIService {
-    private readonly apiKey: string;
+export class VertexAIService implements IAIService {
+    private readonly vertexAI: VertexAI;
     private readonly model: string;
-    private readonly baseUrl: string;
+    private readonly projectId: string;
+    private readonly location: string;
     private readonly maxTokens: number;
     private readonly temperature: number;
 
@@ -78,83 +41,134 @@ export class OpenAIService implements IAIService {
         private readonly config: AIProviderConfig,
         private readonly logger: ILogger
     ) {
-        this.apiKey = config.apiKey;
-        this.model = config.model;
-        this.baseUrl = config.baseUrl || 'https://api.openai.com/v1';
-        this.maxTokens = config.maxTokens || 4000;
-        this.temperature = config.temperature || 0.7;
+        this.model = config.model || 'gemini-2.5-flash';
+        this.projectId = config.projectId || process.env.VERTEX_PROJECT_ID || 'api-for-bcars';
+        this.location = config.location || process.env.VERTEX_LOCATION || 'us-central1';
+        this.maxTokens = config.maxTokens || 30000;
+        this.temperature = config.temperature || 0.7; // Initialize VertexAI with service account credentials
+        // Set the environment variable for authentication
+        process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(process.cwd(), 'google-vertex-api-key.json');
 
-        this.logger.info('OpenAI service initialized', {
-            model: this.model,
-            baseUrl: this.baseUrl,
+        this.vertexAI = new VertexAI({
+            project: this.projectId,
         });
-    }
 
-    /**
-     * Generate text completion using OpenAI API
+        this.logger.info('Vertex AI service initialized', {
+            model: this.model,
+            projectId: this.projectId,
+        });
+    } /**
+     * Generate text completion using Vertex AI SDK
      */
     async generateCompletion(request: AIRequest): Promise<AIResponse> {
         try {
-            const messages: OpenAIMessage[] = [];
+            // Get the generative model
+            const generativeModel = this.vertexAI.getGenerativeModel({
+                model: this.model,
+                generationConfig: {
+                    temperature: request.temperature ?? this.temperature,
+                    //maxOutputTokens: request.maxTokens || this.maxTokens,
+                    topP: 0.95,
+                    topK: 40,
+                },
+                safetySettings: [
+                    {
+                        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                    },
+                    {
+                        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                    },
+                    {
+                        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                    },
+                    {
+                        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+                    },
+                ],
+                systemInstruction: request.systemPrompt || '',
+            });
 
-            if (request.systemPrompt) {
-                messages.push({
-                    role: 'system',
-                    content: request.systemPrompt,
+            const userParts: Part[] = [
+                {
+                    text: request.prompt || '',
+                },
+            ];
+            if (request.files && request.files.length > 0) {
+                request.files.forEach(file => {
+                    if (file.uri) {
+                        userParts.push({
+                            fileData: {
+                                mimeType: file.mimeType,
+                                fileUri: file.uri,
+                            },
+                        });
+                    } else if (file.data) {
+                        userParts.push({
+                            inlineData: {
+                                mimeType: file.mimeType,
+                                data: file.data,
+                            },
+                        });
+                    }
                 });
             }
 
-            // Simple text message
-            messages.push({
-                role: 'user',
-                content: request.prompt,
+            // Generate content (text-only for now)
+            const result = await generativeModel.generateContent({
+                contents: [
+                    {
+                        role: 'user',
+                        parts: userParts,
+                    },
+                ],
             });
+            const response = result.response;
 
-            const response = await fetch(`${this.baseUrl}/chat/completions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${this.apiKey}`,
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages,
-                    max_tokens: request.maxTokens || this.maxTokens,
-                    temperature: request.temperature ?? this.temperature,
-                }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
+            if (!response) {
+                throw new Error('No response from Vertex AI');
             }
 
-            const data: OpenAIResponse = await response.json();
-            const choice = data.choices[0];
-
-            if (!choice) {
-                throw new Error('No response from OpenAI API');
+            const candidates = response.candidates;
+            if (!candidates || candidates.length === 0) {
+                throw new Error('No candidates in Vertex AI response');
             }
 
-            this.logger.debug('OpenAI completion generated', {
-                model: data.model,
-                usage: data.usage,
-                finishReason: choice.finish_reason,
+            const text = candidates[0]?.content?.parts?.[0]?.text;
+            if (!text) {
+                throw new Error('No text content in Vertex AI response');
+            }
+
+            const usageMetadata = response.usageMetadata;
+
+            this.logger.debug('Vertex AI completion generated', {
+                model: this.model,
+                usage: usageMetadata,
+                textLength: text.length,
             });
 
             return {
-                content: choice.message.content,
-                usage: {
-                    promptTokens: data.usage.prompt_tokens,
-                    completionTokens: data.usage.completion_tokens,
-                    totalTokens: data.usage.total_tokens,
-                },
-                model: data.model,
-                finishReason: choice.finish_reason,
+                content: text,
+                usage: usageMetadata
+                    ? {
+                          promptTokens: usageMetadata.promptTokenCount || 0,
+                          completionTokens: usageMetadata.candidatesTokenCount || 0,
+                          totalTokens: usageMetadata.totalTokenCount || 0,
+                      }
+                    : {
+                          promptTokens: 0,
+                          completionTokens: 0,
+                          totalTokens: 0,
+                      },
+                model: this.model,
+                finishReason: 'stop', // Vertex AI SDK handles this internally
             };
         } catch (error) {
-            this.logger.error('Failed to generate OpenAI completion', error instanceof Error ? error : new Error(String(error)));
-            throw new Error(`OpenAI completion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            this.logger.error('Failed to generate Vertex AI completion', error instanceof Error ? error : new Error(String(error)));
+            throw new Error(`Vertex AI completion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -183,7 +197,7 @@ Schema requirements:
         const response = await this.generateCompletion(aiRequest);
 
         try {
-            const parsedData = JSON.parse(response.content);
+            const parsedData = JSON.parse(this.removeMarkdownWrapper(response.content));
 
             // Validate against schema if Zod schema is provided
             return request.schema.parse(parsedData) as T;
@@ -225,7 +239,7 @@ Return your response as valid JSON that matches this exact schema:\n${JSON.strin
             };
             const response = await this.generateCompletion(aiRequest);
             try {
-                const parsedData = JSON.parse(response.content);
+                const parsedData = JSON.parse(this.removeMarkdownWrapper(response.content));
                 const validatedData = request.schema.parse(parsedData) as T;
                 this.logger.debug('Festival data parsed with schema validation', {
                     dataSize: data.length,
@@ -258,7 +272,7 @@ Return your response as valid JSON that matches this exact schema:\n${JSON.strin
             };
             try {
                 const response = await this.generateCompletion(aiRequest);
-                const parsedData = JSON.parse(response.content);
+                const parsedData = JSON.parse(this.removeMarkdownWrapper(response.content));
                 const validatedData = request.schema.parse(parsedData) as Partial<T>;
                 results.push(validatedData);
                 this.logger.debug('Chunk parsed successfully', { chunk: i + 1, totalChunks: chunks.length });
@@ -319,7 +333,7 @@ ${request.contextData ? `Additional context:\n${request.contextData}` : ''}`;
         const response = await this.generateCompletion(aiRequest);
 
         try {
-            const parsedData = JSON.parse(response.content);
+            const parsedData = JSON.parse(this.removeMarkdownWrapper(response.content));
             const validatedResult = ArtistMatchingResponseSchema.parse(parsedData);
 
             this.logger.debug('Artist matching completed with schema validation', {
@@ -380,7 +394,7 @@ ${request.userHistory ? `User history: ${JSON.stringify(request.userHistory, nul
         const response = await this.generateCompletion(aiRequest);
 
         try {
-            const parsedData = JSON.parse(response.content);
+            const parsedData = JSON.parse(this.removeMarkdownWrapper(response.content));
             const validatedRecommendations = RecommendationsResponseSchema.parse(parsedData);
 
             this.logger.debug('Recommendations generated with schema validation', {
@@ -402,11 +416,19 @@ ${request.userHistory ? `User history: ${JSON.stringify(request.userHistory, nul
     }
 
     /**
+     * remove markdown wrapper fro JSON
+     */
+    private removeMarkdownWrapper(json: string): string {
+        // Remove any markdown code block syntax
+        return json.replace(/```json\s*([\s\S]*?)\s*```/gi, '$1').trim();
+    }
+
+    /**
      * Get provider information
      */
     getProviderInfo() {
         return {
-            name: 'OpenAI',
+            name: 'Google Vertex AI',
             model: this.model,
             version: '1.0.0',
         };

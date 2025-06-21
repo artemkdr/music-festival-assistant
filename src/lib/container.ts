@@ -63,14 +63,10 @@ export class DIContainer {
         if (!this._aiService) {
             try {
                 const aiConfig = getAIConfig();
-                if (aiConfig.enabled) {
-                    validateAIConfig(aiConfig);
-                    const factory = new AIServiceFactory(this.getLogger());
-                    this._aiService = factory.createAIService(aiConfig.provider, aiConfig.config);
-                    this.getLogger().info('AI service initialized', { provider: aiConfig.provider, model: aiConfig.config.model });
-                } else {
-                    this.getLogger().info('AI service is disabled');
-                }
+                validateAIConfig(aiConfig);
+                const factory = new AIServiceFactory(this.getLogger());
+                this._aiService = factory.createAIService(aiConfig.provider, aiConfig.config);
+                this.getLogger().info('AI service initialized', { provider: aiConfig.provider, model: aiConfig.config.model });
             } catch (error) {
                 this.getLogger().error('Failed to initialize AI service', error instanceof Error ? error : new Error(String(error)));
                 // Return null instead of throwing to allow the app to continue without AI features
@@ -87,7 +83,7 @@ export class DIContainer {
             const logger = this.getLogger();
             const aiService = this.getAIService(); // This can return null if AI is disabled
             this._festivalCrawlerService = new FestivalCrawlerService(logger, aiService);
-            logger.info('Festival crawler service initialized', { aiEnabled: !!aiService });
+            logger.info('Festival crawler service initialized');
         }
         return this._festivalCrawlerService;
     }

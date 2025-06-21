@@ -4,6 +4,7 @@
 import type { ILogger } from '@/lib/logger';
 import type { IAIService, IAIServiceFactory, AIProvider, AIProviderConfig } from './interfaces';
 import { OpenAIService } from './openai-service';
+import { VertexAIService } from './vertex-service';
 
 /**
  * AI service factory implementation
@@ -21,11 +22,11 @@ export class AIServiceFactory implements IAIServiceFactory {
             case 'openai':
                 return new OpenAIService(config, this.logger);
 
+            case 'google':
+                return new VertexAIService(config, this.logger);
+
             case 'anthropic':
                 throw new Error('Anthropic provider not yet implemented');
-
-            case 'google':
-                throw new Error('Google provider not yet implemented');
 
             case 'azure':
                 throw new Error('Azure OpenAI provider not yet implemented');
@@ -42,7 +43,7 @@ export class AIServiceFactory implements IAIServiceFactory {
      * Get list of supported providers
      */
     getSupportedProviders(): AIProvider[] {
-        return ['openai']; // Only OpenAI is implemented for now
+        return ['openai', 'google']; // OpenAI and Google Vertex AI are implemented
     }
 
     /**
@@ -60,6 +61,9 @@ export class AIServiceFactory implements IAIServiceFactory {
         switch (provider) {
             case 'openai':
                 this.validateOpenAIConfig(config);
+                break;
+            case 'google':
+                this.validateVertexAIConfig(config);
                 break;
             // Add other provider validations as they are implemented
         }
@@ -81,6 +85,34 @@ export class AIServiceFactory implements IAIServiceFactory {
 
         if (config.temperature && (config.temperature < 0 || config.temperature > 2)) {
             throw new Error('temperature must be between 0 and 2');
+        }
+    }
+
+    /**
+     * Validate Vertex AI specific configuration
+     */
+    private validateVertexAIConfig(config: AIProviderConfig): void {
+        const validModels = ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro', 'text-bison', 'chat-bison', 'code-bison'];
+
+        if (!validModels.includes(config.model)) {
+            this.logger.warn('Unknown Vertex AI model specified', { model: config.model });
+        }
+
+        if (config.maxTokens && (config.maxTokens < 1 || config.maxTokens > 8192)) {
+            throw new Error('maxTokens must be between 1 and 8192 for Vertex AI');
+        }
+
+        if (config.temperature && (config.temperature < 0 || config.temperature > 1)) {
+            throw new Error('temperature must be between 0 and 1 for Vertex AI');
+        }
+
+        // Vertex AI specific validations
+        if (!config.projectId && !process.env.VERTEX_PROJECT_ID) {
+            throw new Error('projectId is required for Vertex AI (provide in config or set VERTEX_PROJECT_ID env var)');
+        }
+
+        if (!config.location && !process.env.VERTEX_LOCATION) {
+            this.logger.warn('No location specified for Vertex AI, defaulting to us-central1');
         }
     }
 }

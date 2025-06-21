@@ -13,6 +13,19 @@ export interface AIProviderConfig {
     baseUrl?: string;
     maxTokens?: number;
     temperature?: number;
+    // Vertex AI specific properties
+    projectId?: string;
+    location?: string;
+}
+
+/**
+ * File input for AI requests
+ */
+export interface AIFileInput {
+    data?: string; // Base64 encoded file data or file path
+    mimeType: string; // MIME type of the file (e.g., 'image/jpeg', 'application/pdf')
+    name?: string; // Optional file name for reference
+    uri?: string; // Optional URI for remote files
 }
 
 /**
@@ -23,6 +36,7 @@ export interface AIRequest {
     systemPrompt?: string;
     maxTokens?: number;
     temperature?: number;
+    files?: AIFileInput[]; // Optional file inputs for multimodal AI
 }
 
 /**
@@ -42,17 +56,12 @@ export interface AIResponse {
 /**
  * Structured data extraction request
  */
-export interface StructuredExtractionRequest<T> extends AIRequest {
+export interface StructuredExtractionRequest<T> {
+    content: string; // Raw text, HTML, or JSON data to extract from
     schema: ZodSchema; // Zod schema or other validation schema
+    prompt?: string; // Optional prompt to guide extraction
     examples?: T[];
-}
-
-/**
- * Festival parsing specific requests
- */
-export interface FestivalParsingRequest<T> extends StructuredExtractionRequest<T> {
-    festivalData: string; // Raw HTML, JSON, or text data
-    expectedFormat: 'lineup' | 'schedule' | 'artist_info' | 'venue_info';
+    files?: AIFileInput[];
 }
 
 /**
@@ -90,7 +99,7 @@ export interface IAIService {
     /**
      * Parse festival data from various sources
      */
-    parseFestivalData<T>(request: FestivalParsingRequest<T>): Promise<T>;
+    parseFestivalData<T>(request: StructuredExtractionRequest<T>): Promise<T>;
 
     /**
      * Match and normalize artist names
