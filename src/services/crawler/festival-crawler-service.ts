@@ -4,7 +4,7 @@
 import type { ILogger } from '@/lib/logger';
 import type { IAIService } from '@/services/ai';
 import { ParsedFestivalData, ParsedFestivalDataSchema } from '@/services/ai/schemas';
-import type { Artist, Festival, Performance } from '@/types';
+import { generateFestivalId, type Artist, type Festival, type Performance } from '@/types';
 import { FestivalDataCleaner } from './festival-data-cleaner';
 import type { CrawlerConfig, FestivalCrawlResult, IFestivalCrawlerService } from './interfaces';
 
@@ -57,11 +57,16 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
                 throw new Error('AI service is not configured');
             }
             const aiProcessingStart = Date.now();
+
             // Use parseFestivalData with files prop (Vertex/AIService standard)
-            const parsedData = await this.aiService.parseFestivalData<ParsedFestivalData>({
-                files: urls.map(url => ({ uri: url, mimeType: 'application/octet-stream' })),
-                content: '', // No direct content
+            const parsedData = await this.aiService.extractStructuredData<ParsedFestivalData>({
+                prompt: `Parse the following festival data and extract artist lineup information. Return structured data with artist name, stage, day and time`,
+                files: urls.map(url => ({
+                    uri: url,
+                    mimeType: url.endsWith('.pdf') ? 'application/pdf' : 'text/html',
+                })),
                 schema: ParsedFestivalDataSchema,
+                maxTokens: 50000,
             });
             const aiProcessingTime = Date.now() - aiProcessingStart;
 
@@ -119,17 +124,20 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
      */
     async convertToFestival(parsedData: ParsedFestivalData): Promise<Festival> {
         this.logger.debug('Converting parsed data to festival format');
-        const festivalId = `festival-${Date.now()}`;
+
+        // generate festival ID based on its name, location and start date
+        const festivalId = generateFestivalId(parsedData);
+
         // Create artists with IDs
         const artists: Artist[] = parsedData.artists.map((artistData: ParsedFestivalData['artists'][number], index: number) => ({
             id: `artist-${festivalId}-${index + 1}`,
             name: artistData.name,
             genre: artistData.genre || ['Unknown'],
-            description: artistData.description || `${artistData.name} performing at ${parsedData.name}`,
+            description: artistData.description,
             ...(artistData.imageUrl && { imageUrl: artistData.imageUrl }),
             ...(artistData.streamingLinks && { streamingLinks: artistData.streamingLinks }),
             ...(artistData.socialLinks && { socialLinks: artistData.socialLinks }),
-            popularity: 50, // Default popularity, could be enhanced with AI
+            popularity: 0, // unknown at this point
         }));
 
         // Create performances array
@@ -153,40 +161,17 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
                     });
                 }
             });
-        } else {
-            // Generate basic performance data if no schedule found
-            artists.forEach((artist: Artist, index: number) => {
-                const day = Math.floor(index / 10) + 1; // Distribute across days
-                const hour = 14 + (index % 8); // Distribute across hours
-
-                const startDate = new Date(parsedData.startDate);
-                startDate.setDate(startDate.getDate() + day - 1);
-                startDate.setHours(hour, 0, 0, 0);
-
-                const endDate = new Date(startDate);
-                endDate.setHours(hour + 1, 30, 0, 0);
-
-                performances.push({
-                    id: `perf-${festivalId}-${index + 1}`,
-                    artistId: artist.id,
-                    artist,
-                    startTime: startDate.toISOString(),
-                    endTime: endDate.toISOString(),
-                    stage: parsedData.stages?.[index % (parsedData.stages.length || 1)] || 'Main Stage',
-                    day,
-                });
-            });
         }
         const festival: Festival = {
             id: festivalId,
             name: parsedData.name,
-            description: parsedData.description || `${parsedData.name} - Music Festival`,
+            stages: parsedData.stages || ['Main Stage'],
+            performances,
+            description: parsedData.description,
             location: parsedData.location,
             startDate: parsedData.startDate,
             endDate: parsedData.endDate,
             ...(parsedData.website && { website: parsedData.website }),
-            stages: parsedData.stages || ['Main Stage'],
-            performances,
         };
 
         this.logger.info('Festival data conversion completed', {

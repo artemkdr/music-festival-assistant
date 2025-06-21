@@ -110,9 +110,5 @@ export class AIServiceFactory implements IAIServiceFactory {
         if (!config.projectId && !process.env.VERTEX_PROJECT_ID) {
             throw new Error('projectId is required for Vertex AI (provide in config or set VERTEX_PROJECT_ID env var)');
         }
-
-        if (!config.location && !process.env.VERTEX_LOCATION) {
-            this.logger.warn('No location specified for Vertex AI, defaulting to us-central1');
-        }
     }
 }

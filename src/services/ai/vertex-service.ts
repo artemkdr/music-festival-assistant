@@ -2,29 +2,11 @@
  * Google Vertex AI service implementation
  */
 import type { ILogger } from '@/lib/logger';
-import { chunkText } from '@/services/ai/utils/chunk';
-import { mergeResults } from '@/services/ai/utils/merge';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import { VertexAI, HarmCategory, HarmBlockThreshold, Part } from '@google-cloud/vertexai';
+import { Part, VertexAI } from '@google-cloud/vertexai';
 import path from 'path';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { AIProviderConfig, AIRequest, AIResponse, ArtistMatchingRequest, IAIService, RecommendationRequest, StructuredExtractionRequest } from './interfaces';
 import { ArtistMatchingResponseSchema, RecommendationsResponseSchema } from './schemas';
-
-/**
- * Configuration constants for chunking large data
- */
-const CHUNKING_CONFIG = {
-    // Approximate token estimation (characters to tokens ratio)
-    CHARS_PER_TOKEN: 4,
-    // Maximum tokens per chunk (leaving room for system prompt and response)
-    MAX_CHUNK_TOKENS: 4000,
-    // Maximum characters per chunk
-    MAX_CHUNK_CHARS: 16000,
-    // Overlap between chunks to maintain context
-    CHUNK_OVERLAP_CHARS: 500,
-    // Minimum chunk size to process
-    MIN_CHUNK_CHARS: 1000,
-} as const;
 
 /**
  * Google Vertex AI service implementation
@@ -33,7 +15,6 @@ export class VertexAIService implements IAIService {
     private readonly vertexAI: VertexAI;
     private readonly model: string;
     private readonly projectId: string;
-    private readonly location: string;
     private readonly maxTokens: number;
     private readonly temperature: number;
 
@@ -42,10 +23,9 @@ export class VertexAIService implements IAIService {
         private readonly logger: ILogger
     ) {
         this.model = config.model || 'gemini-2.5-flash';
-        this.projectId = config.projectId || process.env.VERTEX_PROJECT_ID || 'api-for-bcars';
-        this.location = config.location || process.env.VERTEX_LOCATION || 'us-central1';
+        this.projectId = config.projectId || ''; // Project ID for Vertex AI
         this.maxTokens = config.maxTokens || 30000;
-        this.temperature = config.temperature || 0.7; // Initialize VertexAI with service account credentials
+        this.temperature = config.temperature || 0; // Initialize VertexAI with service account credentials
         // Set the environment variable for authentication
         process.env.GOOGLE_APPLICATION_CREDENTIALS = path.join(process.cwd(), 'google-vertex-api-key.json');
 
@@ -67,34 +47,16 @@ export class VertexAIService implements IAIService {
                 model: this.model,
                 generationConfig: {
                     temperature: request.temperature ?? this.temperature,
-                    //maxOutputTokens: request.maxTokens || this.maxTokens,
-                    topP: 0.95,
-                    topK: 40,
+                    maxOutputTokens: request.maxTokens || this.maxTokens,
+                    topP: request.topP ?? 1,
+                    topK: request.topK ?? 1,
                 },
-                safetySettings: [
-                    {
-                        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                    },
-                    {
-                        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                    },
-                    {
-                        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                    },
-                    {
-                        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                    },
-                ],
-                systemInstruction: request.systemPrompt || '',
+                systemInstruction: request.systemPrompt ?? '',
             });
 
             const userParts: Part[] = [
                 {
-                    text: request.prompt || '',
+                    text: request.prompt ?? '',
                 },
             ];
             if (request.files && request.files.length > 0) {
@@ -164,7 +126,6 @@ export class VertexAIService implements IAIService {
                           totalTokens: 0,
                       },
                 model: this.model,
-                finishReason: 'stop', // Vertex AI SDK handles this internally
             };
         } catch (error) {
             this.logger.error('Failed to generate Vertex AI completion', error instanceof Error ? error : new Error(String(error)));
@@ -207,94 +168,6 @@ Schema requirements:
             });
             throw new Error('Failed to extract valid structured data from AI response');
         }
-    }
-
-    /**
-     * Parse festival data from various sources (robust to large data via chunking)
-     */
-    async parseFestivalData<T>(request: StructuredExtractionRequest<T>): Promise<T> {
-        // --- Helper: Estimate token count ---
-        const estimateTokens = (text: string) => Math.ceil(text.length / CHUNKING_CONFIG.CHARS_PER_TOKEN);
-        const prompt = 'Parse the following festival data and extract artist lineup information. Return structured data with artist name, stage, day and time';
-        // --- Main logic ---
-        const systemPrompt = `
-You are an expert in parsing festival data. 
-Extract artist lineup information from festival data.
-Try to find repeated patterns and structures in the data, normally the lineup is structured day by day with the artists by stage and time.
-Or it could be a list of artists with their stage, day and time.
-
-Return your response as valid JSON that matches this exact schema:\n${JSON.stringify(zodToJsonSchema(request.schema), null, 2)}\n\nIMPORTANT: Return only valid JSON, no additional text or explanations.`;
-
-        const data = request.content;
-        const maxChunkChars = CHUNKING_CONFIG.MAX_CHUNK_CHARS;
-        const overlap = CHUNKING_CONFIG.CHUNK_OVERLAP_CHARS;
-        const needsChunking = estimateTokens(data) > CHUNKING_CONFIG.MAX_CHUNK_TOKENS;
-
-        if (!needsChunking) {
-            // --- Single chunk processing ---
-            const aiRequest: AIRequest = {
-                ...request,
-                systemPrompt,
-                prompt: `${prompt} :\n\n${data}`,
-            };
-            const response = await this.generateCompletion(aiRequest);
-            try {
-                const parsedData = JSON.parse(this.removeMarkdownWrapper(response.content));
-                const validatedData = request.schema.parse(parsedData) as T;
-                this.logger.debug('Festival data parsed with schema validation', {
-                    dataSize: data.length,
-                    parsedFields: Object.keys(validatedData || {}),
-                });
-                return validatedData;
-            } catch (error) {
-                this.logger.error('Failed to parse or validate festival data', error instanceof Error ? error : new Error(String(error)), {
-                    rawResponse: response.content,
-                    schema: zodToJsonSchema(request.schema),
-                });
-                return { rawData: response.content } as T;
-            }
-        }
-
-        // --- Chunked processing ---
-        const chunks = chunkText(data, maxChunkChars, overlap);
-        this.logger.info('Festival data is large, using chunked AI parsing', {
-            totalLength: data.length,
-            chunkCount: chunks.length,
-            chunkSize: maxChunkChars,
-        });
-        const results: Partial<T>[] = [];
-        for (let i = 0; i < Math.min(100, chunks.length); i++) {
-            const chunk = chunks[i];
-            const aiRequest: AIRequest = {
-                ...request,
-                systemPrompt,
-                prompt: `${prompt} (chunk ${i + 1} of ${chunks.length}):\n\n${chunk}`,
-            };
-            try {
-                const response = await this.generateCompletion(aiRequest);
-                const parsedData = JSON.parse(this.removeMarkdownWrapper(response.content));
-                const validatedData = request.schema.parse(parsedData) as Partial<T>;
-                results.push(validatedData);
-                this.logger.debug('Chunk parsed successfully', { chunk: i + 1, totalChunks: chunks.length });
-            } catch (error) {
-                this.logger.error('Failed to parse/validate chunk', error instanceof Error ? error : new Error(String(error)), {
-                    chunk: i + 1,
-                    totalChunks: chunks.length,
-                });
-                // Optionally push partial/fallback data
-            }
-        }
-        if (results.length === 0) {
-            this.logger.error('All chunks failed to parse, returning empty result');
-            return { rawData: '' } as T;
-        }
-        // Merge all chunked results
-        const merged = mergeResults(results);
-        this.logger.info('Merged chunked festival data', {
-            chunkCount: chunks.length,
-            mergedKeys: Object.keys(merged as object),
-        });
-        return merged;
     }
 
     /**

@@ -43,6 +43,7 @@ export function getAIConfig(): AIConfig {
             config.projectId = process.env.GOOGLE_VERTEX_PROJECT_ID || '';
             config.maxTokens = process.env.GOOGLE_VERTEX_MAX_TOKENS ? parseInt(process.env.GOOGLE_VERTEX_MAX_TOKENS, 10) : 4000;
             config.temperature = process.env.GOOGLE_VERTEX_TEMPERATURE ? parseFloat(process.env.GOOGLE_VERTEX_TEMPERATURE) : 0.7;
+            config.projectId = process.env.GOOGLE_VERTEX_PROJECT_ID || '';
             break;
 
         case 'azure':

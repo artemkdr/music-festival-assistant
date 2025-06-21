@@ -6,11 +6,14 @@
  * Represents a music artist performing at a festival
  */
 export interface Artist {
+    // internal ID for the artist
     id: string;
     name: string;
     genre: string[];
-    description: string;
-    imageUrl?: string;
+    popularity: number; // 1-100 scale, 0 - unknown
+    mappingIds?: Record<string, string>; // e.g. { spotify: 'spotify-artist-id', lastfm: 'lastfm-artist-id' }
+    description?: string | undefined;
+    imageUrl?: string | undefined;
     streamingLinks?: {
         spotify?: string | undefined;
         appleMusic?: string | undefined;
@@ -24,8 +27,11 @@ export interface Artist {
         twitter?: string | undefined;
         facebook?: string | undefined;
     };
-    popularity: number; // 1-100 scale
 }
+
+export const generateArtistId = (): string => {
+    return `artist-${Math.random().toString(36).substring(2, 15)}-${Date.now()}`;
+};
 
 /**
  * Represents a performance slot at a festival
@@ -46,15 +52,19 @@ export interface Performance {
 export interface Festival {
     id: string;
     name: string;
-    description: string;
     location: string;
     startDate: string; // ISO string
     endDate: string; // ISO string
-    website?: string;
-    imageUrl?: string;
     stages: string[];
     performances: Performance[];
+    description?: string | undefined;
+    website?: string;
+    imageUrl?: string;
 }
+
+export const generateFestivalId = (festival: { name: string; location: string; startDate: string; endDate: string }): string => {
+    return `festival-${normalizeName(festival.name)}-${normalizeName(festival.location)}-${new Date(festival.startDate).toISOString().split('T')[0]}`;
+};
 
 /**
  * User preferences for music discovery
@@ -133,3 +143,23 @@ export interface CalendarEvent {
     location: string;
     url?: string;
 }
+
+/**
+ * Utility to normalize names:
+ * - Remove diacritics,
+ * - Remove special characters,
+ * - Convert to lowercase,
+ * - Trim whitespace
+ * - Replace spaces with '-'
+ * @param name Name to normalize
+ * @returns Normalized name
+ */
+export const normalizeName = (name: string) => {
+    return name
+        .normalize('NFD') // Normalize to decompose diacritics
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-'); // Replace spaces with hyphens
+};

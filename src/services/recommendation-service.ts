@@ -247,14 +247,14 @@ export class RecommendationService implements IRecommendationService {
         }
 
         // Find artists with similar genres
-        const similarArtists = await this.artistRepository.getArtistsByGenres(artist.genre);
+        const similarArtists = await this.artistRepository.getArtistsByGenres(artist.genre ?? []);
 
         return similarArtists
             .filter(a => a.id !== artistId) // Exclude the original artist
             .sort((a, b) => {
                 // Sort by genre overlap and popularity
-                const aGenreOverlap = this.calculateGenreScore(artist.genre, a.genre);
-                const bGenreOverlap = this.calculateGenreScore(artist.genre, b.genre);
+                const aGenreOverlap = this.calculateGenreScore(artist.genre ?? [], a.genre ?? []);
+                const bGenreOverlap = this.calculateGenreScore(artist.genre ?? [], b.genre ?? []);
 
                 if (aGenreOverlap !== bGenreOverlap) {
                     return bGenreOverlap - aGenreOverlap;

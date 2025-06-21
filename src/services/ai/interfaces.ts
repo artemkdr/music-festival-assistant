@@ -15,7 +15,6 @@ export interface AIProviderConfig {
     temperature?: number;
     // Vertex AI specific properties
     projectId?: string;
-    location?: string;
 }
 
 /**
@@ -36,6 +35,8 @@ export interface AIRequest {
     systemPrompt?: string;
     maxTokens?: number;
     temperature?: number;
+    topP?: number; // Optional, for controlling diversity
+    topK?: number; // Optional, for controlling diversity
     files?: AIFileInput[]; // Optional file inputs for multimodal AI
 }
 
@@ -56,10 +57,9 @@ export interface AIResponse {
 /**
  * Structured data extraction request
  */
-export interface StructuredExtractionRequest<T> {
-    content: string; // Raw text, HTML, or JSON data to extract from
+export interface StructuredExtractionRequest<T> extends AIRequest {
     schema: ZodSchema; // Zod schema or other validation schema
-    prompt?: string; // Optional prompt to guide extraction
+    content?: string; // Raw text, HTML, or JSON data to extract from
     examples?: T[];
     files?: AIFileInput[];
 }
@@ -95,11 +95,6 @@ export interface IAIService {
      * Extract structured data using AI
      */
     extractStructuredData<T>(request: StructuredExtractionRequest<T>): Promise<T>;
-
-    /**
-     * Parse festival data from various sources
-     */
-    parseFestivalData<T>(request: StructuredExtractionRequest<T>): Promise<T>;
 
     /**
      * Match and normalize artist names

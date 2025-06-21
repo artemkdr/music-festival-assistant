@@ -15,6 +15,8 @@ import type { IAIService } from '@/services/ai';
 import { AIServiceFactory } from '@/services/ai';
 import type { IFestivalCrawlerService } from '@/services/crawler/interfaces';
 import { FestivalCrawlerService } from '@/services/crawler/festival-crawler-service';
+import { ArtistCrawlerService } from '@/services/crawler/artist-crawler-service';
+import { SpotifyApiService } from '@/services/spotify/spotify-api-service';
 
 /**
  * Dependency injection container class
@@ -35,6 +37,7 @@ export class DIContainer {
     private _userFeedbackService: IUserFeedbackService | null = null;
     private _festivalDiscoveryController: FestivalDiscoveryController | null = null;
     private _userFeedbackController: UserFeedbackController | null = null;
+    private _artistCrawlerService: ArtistCrawlerService | null = null;
 
     /**
      * Get singleton instance
@@ -179,6 +182,24 @@ export class DIContainer {
     }
 
     /**
+     * Get artist crawler service
+     */
+    public getArtistCrawlerService(): ArtistCrawlerService {
+        if (!this._artistCrawlerService) {
+            const logger = this.getLogger();
+            // You may want to load the access token from env/config
+            if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+                throw new Error('Spotify client ID and secret must be set in environment variables');
+            }
+            const spotifyApi = new SpotifyApiService(logger, process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
+            const aiService = this.getAIService();
+            this._artistCrawlerService = new ArtistCrawlerService(logger, spotifyApi, aiService!);
+            logger.info('Artist crawler service initialized');
+        }
+        return this._artistCrawlerService;
+    }
+
+    /**
      * Reset all singletons (useful for testing)
      */
     public reset(): void {
@@ -193,6 +214,7 @@ export class DIContainer {
         this._userFeedbackService = null;
         this._festivalDiscoveryController = null;
         this._userFeedbackController = null;
+        this._artistCrawlerService = null;
     }
 }
 

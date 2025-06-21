@@ -1,11 +1,10 @@
 /**
  * AI service status and testing endpoint
  */
-import { NextRequest, NextResponse } from 'next/server';
-import { container } from '@/lib/container';
 import { getAIConfigStatus } from '@/lib/ai-config';
+import { container } from '@/lib/container';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ParsedFestivalDataSchema } from '@/services/ai/schemas';
 
 /**
  * GET /api/ai/status - Get AI service configuration status
@@ -77,13 +76,6 @@ export async function POST(request: NextRequest) {
             case 'completion':
                 result = await aiService.generateCompletion({
                     prompt: validatedData.prompt,
-                });
-                break;
-
-            case 'festival_parsing':
-                result = await aiService.parseFestivalData({
-                    content: validatedData.prompt,
-                    schema: ParsedFestivalDataSchema,
                 });
                 break;
 
