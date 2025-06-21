@@ -27,7 +27,14 @@ export const artistSchema = z.object({
             facebook: z.string().url().optional(),
         })
         .optional(),
-    popularity: z.number().min(1).max(100),
+    popularity: z.object({
+        spotify: z.number().min(0).max(100).optional(),
+        ai: z.number().min(0).max(100).optional(),
+        appleMusic: z.number().min(0).max(100).optional(),
+        youtube: z.number().min(0).max(100).optional(),
+        soundcloud: z.number().min(0).max(100).optional(),
+        bandcamp: z.number().min(0).max(100).optional(),
+    }),
 });
 
 // Performance schema

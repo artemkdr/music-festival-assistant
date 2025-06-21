@@ -203,7 +203,7 @@ export class RecommendationService implements IRecommendationService {
         score += genreScore * weights.genreMatch;
 
         // Popularity score (normalized)
-        const popularityScore = artist.popularity / 100;
+        const popularityScore = (artist.popularity.spotify || artist.popularity.ai || 0) / 100;
         score += popularityScore * weights.popularity;
 
         // Preferred artists boost
@@ -217,7 +217,7 @@ export class RecommendationService implements IRecommendationService {
         }
 
         // Discovery mode adjustment
-        const discoveryBonus = this.getDiscoveryModeBonus(userPreferences.discoveryMode, artist.popularity);
+        const discoveryBonus = this.getDiscoveryModeBonus(userPreferences.discoveryMode, artist.popularity.spotify || artist.popularity.ai || 0);
         score += discoveryBonus * weights.discoveryMode;
 
         // Ensure score is between 0 and 1
@@ -260,7 +260,7 @@ export class RecommendationService implements IRecommendationService {
                     return bGenreOverlap - aGenreOverlap;
                 }
 
-                return b.popularity - a.popularity;
+                return (b.popularity.spotify || b.popularity.ai || 0) - (a.popularity.spotify || a.popularity.ai || 0);
             })
             .slice(0, limit)
             .map(a => a.id);
@@ -377,9 +377,10 @@ export class RecommendationService implements IRecommendationService {
         }
 
         // Popularity-based reasons
-        if (artist.popularity > 90) {
+        const popularity = artist.popularity.spotify || artist.popularity.ai || 0;
+        if (popularity > 90) {
             reasons.push('Highly popular and critically acclaimed');
-        } else if (artist.popularity < 50 && userPreferences.discoveryMode === 'adventurous') {
+        } else if (popularity < 50 && userPreferences.discoveryMode === 'adventurous') {
             reasons.push('Hidden gem waiting to be discovered');
         }
 

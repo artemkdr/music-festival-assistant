@@ -32,6 +32,9 @@ export class ArtistCrawlerService {
         let streamingLinks: Record<string, string | undefined> = {};
         let socialLinks: Record<string, string | undefined> = {};
         let description = '';
+        let popularity: Record<string, number> = {
+            spotify: spotifyArtist?.popularity || 0,
+        };
 
         if (!spotifyArtist) {
             this.logger.warn(`Artist not found on Spotify: ${name}`);
@@ -66,6 +69,15 @@ export class ArtistCrawlerService {
             };
             // description
             description = aiResult.description || '';
+            // merge popularity
+            popularity = {
+                spotify: spotifyArtist.popularity || 0,
+                ai: aiResult.popularity?.ai || 0,
+                appleMusic: aiResult.popularity?.appleMusic || 0,
+                youtube: aiResult.popularity?.youtube || 0,
+                soundcloud: aiResult.popularity?.soundcloud || 0,
+                bandcamp: aiResult.popularity?.bandcamp || 0,
+            };
         } catch (err) {
             this.logger.warn('AI enrichment for artist description failed', err instanceof Error ? err : new Error(String(err)));
         }
@@ -76,7 +88,7 @@ export class ArtistCrawlerService {
             name: spotifyArtist.name,
             genre: spotifyArtist.genres,
             imageUrl: spotifyArtist.imageUrl,
-            popularity: spotifyArtist.popularity,
+            popularity,
             streamingLinks,
             socialLinks,
         };

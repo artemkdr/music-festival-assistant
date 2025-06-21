@@ -10,7 +10,7 @@ export interface Artist {
     id: string;
     name: string;
     genre: string[];
-    popularity: number; // 1-100 scale, 0 - unknown
+    popularity: Record<string, number>; // 1-100 scale, 0 - unknown, e.g. { spotify: 85, ai: 90, appleMusic: 80 }
     mappingIds?: Record<string, string>; // e.g. { spotify: 'spotify-artist-id', lastfm: 'lastfm-artist-id' }
     description?: string | undefined;
     imageUrl?: string | undefined;

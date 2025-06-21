@@ -22,7 +22,11 @@ export const mockArtists: Artist[] = [
             website: 'https://arcticmonkeys.com',
             instagram: 'https://instagram.com/arcticmonkeys',
         },
-        popularity: 92,
+        popularity: {
+            spotify: 92,
+            appleMusic: 88,
+            youtube: 90,
+        },
     },
     {
         id: 'artist-2',
@@ -38,7 +42,12 @@ export const mockArtists: Artist[] = [
             website: 'https://disclosure.co.uk',
             twitter: 'https://twitter.com/disclosure',
         },
-        popularity: 88,
+        popularity: {
+            spotify: 88,
+            appleMusic: 85,
+            youtube: 80,
+            soundcloud: 75,
+        },
     },
     {
         id: 'artist-3',
@@ -54,7 +63,12 @@ export const mockArtists: Artist[] = [
             website: 'https://tameimpala.com',
             instagram: 'https://instagram.com/tameimpala',
         },
-        popularity: 90,
+        popularity: {
+            spotify: 90,
+            appleMusic: 87,
+            youtube: 85,
+            soundcloud: 80,
+        },
     },
     {
         id: 'artist-4',
@@ -70,7 +84,12 @@ export const mockArtists: Artist[] = [
             website: 'https://fkatwigs.com',
             instagram: 'https://instagram.com/fkatwigs',
         },
-        popularity: 85,
+        popularity: {
+            spotify: 85,
+            appleMusic: 80,
+            youtube: 78,
+            soundcloud: 70,
+        },
     },
     {
         id: 'artist-5',
@@ -86,7 +105,12 @@ export const mockArtists: Artist[] = [
             website: 'https://glassanimals.com',
             twitter: 'https://twitter.com/GlassAnimals',
         },
-        popularity: 87,
+        popularity: {
+            spotify: 87,
+            appleMusic: 82,
+            youtube: 85,
+            soundcloud: 80,
+        },
     },
     {
         id: 'artist-6',
@@ -102,7 +126,12 @@ export const mockArtists: Artist[] = [
             website: 'https://bicepmusic.co.uk',
             instagram: 'https://instagram.com/bicepmusic',
         },
-        popularity: 82,
+        popularity: {
+            spotify: 89,
+            appleMusic: 84,
+            youtube: 82,
+            soundcloud: 78,
+        },
     },
 ];
 

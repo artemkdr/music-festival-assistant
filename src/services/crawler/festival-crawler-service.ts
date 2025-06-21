@@ -137,7 +137,9 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             ...(artistData.imageUrl && { imageUrl: artistData.imageUrl }),
             ...(artistData.streamingLinks && { streamingLinks: artistData.streamingLinks }),
             ...(artistData.socialLinks && { socialLinks: artistData.socialLinks }),
-            popularity: 0, // unknown at this point
+            popularity: {
+                spotify: 0,
+            },
         }));
 
         // Create performances array
