@@ -2,16 +2,19 @@
  * Admin endpoint for crawling artist data
  * Accepts a festivalId or a list of artist names, crawls missing artists, and saves them to the repository.
  */
+import { requireAdmin } from '@/lib/api/auth-middleware';
 import { DIContainer } from '@/lib/container';
+import { User } from '@/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 const CrawlArtistsRequestSchema = z.object({
     festivalId: z.string().optional(),
     artistNames: z.array(z.string()).optional(),
+    force: z.boolean().optional().default(false), // Optional force flag to re-crawl existing artists
 });
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export const POST = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const artistRepo = container.getArtistRepository();
@@ -54,10 +57,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         const results: { name: string; status: 'crawled' | 'exists' | 'error'; error?: string }[] = [];
         for (const name of artistNames) {
             try {
-                const existing = await artistRepo.searchArtistsByName(name);
-                if (existing.length > 0) {
-                    results.push({ name, status: 'exists' });
-                    continue;
+                if (validated.force === false) {
+                    const existing = await artistRepo.searchArtistsByName(name);
+                    if (existing.length > 0) {
+                        results.push({ name, status: 'exists' });
+                        continue;
+                    }
                 }
                 // crawls the artist by name
                 const artist = await artistCrawler.crawlArtistByName(name);
@@ -99,4 +104,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             { status: 500 }
         );
     }
-}
+});

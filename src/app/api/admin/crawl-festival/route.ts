@@ -3,8 +3,10 @@
  * This endpoint is for admin use only to add new festivals to the system
  */
 import { DIContainer } from '@/lib/container';
+import { requireAdmin } from '@/lib/api/auth-middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import type { User } from '@/services/auth/interfaces';
 
 /**
  * Request schema for festival crawling
@@ -13,26 +15,25 @@ const CrawlFestivalRequestSchema = z.object({
     url: z.string().url('Must be a valid URL'),
 });
 
-//type CrawlFestivalRequest = z.infer<typeof CrawlFestivalRequestSchema>;
-
 /**
  * POST /api/admin/crawl-festival
- * Crawl a festival website and extract lineup data
+ * Crawl a festival website and extract lineup data (Admin only)
  */
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export const POST = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const crawlerService = container.getFestivalCrawlerService();
     const festivalRepository = container.getFestivalRepository();
 
     try {
-        logger.info('Admin festival crawl request received');
+        logger.info('Admin festival crawl request received', { userId: user.id, userEmail: user.email });
 
         // Parse and validate request body
         const body = await request.json();
         const validatedRequest = CrawlFestivalRequestSchema.parse(body);
         logger.info('Starting festival crawl', {
             url: validatedRequest.url,
+            requestedBy: user.id,
         });
 
         const crawlResult = await crawlerService.crawlFestival([validatedRequest.url]);
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 logger.info('Festival saved to repository', {
                     festivalId: savedFestival.id,
                     festivalName: savedFestival.name,
+                    savedBy: user.id,
                 });
 
                 return NextResponse.json({
@@ -109,4 +111,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             { status: 500 }
         );
     }
-}
+});

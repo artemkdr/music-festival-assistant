@@ -152,7 +152,7 @@ Schema requirements:
         const aiRequest: AIRequest = {
             ...request,
             systemPrompt,
-            prompt: `${request.prompt ?? ''}\nExtract structured data from the following text:\n\n${request.content}`,
+            prompt: `${request.prompt ?? ''}${request.content ? `\nExtract structured data from the following text:\n\n${request.content}` : ''}`,
         };
 
         const response = await this.generateCompletion(aiRequest);

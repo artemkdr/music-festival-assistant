@@ -29,10 +29,12 @@ export class ArtistCrawlerService {
             this.logger.error('Spotify search failed', err instanceof Error ? err : new Error(String(err)));
         }
 
-        let streamingLinks: Record<string, string | undefined> = {};
+        let streamingLinks: Record<string, string | undefined> = {
+            spotify: spotifyArtist?.spotifyUrl || '',
+        };
         let socialLinks: Record<string, string | undefined> = {};
         let description = '';
-        let popularity: Record<string, number> = {
+        const popularity: Record<string, number> = {
             spotify: spotifyArtist?.popularity || 0,
         };
 
@@ -51,9 +53,16 @@ export class ArtistCrawlerService {
 
         // 2. Use AI to enrich description
         try {
+            const artistShortSchema = artistSchema.pick({
+                name: true,
+                genre: true,
+                socialLinks: true,
+                streamingLinks: true,
+                description: true,
+            });
             const aiResult = await this.aiService.extractStructuredData<Artist>({
-                prompt: `Provide a concise, informative description for the music artist named ${spotifyArtist.name}, spotify ID: ${spotifyArtist.id}`,
-                schema: artistSchema, // TODO: Use a Zod schema for description
+                prompt: `Provide the following short information about music artist named ${spotifyArtist.name}, spotify ID: ${spotifyArtist.id}: decscription, genre, social links, streaming links.`,
+                schema: artistShortSchema, // TODO: Use a Zod schema for description
                 maxTokens: 5000,
             });
             // merge disctint genres
@@ -69,15 +78,6 @@ export class ArtistCrawlerService {
             };
             // description
             description = aiResult.description || '';
-            // merge popularity
-            popularity = {
-                spotify: spotifyArtist.popularity || 0,
-                ai: aiResult.popularity?.ai || 0,
-                appleMusic: aiResult.popularity?.appleMusic || 0,
-                youtube: aiResult.popularity?.youtube || 0,
-                soundcloud: aiResult.popularity?.soundcloud || 0,
-                bandcamp: aiResult.popularity?.bandcamp || 0,
-            };
         } catch (err) {
             this.logger.warn('AI enrichment for artist description failed', err instanceof Error ? err : new Error(String(err)));
         }

@@ -17,6 +17,9 @@ import type { IFestivalCrawlerService } from '@/services/crawler/interfaces';
 import { FestivalCrawlerService } from '@/services/crawler/festival-crawler-service';
 import { ArtistCrawlerService } from '@/services/crawler/artist-crawler-service';
 import { SpotifyApiService } from '@/services/spotify/spotify-api-service';
+import { AuthService } from '@/services/auth/auth-service';
+import { DummyAuthProvider } from '@/services/auth/dummy-auth-provider';
+import type { IAuthService } from '@/services/auth/interfaces';
 
 /**
  * Dependency injection container class
@@ -38,6 +41,7 @@ export class DIContainer {
     private _festivalDiscoveryController: FestivalDiscoveryController | null = null;
     private _userFeedbackController: UserFeedbackController | null = null;
     private _artistCrawlerService: ArtistCrawlerService | null = null;
+    private _authService: IAuthService | null = null;
 
     /**
      * Get singleton instance
@@ -200,6 +204,19 @@ export class DIContainer {
     }
 
     /**
+     * Get authentication service
+     */
+    public getAuthService(): IAuthService {
+        if (!this._authService) {
+            const logger = this.getLogger();
+            const authProvider = new DummyAuthProvider(logger);
+            this._authService = new AuthService(authProvider, logger);
+            logger.info('Auth service initialized with dummy provider');
+        }
+        return this._authService;
+    }
+
+    /**
      * Reset all singletons (useful for testing)
      */
     public reset(): void {
@@ -215,6 +232,7 @@ export class DIContainer {
         this._festivalDiscoveryController = null;
         this._userFeedbackController = null;
         this._artistCrawlerService = null;
+        this._authService = null;
     }
 }
 
