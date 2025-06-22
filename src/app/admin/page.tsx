@@ -22,28 +22,27 @@ export default function AdminDashboardPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const loadStats = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+
+                const response = await apiClient.getAdminStats();
+
+                if (response.status !== 'success' || !response.data) {
+                    throw new Error(response.message || 'Failed to fetch statistics');
+                }
+
+                setStats(response.data as typeof stats);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load statistics');
+                console.error('Error loading stats:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
         loadStats();
     }, []);
-
-    const loadStats = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            const response = await apiClient.getAdminStats();
-            
-            if (response.status !== 'success' || !response.data) {
-                throw new Error(response.message || 'Failed to fetch statistics');
-            }
-
-            setStats(response.data as typeof stats);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load statistics');
-            console.error('Error loading stats:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const quickActions = [
         {
@@ -124,12 +123,6 @@ export default function AdminDashboardPage() {
                                     <div className="ml-3">
                                         <h3 className="text-sm font-medium text-red-800">Failed to load statistics</h3>
                                         <p className="mt-1 text-sm text-red-700">{error}</p>
-                                        <button
-                                            onClick={loadStats}
-                                            className="mt-2 text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
-                                        >
-                                            Retry
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -171,7 +164,7 @@ export default function AdminDashboardPage() {
                                 </a>
                             ))}
                         </div>
-                    </div>                    
+                    </div>
                 </div>
             </AdminLayout>
         </ProtectedRoute>

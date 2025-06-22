@@ -66,7 +66,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
                     mimeType: url.endsWith('.pdf') ? 'application/pdf' : 'text/html',
                 })),
                 schema: ParsedFestivalDataSchema,
-                maxTokens: 50000,
+                maxTokens: 0,
             });
             const aiProcessingTime = Date.now() - aiProcessingStart;
 

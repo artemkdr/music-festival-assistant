@@ -3,7 +3,7 @@
  * Following clean architecture with dependency injection
  */
 import type { ILogger } from '@/lib/logger';
-import { festivalDiscoveryRequestSchema, userFeedbackSchema } from '@/schemas';
+import { FestivalDiscoveryRequestSchema, UserFeedbackSchema } from '@/schemas';
 import type { IFestivalDiscoveryService, IUserFeedbackService } from '@/services/interfaces';
 import type { ApiResponse, FestivalDiscoveryResponse, UserPreferences } from '@/types';
 import { NextRequest, NextResponse } from 'next/server';
@@ -28,7 +28,7 @@ export class FestivalDiscoveryController {
             const body = await request.json();
 
             // Validate request body
-            const validationResult = festivalDiscoveryRequestSchema.safeParse(body);
+            const validationResult = FestivalDiscoveryRequestSchema.safeParse(body);
             if (!validationResult.success) {
                 this.logger.warn('Invalid request body', { errors: validationResult.error.errors });
                 return this.createErrorResponse(
@@ -143,7 +143,7 @@ export class UserFeedbackController {
             const body = await request.json();
 
             // Validate request body
-            const validationResult = userFeedbackSchema.safeParse(body);
+            const validationResult = UserFeedbackSchema.safeParse(body);
             if (!validationResult.success) {
                 this.logger.warn('Invalid feedback body', { errors: validationResult.error.errors });
                 return this.createErrorResponse(

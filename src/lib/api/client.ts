@@ -182,6 +182,16 @@ export class ApiClient {
     }
 
     /**
+     * Admin: Update festival by ID
+     */
+    async updateFestival(id: string, festivalData: unknown): Promise<ApiResponse> {
+        return this.request(`/admin/festivals/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(festivalData),
+        });
+    }
+
+    /**
      * Admin: Get dashboard statistics
      */
     async getAdminStats(): Promise<ApiResponse> {
@@ -203,6 +213,16 @@ export class ApiClient {
     }
 
     /**
+     * Admin: Update artist by ID
+     */
+    async updateArtist(id: string, artistData: unknown): Promise<ApiResponse> {
+        return this.request(`/admin/artists/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(artistData),
+        });
+    }
+
+    /**
      * Admin: Get artist performances
      */
     async getArtistPerformances(id: string): Promise<ApiResponse> {
@@ -212,10 +232,15 @@ export class ApiClient {
     /**
      * Admin: Crawl festival
      */
-    async crawlFestival(url: string): Promise<ApiResponse> {
+    async crawlFestival<T>(data: { urls: string[] } | string): Promise<ApiResponse<T>> {
+        // Support backward compatibility with single URL string
+        const requestBody = typeof data === 'string' 
+            ? { urls: [data] } 
+            : data;
+
         return this.request('/admin/crawl-festival', {
             method: 'POST',
-            body: JSON.stringify({ url }),
+            body: JSON.stringify(requestBody),
         });
     }
 

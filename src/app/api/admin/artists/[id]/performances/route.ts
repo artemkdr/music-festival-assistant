@@ -13,18 +13,29 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const festivalRepo = container.getFestivalRepository();
+    const artistRepo = container.getArtistRepository();
+    const { id } = await params;
 
     try {
-        logger.info('Artist performances request received', { artistId: params.id });
-        
+        logger.info('Artist performances request received', { artistId: id });
+
+        const artist = await artistRepo.getArtistById(id);
+        if (!artist) {
+            return NextResponse.json(
+                {
+                    status: 'error',
+                    message: `Artist not found: ${id}`,
+                },
+                { status: 404 }
+            );
+        }
+
         // Get all festivals and filter for ones that include this artist
         const allFestivals = await festivalRepo.getAllFestivals();
-          const performances = allFestivals
-            .filter(festival => 
-                festival.performances.some(perf => perf.artist.id === params.id)
-            )
+        const performances = allFestivals
+            .filter(festival => festival.performances.some(perf => perf.artist.id === artist.id || perf.artist.name.toLowerCase() === artist.name.toLowerCase()))
             .map(festival => {
-                const performance = festival.performances.find(perf => perf.artist.id === params.id);
+                const performance = festival.performances.find(perf => perf.artist.id === artist.id || perf.artist.name.toLowerCase() === artist.name.toLowerCase());
                 return {
                     festivalId: festival.id,
                     festivalName: festival.name,

@@ -4,10 +4,9 @@
  */
 import { requireAdmin } from '@/lib/api/auth-middleware';
 import { DIContainer } from '@/lib/container';
-import { User } from '@/services/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export const GET = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {
+export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const festivalRepo = container.getFestivalRepository();
@@ -17,10 +16,7 @@ export const GET = requireAdmin(async (request: NextRequest, user: User): Promis
         logger.info('Admin stats request received');
 
         // Get all data to calculate statistics
-        const [festivals, artists] = await Promise.all([
-            festivalRepo.getAllFestivals(),
-            artistRepo.getAllArtists(),
-        ]);
+        const [festivals, artists] = await Promise.all([festivalRepo.getAllFestivals(), artistRepo.getAllArtists()]);
 
         // Calculate total performances across all festivals
         const totalPerformances = festivals.reduce((total, festival) => total + festival.performances.length, 0);

@@ -7,18 +7,29 @@
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { apiClient } from '@/lib/api/client';
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import React, { useState, useEffect, Usable } from 'react';
 
 interface Artist {
     id: string;
     name: string;
-    genres: string[];
-    spotifyId?: string;
+    genre: string[];
+    mappingIds?: Record<string, string>;
     imageUrl?: string;
-    bio?: string;
-    popularity?: number;
-    externalUrls?: {
+    description?: string;
+    popularity?: Record<string, number>;
+    streamingLinks?: {
         spotify?: string;
+        appleMusic?: string;
+        youtube?: string;
+        soundcloud?: string;
+        bandcamp?: string;
+    };
+    socialLinks?: {
+        website?: string;
+        instagram?: string;
+        twitter?: string;
+        facebook?: string;
     };
     followers?: number;
 }
@@ -32,7 +43,7 @@ interface Performance {
 }
 
 interface ArtistDetailPageProps {
-    params: { id: string };
+    params: Usable<{ id: string }>;
 }
 
 export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
@@ -40,40 +51,40 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
     const [performances, setPerformances] = useState<Performance[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { id } = React.use(params);
 
     useEffect(() => {
+        const loadArtist = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+
+                // Fetch artist details from API
+                const artistResponse = await apiClient.getArtist(id);
+
+                if (artistResponse.status !== 'success' || !artistResponse.data) {
+                    throw new Error(artistResponse.message || 'Failed to fetch artist details');
+                }
+
+                // Fetch artist performances from API
+                const performancesResponse = await apiClient.getArtistPerformances(id);
+
+                if (performancesResponse.status !== 'success') {
+                    console.warn('Failed to fetch performances:', performancesResponse.message);
+                    // Continue without performances data instead of failing completely
+                }
+
+                setArtist(artistResponse.data as Artist);
+                setPerformances((performancesResponse.data as Performance[]) || []);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load artist');
+                console.error('Error loading artist:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
         loadArtist();
-    }, [params.id]);
-
-    const loadArtist = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            // Fetch artist details from API
-            const artistResponse = await apiClient.getArtist(params.id);
-            
-            if (artistResponse.status !== 'success' || !artistResponse.data) {
-                throw new Error(artistResponse.message || 'Failed to fetch artist details');
-            }
-
-            // Fetch artist performances from API
-            const performancesResponse = await apiClient.getArtistPerformances(params.id);
-            
-            if (performancesResponse.status !== 'success') {
-                console.warn('Failed to fetch performances:', performancesResponse.message);
-                // Continue without performances data instead of failing completely
-            }
-
-            setArtist(artistResponse.data as Artist);
-            setPerformances((performancesResponse.data as Performance[]) || []);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load artist');
-            console.error('Error loading artist:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    }, [id]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -108,26 +119,26 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center space-x-3 mb-2">
-                                <a href="/admin/artists" className="text-gray-500 hover:text-gray-700">
+                                <Link href="/admin/artists" className="text-gray-500 hover:text-gray-700">
                                     ← Back to Artists
-                                </a>
+                                </Link>
                             </div>
                             <h1 className="text-3xl font-bold text-gray-900">{isLoading ? 'Loading...' : artist?.name || 'Artist Not Found'}</h1>
                         </div>
                         {artist && (
                             <div className="flex space-x-3">
-                                <a href={`/admin/artists/${artist.id}/edit`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                <Link href={`/admin/artists/${artist.id}/edit`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                     Edit Artist
-                                </a>
-                                {artist.externalUrls?.spotify && (
-                                    <a
-                                        href={artist.externalUrls.spotify}
+                                </Link>
+                                {artist.streamingLinks?.spotify && (
+                                    <Link
+                                        href={artist.streamingLinks.spotify}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                                     >
                                         View on Spotify
-                                    </a>
+                                    </Link>
                                 )}
                             </div>
                         )}
@@ -174,13 +185,13 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                                     </div>
                                                 </div>
 
-                                                {artist.genres.length > 0 && (
+                                                {artist.genre?.length > 0 && (
                                                     <div className="flex items-start">
                                                         <span className="mr-3 text-lg mt-1">🎵</span>
                                                         <div>
                                                             <div className="text-sm font-medium text-gray-500 mb-2">Genres</div>
                                                             <div className="flex flex-wrap gap-2">
-                                                                {artist.genres.map(genre => (
+                                                                {artist.genre?.map(genre => (
                                                                     <span key={genre} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                                                         {genre}
                                                                     </span>
@@ -190,12 +201,12 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                                     </div>
                                                 )}
 
-                                                {artist.spotifyId && (
+                                                {artist.mappingIds?.spotify && (
                                                     <div className="flex items-center">
                                                         <span className="mr-3 text-lg">🟢</span>
                                                         <div>
                                                             <div className="text-sm font-medium text-gray-500">Spotify ID</div>
-                                                            <div className="text-sm text-gray-900 font-mono">{artist.spotifyId}</div>
+                                                            <div className="text-sm text-gray-900 font-mono">{artist.mappingIds.spotify}</div>
                                                         </div>
                                                     </div>
                                                 )}
@@ -205,9 +216,9 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                         <div className="space-y-4">
                                             {/* Stats */}
                                             <div className="grid grid-cols-2 gap-4">
-                                                {artist.popularity && (
+                                                {artist.popularity?.spotify && (
                                                     <div className="bg-purple-50 p-4 rounded-lg">
-                                                        <div className="text-2xl font-bold text-purple-600">{artist.popularity}/100</div>
+                                                        <div className="text-2xl font-bold text-purple-600">{artist.popularity.spotify}/100</div>
                                                         <div className="text-sm text-purple-600">Popularity</div>
                                                     </div>
                                                 )}
@@ -220,10 +231,10 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                                 )}
                                             </div>
 
-                                            {artist.bio && (
+                                            {artist.description && (
                                                 <div>
-                                                    <div className="text-sm font-medium text-gray-500 mb-2">Biography</div>
-                                                    <p className="text-sm text-gray-900 leading-relaxed">{artist.bio}</p>
+                                                    <div className="text-sm font-medium text-gray-500 mb-2">Description</div>
+                                                    <p className="text-sm text-gray-900 leading-relaxed">{artist.description}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -269,14 +280,14 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                             </div>
 
                             {/* External Links */}
-                            {artist.externalUrls && (
+                            {artist.streamingLinks && (
                                 <div className="bg-white shadow rounded-lg">
                                     <div className="px-4 py-5 sm:p-6">
-                                        <h2 className="text-lg font-medium text-gray-900 mb-4">External Links</h2>
+                                        <h2 className="text-lg font-medium text-gray-900 mb-4">Streaming Links</h2>
                                         <div className="space-y-2">
-                                            {artist.externalUrls.spotify && (
+                                            {artist.streamingLinks.spotify && (
                                                 <a
-                                                    href={artist.externalUrls.spotify}
+                                                    href={artist.streamingLinks.spotify}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="flex items-center space-x-3 p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"

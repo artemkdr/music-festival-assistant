@@ -5,7 +5,6 @@
 'use client';
 
 import { useAuth } from '@/contexts/auth-context';
-import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 
 interface ProtectedRouteProps {
@@ -16,7 +15,6 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requireAdmin = false, fallbackPath = '/admin/login' }: ProtectedRouteProps) {
     const { isAuthenticated, isAdmin, isLoading } = useAuth();
-    const router = useRouter();
 
     useEffect(() => {
         if (isLoading) return;

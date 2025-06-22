@@ -5,7 +5,7 @@ import type { ILogger } from '@/lib/logger';
 import type { IAIService } from '@/services/ai';
 import { generateArtistId, type Artist } from '@/types';
 import { SpotifyApiService, SpotifyArtist } from '@/services/spotify/spotify-api-service';
-import { artistSchema } from '@/schemas';
+import { ArtistSchema } from '@/schemas';
 
 export class ArtistCrawlerService {
     constructor(
@@ -53,7 +53,7 @@ export class ArtistCrawlerService {
 
         // 2. Use AI to enrich description
         try {
-            const artistShortSchema = artistSchema.pick({
+            const artistShortSchema = ArtistSchema.pick({
                 name: true,
                 genre: true,
                 socialLinks: true,

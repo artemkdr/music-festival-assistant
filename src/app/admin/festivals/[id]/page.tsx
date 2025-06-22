@@ -7,7 +7,8 @@
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { apiClient } from '@/lib/api/client';
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import React, { useState, useEffect, Usable } from 'react';
 
 interface Festival {
     id: string;
@@ -29,38 +30,38 @@ interface Festival {
 }
 
 interface FestivalDetailPageProps {
-    params: { id: string };
+    params: Usable<{ id: string }>;
 }
 
 export default function FestivalDetailPage({ params }: FestivalDetailPageProps) {
     const [festival, setFestival] = useState<Festival | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { id } = React.use(params);
 
     useEffect(() => {
-        loadFestival();
-    }, [params.id]);
+        const loadFestival = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
 
-    const loadFestival = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
+                // Fetch festival details from API
+                const festivalResponse = await apiClient.getFestival(id);
 
-            // Fetch festival details from API
-            const festivalResponse = await apiClient.getFestival(params.id);
-            
-            if (festivalResponse.status !== 'success' || !festivalResponse.data) {
-                throw new Error(festivalResponse.message || 'Failed to fetch festival details');
+                if (festivalResponse.status !== 'success' || !festivalResponse.data) {
+                    throw new Error(festivalResponse.message || 'Failed to fetch festival details');
+                }
+
+                setFestival(festivalResponse.data as Festival);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load festival');
+                console.error('Error loading festival:', err);
+            } finally {
+                setIsLoading(false);
             }
-
-            setFestival(festivalResponse.data as Festival);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load festival');
-            console.error('Error loading festival:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        };
+        loadFestival();
+    }, [id]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -69,7 +70,6 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
             day: 'numeric',
         });
     };
-    
 
     // Helper function to get date for a performance based on festival start date and day
     const getPerformanceDate = (festival: Festival, day: number): string => {
@@ -99,20 +99,20 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center space-x-3 mb-2">
-                                <a href="/admin/festivals" className="text-gray-500 hover:text-gray-700">
+                                <Link href="/admin/festivals" className="text-gray-500 hover:text-gray-700">
                                     ← Back to Festivals
-                                </a>
+                                </Link>
                             </div>
                             <h1 className="text-3xl font-bold text-gray-900">{isLoading ? 'Loading...' : festival?.name || 'Festival Not Found'}</h1>
                         </div>
                         {festival && (
                             <div className="flex space-x-3">
-                                <a href={`/admin/festivals/${festival.id}/edit`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                <Link href={`/admin/festivals/${festival.id}/edit`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                     Edit Festival
-                                </a>
-                                <a href={`/admin/artists/crawl?festivalId=${festival.id}`} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                </Link>
+                                <Link href={`/admin/artists/crawl?festivalId=${festival.id}`} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                     Crawl Artists
-                                </a>
+                                </Link>
                             </div>
                         )}
                     </div>
@@ -165,15 +165,17 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center">
-                                                    <span className="mr-3 text-lg">🌐</span>
-                                                    <div>
-                                                        <div className="text-sm font-medium text-gray-500">Website</div>
-                                                        <a href={festival.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800">
-                                                            {festival.website}
-                                                        </a>
+                                                {festival.website && (
+                                                    <div className="flex items-center">
+                                                        <span className="mr-3 text-lg">🌐</span>
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-500">Website</div>
+                                                            <Link href={festival.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800">
+                                                                {festival.website}
+                                                            </Link>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                         <div>
@@ -220,16 +222,16 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                                 <div className="flex items-center space-x-4">
                                                                     <div className="text-sm font-medium text-gray-900">{performance.startTime ?? 'TBA'}</div>
                                                                     <div>
-                                                                        <a href={`/admin/artists/${performance.artist.id}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                                                                        <Link href={`/admin/artists/${performance.artist.id}`} className="text-blue-600 hover:text-blue-800 font-medium">
                                                                             {performance.artist.name}
-                                                                        </a>
+                                                                        </Link>
                                                                     </div>
                                                                     {performance.stage && <div className="text-sm text-gray-500">@ {performance.stage}</div>}
                                                                 </div>
                                                                 <div className="flex space-x-2">
-                                                                    <a href={`/admin/artists/${performance.artist.id}`} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                                                    <Link href={`/admin/artists/${performance.artist.id}`} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
                                                                         View Artist
-                                                                    </a>
+                                                                    </Link>
                                                                 </div>
                                                             </div>
                                                         ))}

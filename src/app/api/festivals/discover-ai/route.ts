@@ -3,7 +3,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/lib/container';
-import { festivalDiscoveryRequestSchema } from '@/schemas';
+import { FestivalDiscoveryRequestSchema } from '@/schemas';
 import type { UserPreferences } from '@/types';
 
 /**
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         const recommendationService = container().getRecommendationService();
 
         const body = await request.json();
-        const validatedData = festivalDiscoveryRequestSchema.parse(body);
+        const validatedData = FestivalDiscoveryRequestSchema.parse(body);
 
         logger.info('AI-enhanced festival discovery requested', {
             festivalId: validatedData.festivalId,

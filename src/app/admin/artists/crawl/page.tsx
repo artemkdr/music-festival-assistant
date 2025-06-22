@@ -7,6 +7,7 @@
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { apiClient } from '@/lib/api/client';
+import Link from 'next/link';
 import { useState } from 'react';
 
 interface CrawlResult {
@@ -299,9 +300,9 @@ export default function ArtistsCrawlPage() {
                                 </div>
 
                                 <div className="mt-6 flex space-x-3">
-                                    <a href="/admin/artists" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <Link href="/admin/artists" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                         View All Artists
-                                    </a>
+                                    </Link>
                                     <button onClick={handleReset} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                         Crawl More Artists
                                     </button>

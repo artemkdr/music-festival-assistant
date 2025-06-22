@@ -5,7 +5,6 @@
 'use client';
 
 import { useAuth } from '@/contexts/auth-context';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function AdminLoginPage() {
@@ -15,7 +14,7 @@ export default function AdminLoginPage() {
     const [isLoading, setIsLoading] = useState(false);
 
     const { login, isAuthenticated, isAdmin } = useAuth();
-    const router = useRouter(); // Redirect if already authenticated as admin
+
     useEffect(() => {
         if (isAuthenticated && isAdmin) {
             window.location.href = '/admin';
@@ -35,7 +34,7 @@ export default function AdminLoginPage() {
                 setError(result.error || 'Login failed');
             }
         } catch (err) {
-            setError('An unexpected error occurred');
+            setError(`An unexpected error occurred, ${err instanceof Error ? err.message : 'please try again later'}`);
         } finally {
             setIsLoading(false);
         }
@@ -59,7 +58,7 @@ export default function AdminLoginPage() {
                         <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h3>
                         <div className="text-sm text-blue-600 space-y-1">
                             <p>
-                                <strong>Email:</strong> admin@example.com
+                                <strong>Email:</strong> admin@music-festival.com
                             </p>
                             <p>
                                 <strong>Password:</strong> admin123

@@ -12,7 +12,9 @@ import type { User } from '@/services/auth/interfaces';
  * Request schema for festival crawling
  */
 const CrawlFestivalRequestSchema = z.object({
-    url: z.string().url('Must be a valid URL'),
+    urls: z.array(z.string().url('Must be a valid URL'))
+        .min(1, 'At least one URL is required')
+        .max(10, 'Maximum 10 URLs allowed'),
 });
 
 /**
@@ -32,11 +34,12 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
         const body = await request.json();
         const validatedRequest = CrawlFestivalRequestSchema.parse(body);
         logger.info('Starting festival crawl', {
-            url: validatedRequest.url,
+            urls: validatedRequest.urls,
+            urlCount: validatedRequest.urls.length,
             requestedBy: user.id,
         });
 
-        const crawlResult = await crawlerService.crawlFestival([validatedRequest.url]);
+        const crawlResult = await crawlerService.crawlFestival(validatedRequest.urls);
 
         // Save to database if requested and crawl was successful
         if (crawlResult.success && crawlResult.festival) {

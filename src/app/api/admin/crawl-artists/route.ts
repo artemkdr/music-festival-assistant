@@ -4,7 +4,6 @@
  */
 import { requireAdmin } from '@/lib/api/auth-middleware';
 import { DIContainer } from '@/lib/container';
-import { User } from '@/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -14,7 +13,7 @@ const CrawlArtistsRequestSchema = z.object({
     force: z.boolean().optional().default(false), // Optional force flag to re-crawl existing artists
 });
 
-export const POST = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {
+export const POST = requireAdmin(async (request: NextRequest): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const artistRepo = container.getArtistRepository();

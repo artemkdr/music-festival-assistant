@@ -7,13 +7,14 @@
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { apiClient } from '@/lib/api/client';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface Artist {
     id: string;
     name: string;
     genre: string[];
-    mappingIds?: Record<string, string>; // e.g. { spotify: 'spotifyId' }    
+    mappingIds?: Record<string, string>; // e.g. { spotify: 'spotifyId' }
     imageUrl?: string;
     description?: string;
     popularity?: Record<string, number>; // e.g. { spotify: 75 }
@@ -25,7 +26,6 @@ export default function ArtistsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [genreFilter, setGenreFilter] = useState('');
 
     // Load artists on component mount
     useEffect(() => {
@@ -38,7 +38,7 @@ export default function ArtistsPage() {
             setError(null);
 
             const response = await apiClient.getArtists();
-            
+
             if (response.status === 'success') {
                 setArtists(response.data as Artist[]);
             } else {
@@ -57,8 +57,7 @@ export default function ArtistsPage() {
     // Filter artists based on search term and genre filter
     const filteredArtists = artists.filter(artist => {
         const matchesSearch = artist.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesGenre = !genreFilter || artist.genre?.includes(genreFilter);
-        return matchesSearch && matchesGenre;
+        return matchesSearch;
     });
 
     return (
@@ -72,9 +71,9 @@ export default function ArtistsPage() {
                             <p className="mt-2 text-gray-600">Manage artist data and crawl new artists from Spotify</p>
                         </div>
                         <div className="flex space-x-3">
-                            <a href="/admin/artists/crawl" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <Link href="/admin/artists/crawl" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                 🎤 Crawl Artists
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -94,7 +93,7 @@ export default function ArtistsPage() {
                                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     placeholder="Search by artist name..."
                                 />
-                            </div>                            
+                            </div>
                         </div>
                     </div>
 
@@ -204,19 +203,22 @@ export default function ArtistsPage() {
                                                     <span className="mr-2">📊</span>
                                                     Popularity: {artist.popularity.spotify}/100
                                                 </div>
-                                            )}                                            
+                                            )}
                                         </div>
 
                                         <div className="flex space-x-2">
-                                            <a href={`/admin/artists/${artist.id}`} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium text-center">
+                                            <Link
+                                                href={`/admin/artists/${artist.id}`}
+                                                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium text-center"
+                                            >
                                                 View Details
-                                            </a>
-                                            <a
+                                            </Link>
+                                            <Link
                                                 href={`/admin/artists/${artist.id}/edit`}
                                                 className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-md text-sm font-medium text-center"
                                             >
                                                 Edit
-                                            </a>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>
@@ -228,14 +230,14 @@ export default function ArtistsPage() {
                     {!isLoading && !error && filteredArtists.length === 0 && (
                         <div className="text-center py-12">
                             <span className="text-6xl mb-4 block">🎤</span>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">{searchTerm || genreFilter ? 'No artists match your filters' : 'No artists found'}</h3>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">{searchTerm ? 'No artists match your filters' : 'No artists found'}</h3>
                             <p className="text-gray-600 mb-6">
-                                {searchTerm || genreFilter ? 'Try adjusting your search or filter criteria.' : 'Get started by crawling artists from Spotify or adding them manually.'}
+                                {searchTerm ? 'Try adjusting your search or filter criteria.' : 'Get started by crawling artists from Spotify or adding them manually.'}
                             </p>
-                            {!searchTerm && !genreFilter && (
-                                <a href="/admin/artists/crawl" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            {!searchTerm && (
+                                <Link href="/admin/artists/crawl" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                     Crawl Your First Artists
-                                </a>
+                                </Link>
                             )}
                         </div>
                     )}

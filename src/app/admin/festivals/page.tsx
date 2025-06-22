@@ -7,6 +7,7 @@
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { apiClient } from '@/lib/api/client';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 interface Festival {
@@ -37,9 +38,9 @@ export default function FestivalsPage() {
         try {
             setIsLoading(true);
             setError(null);
-            
+
             const response = await apiClient.getFestivals();
-            
+
             if (response.status === 'success') {
                 setFestivals(response.data as Festival[]);
             } else {
@@ -71,9 +72,9 @@ export default function FestivalsPage() {
                             <p className="mt-2 text-gray-600">Manage festival data and crawl new festivals</p>
                         </div>
                         <div className="flex space-x-3">
-                            <a href="/admin/festivals/crawl" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <Link href="/admin/festivals/crawl" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                 🎪 Crawl New Festival
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
@@ -151,9 +152,9 @@ export default function FestivalsPage() {
                             <span className="text-6xl mb-4 block">🎪</span>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No festivals found</h3>
                             <p className="text-gray-600 mb-6">Get started by crawling your first festival from a website URL.</p>
-                            <a href="/admin/festivals/crawl" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <Link href="/admin/festivals/crawl" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                                 Crawl Your First Festival
-                            </a>
+                            </Link>
                         </div>
                     )}
                 </div>

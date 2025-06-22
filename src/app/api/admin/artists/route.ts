@@ -4,10 +4,9 @@
  */
 import { requireAdmin } from '@/lib/api/auth-middleware';
 import { DIContainer } from '@/lib/container';
-import { User } from '@/services/auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export const GET = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {
+export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const artistRepo = container.getArtistRepository();

@@ -1,40 +1,106 @@
 /**
  * Individual festival API endpoint
  * GET /api/admin/festivals/[id] - Get festival by ID
+ * PUT /api/admin/festivals/[id] - Update festival by ID
  */
-import { requireAdmin } from '@/lib/api/auth-middleware';
 import { DIContainer } from '@/lib/container';
-import { User } from '@/services/auth';
+import { UpdateFestivalSchema } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
+import { ZodError } from 'zod';
 
 interface RouteParams {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams): Promise<Response> {
-    // Apply admin authentication manually since requireAdmin doesn't support route params properly
+export async function GET(request: NextRequest, context: RouteParams): Promise<Response> {
+    const { id } = await context.params;
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const festivalRepo = container.getFestivalRepository();
+    const artistRepo = container.getArtistRepository();
 
     try {
-        const id = await params.id;
-
         logger.info('Admin festival detail request received', { festivalId: id });
-        
+
         const festival = await festivalRepo.getFestivalById(id);
 
         if (!festival) {
-            return NextResponse.json({
-                status: 'error',
-                message: `Festival not found: ${id}`,
-            }, { status: 404 });
+            return NextResponse.json(
+                {
+                    status: 'error',
+                    message: `Festival not found: ${id}`,
+                },
+                { status: 404 }
+            );
         }
+
+        // Resolve artist references in performances
+        logger.debug('Resolving artist references for festival performances', { 
+            festivalId: id, 
+            performanceCount: festival.performances.length 
+        });
+
+        const enrichedPerformances = await Promise.all(
+            festival.performances.map(async (performance) => {
+                // Try to find the artist by name
+                const artistMatches = await artistRepo.searchArtistsByName(performance.artist.name);
+                
+                if (artistMatches.length > 0) {
+                    // Use the first exact match or best match
+                    const exactMatch = artistMatches.find(artist => 
+                        artist.name.toLowerCase() === performance.artist.name.toLowerCase()
+                    );
+                    const bestMatch = exactMatch || artistMatches[0];
+                    
+                    if (bestMatch) {
+                        logger.debug('Found artist match for performance', {
+                            performanceArtistName: performance.artist.name,
+                            matchedArtistId: bestMatch.id,
+                            matchedArtistName: bestMatch.name,
+                            isExactMatch: !!exactMatch
+                        });
+
+                        // Return performance with resolved artist data
+                        return {
+                            ...performance,
+                            artistId: bestMatch.id,
+                            artist: bestMatch,
+                        };
+                    }
+                }
+                
+                // No artist found, keep original data but log the issue
+                logger.warn('No artist found for performance', {
+                    performanceArtistName: performance.artist.name,
+                    festivalId: id
+                });
+                
+                return performance;
+            })
+        );
+
+        const enrichedFestival = {
+            ...festival,
+            performances: enrichedPerformances,
+        };
+
+        // Count how many artists were successfully resolved
+        const originalArtistIds = festival.performances.map(p => p.artistId);
+        const resolvedArtistIds = enrichedPerformances.map(p => p.artistId);
+        const newlyResolvedCount = resolvedArtistIds.filter((id, index) => 
+            id !== originalArtistIds[index]
+        ).length;
+
+        logger.info('Festival retrieved successfully with artist resolution', {
+            festivalId: id,
+            performanceCount: enrichedFestival.performances.length,
+            resolvedArtists: newlyResolvedCount
+        });
 
         return NextResponse.json({
             status: 'success',
             message: 'Festival retrieved successfully',
-            data: festival,
+            data: enrichedFestival,
         });
     } catch (error) {
         logger.error('Failed to get festival', error instanceof Error ? error : new Error(String(error)));
@@ -42,6 +108,68 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
             {
                 status: 'error',
                 message: error instanceof Error ? error.message : 'Failed to retrieve festival',
+            },
+            { status: 500 }
+        );
+    }
+}
+
+export async function PUT(request: NextRequest, context: RouteParams): Promise<Response> {
+    const { id } = await context.params;
+    const container = DIContainer.getInstance();
+    const logger = container.getLogger();
+    const festivalRepo = container.getFestivalRepository();
+
+    try {
+        logger.info('Admin festival update request received', { festivalId: id });
+
+        // Parse and validate request body
+        const body = await request.json();
+        const validatedData = UpdateFestivalSchema.parse(body);
+
+        // Check if festival exists
+        const existingFestival = await festivalRepo.getFestivalById(id);
+        if (!existingFestival) {
+            return NextResponse.json(
+                {
+                    status: 'error',
+                    message: `Festival not found: ${id}`,
+                },
+                { status: 404 }
+            );
+        }
+
+        // Update festival with validated data
+        const updatedFestival = {
+            ...existingFestival,
+            ...validatedData,
+            id, // Ensure ID doesn't change
+        };
+
+        const savedFestival = await festivalRepo.saveFestival(updatedFestival);
+
+        return NextResponse.json({
+            status: 'success',
+            message: 'Festival updated successfully',
+            data: savedFestival,
+        });
+    } catch (error) {
+        if (error instanceof ZodError) {
+            return NextResponse.json(
+                {
+                    status: 'error',
+                    message: 'Invalid festival data',
+                    errors: error.errors,
+                },
+                { status: 400 }
+            );
+        }
+
+        logger.error('Failed to update festival', error instanceof Error ? error : new Error(String(error)));
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Failed to update festival',
             },
             { status: 500 }
         );
