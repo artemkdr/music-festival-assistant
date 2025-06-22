@@ -168,6 +168,48 @@ export class ApiClient {
     }
 
     /**
+     * Admin: Get all festivals
+     */
+    async getFestivals(): Promise<ApiResponse> {
+        return this.request('/admin/festivals');
+    }
+
+    /**
+     * Admin: Get festival by ID
+     */
+    async getFestival(id: string): Promise<ApiResponse> {
+        return this.request(`/admin/festivals/${id}`);
+    }
+
+    /**
+     * Admin: Get dashboard statistics
+     */
+    async getAdminStats(): Promise<ApiResponse> {
+        return this.request('/admin/stats');
+    }
+
+    /**
+     * Admin: Get all artists
+     */
+    async getArtists(): Promise<ApiResponse> {
+        return this.request('/admin/artists');
+    }
+
+    /**
+     * Admin: Get artist by ID
+     */
+    async getArtist(id: string): Promise<ApiResponse> {
+        return this.request(`/admin/artists/${id}`);
+    }
+
+    /**
+     * Admin: Get artist performances
+     */
+    async getArtistPerformances(id: string): Promise<ApiResponse> {
+        return this.request(`/admin/artists/${id}/performances`);
+    }
+
+    /**
      * Admin: Crawl festival
      */
     async crawlFestival(url: string): Promise<ApiResponse> {

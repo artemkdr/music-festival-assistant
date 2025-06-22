@@ -1,0 +1,54 @@
+/**
+ * Admin statistics API endpoint
+ * GET /api/admin/stats - Get dashboard statistics
+ */
+import { requireAdmin } from '@/lib/api/auth-middleware';
+import { DIContainer } from '@/lib/container';
+import { User } from '@/services/auth';
+import { NextRequest, NextResponse } from 'next/server';
+
+export const GET = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {
+    const container = DIContainer.getInstance();
+    const logger = container.getLogger();
+    const festivalRepo = container.getFestivalRepository();
+    const artistRepo = container.getArtistRepository();
+
+    try {
+        logger.info('Admin stats request received');
+
+        // Get all data to calculate statistics
+        const [festivals, artists] = await Promise.all([
+            festivalRepo.getAllFestivals(),
+            artistRepo.getAllArtists(),
+        ]);
+
+        // Calculate total performances across all festivals
+        const totalPerformances = festivals.reduce((total, festival) => total + festival.performances.length, 0);
+
+        // For now, we'll use a placeholder for active sessions since we don't have session tracking
+        // In a real app, this would come from a session store or analytics
+        const activeSessions = Math.floor(Math.random() * 50) + 10; // Mock for demo
+
+        const stats = {
+            festivals: festivals.length,
+            artists: artists.length,
+            performances: totalPerformances,
+            activeSessions,
+        };
+
+        return NextResponse.json({
+            status: 'success',
+            message: 'Statistics retrieved successfully',
+            data: stats,
+        });
+    } catch (error) {
+        logger.error('Failed to get admin stats', error instanceof Error ? error : new Error(String(error)));
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Failed to retrieve statistics',
+            },
+            { status: 500 }
+        );
+    }
+});
