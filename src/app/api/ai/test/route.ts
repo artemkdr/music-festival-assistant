@@ -42,8 +42,9 @@ export async function GET() {
  * Test AI service schema
  */
 const testAIRequestSchema = z.object({
-    prompt: z.string().min(1).max(1000),
-    type: z.enum(['completion', 'festival_parsing', 'artist_matching', 'recommendations']).default('completion'),
+    input: z.array(z.string().max(10000)).min(1).max(10),
+    type: z.enum(['text', 'artist', 'festival']).default('text'),
+    temperature: z.number().min(0).max(1).default(0.3),
 });
 
 /**
@@ -52,9 +53,10 @@ const testAIRequestSchema = z.object({
 export async function POST(request: NextRequest) {
     try {
         const logger = container().getLogger();
+        const musicalAiService = container().getMusicalAIService();
         const aiService = container().getAIService();
 
-        if (!aiService) {
+        if (!aiService || !musicalAiService) {
             return NextResponse.json(
                 {
                     status: 'error' as const,
@@ -68,30 +70,33 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const validatedData = testAIRequestSchema.parse(body);
 
-        logger.info('Testing AI service', { type: validatedData.type, promptLength: validatedData.prompt.length });
+        logger.info('Testing AI service', { type: validatedData.type, inputLength: validatedData.input.length });
+
+        // prepare the AI request from input
+        if (validatedData.input.length === 0) {
+            return NextResponse.json(
+                {
+                    status: 'error' as const,
+                    message: 'Input array cannot be empty',
+                    errors: ['Input array must contain at least one item'],
+                },
+                { status: 400 }
+            );
+        }
 
         let result;
 
         switch (validatedData.type) {
-            case 'completion':
+            case 'text':
                 result = await aiService.generateCompletion({
-                    prompt: validatedData.prompt,
+                    prompt: validatedData.input.join('\n'),
                 });
                 break;
-
-            case 'artist_matching':
-                result = await aiService.matchArtist({
-                    prompt: validatedData.prompt,
-                    artistName: validatedData.prompt,
-                });
+            case 'artist':
+                result = await musicalAiService.getArtistDetails(validatedData.input);
                 break;
-
-            case 'recommendations':
-                result = await aiService.generateRecommendations({
-                    prompt: validatedData.prompt,
-                    userPreferences: { genres: ['rock'], discoveryMode: 'balanced' },
-                    availableArtists: [],
-                });
+            case 'festival':
+                result = await musicalAiService.scrapeFestivalLineup(validatedData.input);
                 break;
 
             default:

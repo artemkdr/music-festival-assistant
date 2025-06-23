@@ -2,12 +2,14 @@
  * AI service abstractions for festival parsing, matching, and recommendations
  */
 
+import { Artist, Festival, Recommendation, UserPreferences } from '@/types';
 import { ZodSchema } from 'zod';
 
 /**
  * Configuration for AI provider
  */
 export interface AIProviderConfig {
+    provider: AIProvider;
     apiKey: string;
     model: string;
     baseUrl?: string;
@@ -15,6 +17,7 @@ export interface AIProviderConfig {
     temperature?: number;
     // Vertex AI specific properties
     projectId?: string;
+    location?: string; // e.g., 'us-central1'
 }
 
 /**
@@ -57,11 +60,10 @@ export interface AIResponse {
 /**
  * Structured data extraction request
  */
-export interface StructuredExtractionRequest<T> extends AIRequest {
+export interface SchemaAIRequest<T> extends AIRequest {
     schema: ZodSchema; // Zod schema or other validation schema
     content?: string; // Raw text, HTML, or JSON data to extract from
     examples?: T[];
-    files?: AIFileInput[];
 }
 
 /**
@@ -94,11 +96,11 @@ export interface IAIService {
     /**
      * Extract structured data using AI
      */
-    extractStructuredData<T>(request: StructuredExtractionRequest<T>): Promise<T>;
+    generateObject<T>(request: SchemaAIRequest<T>): Promise<T>;
 
     /**
      * Match and normalize artist names
-     */
+    
     matchArtist(request: ArtistMatchingRequest): Promise<{
         matchedArtist?: string;
         confidence: number;
@@ -107,8 +109,8 @@ export interface IAIService {
 
     /**
      * Generate personalized recommendations
-     */
-    generateRecommendations(request: RecommendationRequest): Promise<unknown[]>;
+    
+    generateRecommendations(request: RecommendationRequest): Promise<unknown[]>;*/
 
     /**
      * Get provider information
@@ -123,7 +125,7 @@ export interface IAIService {
 /**
  * AI provider types
  */
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure' | 'custom';
+export type AIProvider = 'openai' | 'anthropic' | 'google' | 'vertex' | 'azure' | 'custom';
 
 /**
  * AI service factory interface
@@ -131,4 +133,23 @@ export type AIProvider = 'openai' | 'anthropic' | 'google' | 'azure' | 'custom';
 export interface IAIServiceFactory {
     createAIService(provider: AIProvider, config: AIProviderConfig): IAIService;
     getSupportedProviders(): AIProvider[];
+}
+
+/**
+ * Musical AI service interface
+ */
+export interface IMusicalAIService {
+    scrapeFestivalLineup(inputs: string[]): Promise<Festival>;
+    getArtistDetails(inputs: string[]): Promise<Artist>;
+    generateRecommendations({
+        userPreferences,
+        availableArtists,
+    }: {
+        userPreferences: UserPreferences;
+        availableArtists: {
+            name: string;
+            genre: string[] | undefined;
+            description: string | undefined;
+        }[];
+    }): Promise<Recommendation[]>;
 }

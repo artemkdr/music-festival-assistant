@@ -5,6 +5,7 @@
  */
 import { DIContainer } from '@/lib/container';
 import { UpdateArtistSchema } from '@/schemas';
+import { Artist } from '@/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -77,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
         }
 
         // Update artist with validated data
-        const updatedArtist = {
+        const updatedArtist: Artist = {
             ...existingArtist,
             ...validatedData,
             id: params.id, // Ensure ID doesn't change

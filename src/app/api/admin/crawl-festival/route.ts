@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/api/auth-middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import type { User } from '@/services/auth/interfaces';
+import { generateFestivalId } from '@/types';
 
 /**
  * Request schema for festival crawling
@@ -37,12 +38,18 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
             requestedBy: user.id,
         });
 
-        const crawlResult = await crawlerService.crawlFestival(validatedRequest.urls);
+        const festival = await crawlerService.crawlFestival(validatedRequest.urls);
 
         // Save to database if requested and crawl was successful
-        if (crawlResult.success && crawlResult.festival) {
+        if (!!festival) {
             try {
-                const savedFestival = await festivalRepository.saveFestival(crawlResult.festival);
+                festival.id = generateFestivalId({
+                    name: festival.name,
+                    startDate: festival.startDate,
+                    endDate: festival.endDate,
+                    location: festival.location,
+                });
+                const savedFestival = await festivalRepository.saveFestival(festival);
                 logger.info('Festival saved to repository', {
                     festivalId: savedFestival.id,
                     festivalName: savedFestival.name,
@@ -55,13 +62,10 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
                     data: {
                         festival: savedFestival,
                         crawlResult: {
-                            success: crawlResult.success,
-                            artistCount: crawlResult.parsedData?.artists.length || 0,
-                            stageCount: crawlResult.parsedData?.stages?.length || 0,
-                            scheduleItemCount: crawlResult.parsedData?.schedule?.length || 0,
-                            totalProcessingTime: crawlResult.totalProcessingTime,
-                            aiProcessingTime: crawlResult.aiProcessingTime,
-                            warnings: crawlResult.warnings,
+                            success: true,
+                            artistCount: festival.performances.reduce((acc, p) => acc + (p.artist ? 1 : 0), 0),
+                            stageCount: festival.stages.length,
+                            scheduleItemCount: festival.performances.length,
                         },
                     },
                 });
@@ -72,7 +76,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
                     status: 'partial_success',
                     message: 'Festival crawled successfully but failed to save to database',
                     data: {
-                        crawlResult,
                         saveError: saveError instanceof Error ? saveError.message : 'Unknown save error',
                     },
                 });
@@ -81,10 +84,10 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
 
         // Return crawl result without saving
         return NextResponse.json({
-            status: crawlResult.success ? 'success' : 'error',
-            message: crawlResult.success ? 'Festival crawled successfully' : 'Festival crawl failed',
+            status: !!festival ? 'success' : 'error',
+            message: !!festival ? 'Festival crawled successfully' : 'Festival crawl failed',
             data: {
-                crawlResult,
+                festival,
             },
         });
     } catch (error) {

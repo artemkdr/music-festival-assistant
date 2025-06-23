@@ -21,6 +21,7 @@ export function getAIConfig(): AIConfig {
     const config: AIProviderConfig = {
         apiKey: '',
         model: '',
+        provider,
     };
 
     // Provider-specific configuration
@@ -37,6 +38,7 @@ export function getAIConfig(): AIConfig {
             config.model = process.env.ANTHROPIC_MODEL || 'claude-3-opus-20240229';
             break;
 
+        case 'vertex':
         case 'google':
             // use api key json file for other props
             config.model = process.env.GOOGLE_VERTEX_MODEL || 'gemini-2.5-flash';

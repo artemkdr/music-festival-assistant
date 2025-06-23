@@ -2,7 +2,7 @@
  * Festival web crawler service interfaces
  */
 import { ParsedFestivalData } from '@/services/ai/schemas';
-import type { Festival } from '@/types';
+import type { Artist, Festival } from '@/types';
 
 /**
  * Raw festival data extracted from web pages
@@ -57,23 +57,14 @@ export interface IFestivalCrawlerService {
      * @param festivalInfo Optional basic festival information
      * @returns Promise resolving to crawl result
      */
-    crawlFestival(urls: string[]): Promise<FestivalCrawlResult>;
+    crawlFestival(urls: string[]): Promise<Festival>;
+}
 
+export interface IArtistCrawlerService {
     /**
-     * Convert parsed data to festival format
-     * @param parsedData Parsed lineup data
-     * @param festivalInfo Basic festival information
-     * @returns Promise resolving to festival object
+     * Crawl artist data by name: try Spotify first, then enrich with AI if needed.
+     * @param name Artist name (assumed unique for this context)
+     * @returns Complete Artist object
      */
-    convertToFestival(
-        parsedData: ParsedFestivalData,
-        festivalInfo: {
-            name: string;
-            location: string;
-            startDate: string;
-            endDate: string;
-            description?: string;
-            website?: string;
-        }
-    ): Promise<Festival>;
+    crawlArtistByName(name: string): Promise<Artist>;
 }

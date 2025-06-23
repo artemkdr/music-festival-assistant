@@ -22,11 +22,6 @@ export const mockArtists: Artist[] = [
             website: 'https://arcticmonkeys.com',
             instagram: 'https://instagram.com/arcticmonkeys',
         },
-        popularity: {
-            spotify: 92,
-            appleMusic: 88,
-            youtube: 90,
-        },
     },
     {
         id: 'artist-2',
@@ -40,13 +35,6 @@ export const mockArtists: Artist[] = [
         },
         socialLinks: {
             website: 'https://disclosure.co.uk',
-            twitter: 'https://twitter.com/disclosure',
-        },
-        popularity: {
-            spotify: 88,
-            appleMusic: 85,
-            youtube: 80,
-            soundcloud: 75,
         },
     },
     {
@@ -57,17 +45,10 @@ export const mockArtists: Artist[] = [
         imageUrl: 'https://example.com/tame-impala.jpg',
         streamingLinks: {
             spotify: 'https://open.spotify.com/artist/5INjqkS1o8h1imAzPqGZBb',
-            soundcloud: 'https://soundcloud.com/tame-impala',
         },
         socialLinks: {
             website: 'https://tameimpala.com',
             instagram: 'https://instagram.com/tameimpala',
-        },
-        popularity: {
-            spotify: 90,
-            appleMusic: 87,
-            youtube: 85,
-            soundcloud: 80,
         },
     },
     {
@@ -84,12 +65,6 @@ export const mockArtists: Artist[] = [
             website: 'https://fkatwigs.com',
             instagram: 'https://instagram.com/fkatwigs',
         },
-        popularity: {
-            spotify: 85,
-            appleMusic: 80,
-            youtube: 78,
-            soundcloud: 70,
-        },
     },
     {
         id: 'artist-5',
@@ -99,17 +74,9 @@ export const mockArtists: Artist[] = [
         imageUrl: 'https://example.com/glass-animals.jpg',
         streamingLinks: {
             spotify: 'https://open.spotify.com/artist/4yvcSjfu4PC0CYQyLy4wSq',
-            bandcamp: 'https://glassanimals.bandcamp.com',
         },
         socialLinks: {
             website: 'https://glassanimals.com',
-            twitter: 'https://twitter.com/GlassAnimals',
-        },
-        popularity: {
-            spotify: 87,
-            appleMusic: 82,
-            youtube: 85,
-            soundcloud: 80,
         },
     },
     {
@@ -125,12 +92,6 @@ export const mockArtists: Artist[] = [
         socialLinks: {
             website: 'https://bicepmusic.co.uk',
             instagram: 'https://instagram.com/bicepmusic',
-        },
-        popularity: {
-            spotify: 89,
-            appleMusic: 84,
-            youtube: 82,
-            soundcloud: 78,
         },
     },
 ];

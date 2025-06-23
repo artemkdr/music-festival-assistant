@@ -2,9 +2,8 @@
  * AI service factory for creating AI providers
  */
 import type { ILogger } from '@/lib/logger';
-import type { IAIService, IAIServiceFactory, AIProvider, AIProviderConfig } from './interfaces';
-import { OpenAIService } from './openai-service';
-import { VertexAIService } from './vertex-service';
+import { AIService } from '@/services/ai/ai-service';
+import type { AIProvider, AIProviderConfig, IAIService, IAIServiceFactory } from './interfaces';
 
 /**
  * AI service factory implementation
@@ -18,32 +17,14 @@ export class AIServiceFactory implements IAIServiceFactory {
     createAIService(provider: AIProvider, config: AIProviderConfig): IAIService {
         this.logger.info('Creating AI service', { provider, model: config.model });
 
-        switch (provider) {
-            case 'openai':
-                return new OpenAIService(config, this.logger);
-
-            case 'google':
-                return new VertexAIService(config, this.logger);
-
-            case 'anthropic':
-                throw new Error('Anthropic provider not yet implemented');
-
-            case 'azure':
-                throw new Error('Azure OpenAI provider not yet implemented');
-
-            case 'custom':
-                throw new Error('Custom provider not yet implemented');
-
-            default:
-                throw new Error(`Unsupported AI provider: ${provider}`);
-        }
+        return new AIService(config, this.logger);
     }
 
     /**
      * Get list of supported providers
      */
     getSupportedProviders(): AIProvider[] {
-        return ['openai', 'google']; // OpenAI and Google Vertex AI are implemented
+        return ['openai', 'vertex', 'google']; // OpenAI and Vertex AI are implemented
     }
 
     /**
@@ -63,6 +44,7 @@ export class AIServiceFactory implements IAIServiceFactory {
                 this.validateOpenAIConfig(config);
                 break;
             case 'google':
+            case 'vertex':
                 this.validateVertexAIConfig(config);
                 break;
             // Add other provider validations as they are implemented

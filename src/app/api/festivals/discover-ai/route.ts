@@ -1,10 +1,10 @@
 /**
  * AI-enhanced festival discovery endpoint
  */
-import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/lib/container';
 import { FestivalDiscoveryRequestSchema } from '@/schemas';
 import type { UserPreferences } from '@/types';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * POST /api/festivals/discover-ai - AI-enhanced festival discovery
@@ -12,7 +12,6 @@ import type { UserPreferences } from '@/types';
 export async function POST(request: NextRequest) {
     try {
         const logger = container().getLogger();
-        const festivalDiscoveryService = container().getFestivalDiscoveryService();
         const recommendationService = container().getRecommendationService();
 
         const body = await request.json();
@@ -55,10 +54,6 @@ export async function POST(request: NextRequest) {
                     enhancedCount: aiRecommendations.filter(r => r.aiEnhanced).length,
                 },
             };
-        } else if (validatedData.festivalUrl) {
-            // Use traditional URL-based discovery for now
-            // TODO: Implement AI-powered web scraping
-            response = await festivalDiscoveryService.discoverArtistsFromUrl(validatedData.festivalUrl, validatedData.userPreferences as UserPreferences);
         } else {
             return NextResponse.json(
                 {

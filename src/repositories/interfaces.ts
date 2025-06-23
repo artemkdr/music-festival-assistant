@@ -2,7 +2,7 @@
  * Repository interfaces for data access layer
  * Following repository pattern for clean architecture
  */
-import type { Artist, Festival, Performance, UserFeedback } from '@/types';
+import type { Artist, Festival, Performance } from '@/types';
 
 /**
  * Festival repository interface
@@ -107,35 +107,4 @@ export interface IPerformanceRepository {
      * @returns Promise resolving to saved performance
      */
     savePerformance(performance: Performance): Promise<Performance>;
-}
-
-/**
- * User feedback repository interface
- */
-export interface IUserFeedbackRepository {
-    /**
-     * Save user feedback
-     * @param feedback User feedback data
-     * @returns Promise resolving to saved feedback
-     */
-    saveFeedback(feedback: UserFeedback): Promise<UserFeedback>;
-
-    /**
-     * Get feedback by session ID
-     * @param sessionId Session identifier
-     * @returns Promise resolving to array of feedback
-     */
-    getFeedbackBySessionId(sessionId: string): Promise<UserFeedback[]>;
-
-    /**
-     * Get feedback statistics for an artist
-     * @param artistId Artist identifier
-     * @returns Promise resolving to feedback stats
-     */
-    getArtistFeedbackStats(artistId: string): Promise<{
-        likes: number;
-        dislikes: number;
-        loves: number;
-        skips: number;
-    }>;
 }

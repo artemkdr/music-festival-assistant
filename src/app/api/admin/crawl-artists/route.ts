@@ -4,6 +4,7 @@
  */
 import { requireAdmin } from '@/lib/api/auth-middleware';
 import { DIContainer } from '@/lib/container';
+import { generateArtistId } from '@/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -56,17 +57,21 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         const results: { name: string; status: 'crawled' | 'exists' | 'error'; error?: string }[] = [];
         for (const name of artistNames) {
             try {
-                if (validated.force === false) {
-                    const existing = await artistRepo.searchArtistsByName(name);
-                    if (existing.length > 0) {
-                        results.push({ name, status: 'exists' });
+                let artistId = generateArtistId();
+
+                const existing = await artistRepo.searchArtistsByName(name);
+                if (existing.length > 0) {
+                    artistId = existing[0]!.id; // Use the first existing artist's ID
+                    results.push({ name, status: 'exists' });
+                    if (validated.force === false) {
                         continue;
                     }
                 }
+
                 // crawls the artist by name
                 const artist = await artistCrawler.crawlArtistByName(name);
                 results.push({ name, status: 'crawled' });
-
+                artist.id = artistId; // Ensure the artist has the correct ID
                 // Save the crawled artist to the repository
                 await artistRepo.saveArtist(artist);
             } catch (err) {

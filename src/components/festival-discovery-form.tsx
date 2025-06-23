@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
-import type { UserPreferences } from '@/types';
+import type { UserPreferences, Festival } from '@/types';
 import { availableGenres } from '@/lib/mock-data';
+import { apiClient } from '@/lib/api/client';
 
 interface FestivalDiscoveryFormProps {
-    onSubmit: (festivalUrl: string, userPreferences: UserPreferences) => Promise<void>;
+    onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;
     isLoading: boolean;
 }
 
@@ -14,10 +15,41 @@ interface FestivalDiscoveryFormProps {
  * Form component for festival discovery input
  */
 export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscoveryFormProps): ReactElement {
-    const [festivalUrl, setFestivalUrl] = useState('');
+    const [festivals, setFestivals] = useState<Festival[]>([]);
+    const [selectedFestivalId, setSelectedFestivalId] = useState('');
+    const [festivalSearchTerm, setFestivalSearchTerm] = useState('');
+    const [showFestivalDropdown, setShowFestivalDropdown] = useState(false);
+    const [loadingFestivals, setLoadingFestivals] = useState(false);
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [discoveryMode, setDiscoveryMode] = useState<'conservative' | 'balanced' | 'adventurous'>('balanced');
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Load festivals on component mount
+    useEffect(() => {
+        const loadFestivals = async () => {
+            setLoadingFestivals(true);
+            try {
+                const response = await apiClient.getFestivals();
+                if (response.status === 'success' && response.data) {
+                    setFestivals(response.data as Festival[]);
+                }
+            } catch (error) {
+                console.error('Failed to load festivals:', error);
+            } finally {
+                setLoadingFestivals(false);
+            }
+        };
+
+        loadFestivals();
+    }, []);
+
+    // Filter festivals based on search term
+    const filteredFestivals = festivals.filter(
+        festival => festival.name.toLowerCase().includes(festivalSearchTerm.toLowerCase()) || festival.location.toLowerCase().includes(festivalSearchTerm.toLowerCase())
+    );
+
+    // Get selected festival details
+    const selectedFestival = festivals.find(f => f.id === selectedFestivalId);
 
     /**
      * Handle form submission
@@ -31,10 +63,8 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
         // Validate form
         const newErrors: Record<string, string> = {};
 
-        if (!festivalUrl.trim()) {
-            newErrors.festivalUrl = 'Festival URL is required';
-        } else if (!isValidUrl(festivalUrl)) {
-            newErrors.festivalUrl = 'Please enter a valid URL';
+        if (!selectedFestivalId) {
+            newErrors.festival = 'Please select a festival';
         }
 
         if (selectedGenres.length === 0) {
@@ -44,25 +74,25 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
-        } // Create user preferences
+        }
+
+        // Create user preferences
         const userPreferences: UserPreferences = {
             genres: selectedGenres,
             discoveryMode,
         };
 
-        await onSubmit(festivalUrl, userPreferences);
+        await onSubmit(selectedFestivalId, userPreferences);
     };
 
     /**
-     * Validate URL format
+     * Handle festival selection
      */
-    const isValidUrl = (url: string): boolean => {
-        try {
-            new URL(url);
-            return true;
-        } catch {
-            return false;
-        }
+    const handleFestivalSelect = (festivalId: string): void => {
+        setSelectedFestivalId(festivalId);
+        const festival = festivals.find(f => f.id === festivalId);
+        setFestivalSearchTerm(festival ? festival.name : '');
+        setShowFestivalDropdown(false);
     };
 
     /**
@@ -84,22 +114,81 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Festival Discovery</h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Festival URL Input */}
+                {/* Festival Selection */}
                 <div>
-                    <label htmlFor="festival-url" className="block text-sm font-medium text-gray-700 mb-2">
-                        Festival Website URL
+                    <label htmlFor="festival-search" className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Festival
                     </label>
-                    <input
-                        type="url"
-                        id="festival-url"
-                        value={festivalUrl}
-                        onChange={e => setFestivalUrl(e.target.value)}
-                        placeholder="https://summersoundfestival.com"
-                        className={`input w-full ${errors.festivalUrl ? 'border-red-500' : ''}`}
-                        disabled={isLoading}
-                    />
-                    {errors.festivalUrl && <p className="mt-1 text-sm text-red-600">{errors.festivalUrl}</p>}
-                    <p className="mt-1 text-sm text-gray-500">For this demo, any URL will work as we&apos;re using mock data</p>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            id="festival-search"
+                            value={festivalSearchTerm}
+                            onChange={e => {
+                                setFestivalSearchTerm(e.target.value);
+                                setShowFestivalDropdown(true);
+                                if (!e.target.value) {
+                                    setSelectedFestivalId('');
+                                }
+                            }}
+                            onFocus={() => setShowFestivalDropdown(true)}
+                            placeholder="Search for a festival..."
+                            className={`input w-full ${errors.festival ? 'border-red-500' : ''}`}
+                            disabled={isLoading || loadingFestivals}
+                        />
+
+                        {/* Loading indicator */}
+                        {loadingFestivals && (
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            </div>
+                        )}
+
+                        {/* Dropdown */}
+                        {showFestivalDropdown && !loadingFestivals && (
+                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                {filteredFestivals.length > 0 ? (
+                                    filteredFestivals.map(festival => (
+                                        <button
+                                            key={festival.id}
+                                            type="button"
+                                            onClick={() => handleFestivalSelect(festival.id)}
+                                            className="w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                                        >
+                                            <div className="font-medium text-gray-900">{festival.name}</div>
+                                            <div className="text-sm text-gray-500">{festival.location}</div>
+                                            <div className="text-xs text-gray-400">
+                                                {new Date(festival.startDate).toLocaleDateString()} - {new Date(festival.endDate).toLocaleDateString()}
+                                            </div>
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="px-4 py-3 text-gray-500 text-sm">{festivalSearchTerm ? 'No festivals found matching your search' : 'No festivals available'}</div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Click outside to close dropdown */}
+                        {showFestivalDropdown && <div className="fixed inset-0 z-5" onClick={() => setShowFestivalDropdown(false)} />}
+                    </div>
+
+                    {errors.festival && <p className="mt-1 text-sm text-red-600">{errors.festival}</p>}
+
+                    {/* Selected Festival Display */}
+                    {selectedFestival && (
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                            <div className="flex items-start">
+                                <span className="text-blue-400 mr-2">🎪</span>
+                                <div>
+                                    <div className="font-medium text-blue-900">{selectedFestival.name}</div>
+                                    <div className="text-sm text-blue-700">{selectedFestival.location}</div>
+                                    <div className="text-xs text-blue-600">{selectedFestival.performances.length} artists performing</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <p className="mt-1 text-sm text-gray-500">Search and select from {festivals.length} festivals in our database</p>
                 </div>
 
                 {/* Genre Selection */}

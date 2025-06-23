@@ -2,10 +2,10 @@
  * Mock repository implementations using in-memory data
  * These will be replaced with actual database implementations in production
  */
-import type { Artist, Festival, Performance, UserFeedback } from '@/types';
-import type { IFestivalRepository, IArtistRepository, IPerformanceRepository, IUserFeedbackRepository } from './interfaces';
-import { mockFestival, mockArtists, mockPerformances } from '@/lib/mock-data';
 import type { ILogger } from '@/lib/logger';
+import { mockArtists, mockFestival, mockPerformances } from '@/lib/mock-data';
+import type { Artist, Festival, Performance } from '@/types';
+import type { IArtistRepository, IFestivalRepository, IPerformanceRepository } from './interfaces';
 
 /**
  * Mock festival repository implementation
@@ -70,7 +70,7 @@ export class MockArtistRepository implements IArtistRepository {
     async getArtistsByGenres(genres: string[]): Promise<Artist[]> {
         this.logger.debug('Getting artists by genres', { genres });
         const matchingArtists = this.artists.filter(artist =>
-            artist.genre.some(artistGenre => genres.some(userGenre => artistGenre.toLowerCase().includes(userGenre.toLowerCase()) || userGenre.toLowerCase().includes(artistGenre.toLowerCase())))
+            artist.genre?.some(artistGenre => genres.some(userGenre => artistGenre.toLowerCase().includes(userGenre.toLowerCase()) || userGenre.toLowerCase().includes(artistGenre.toLowerCase())))
         );
         this.logger.info('Genre-based artist lookup result', {
             genres,
@@ -165,58 +165,5 @@ export class MockPerformanceRepository implements IPerformanceRepository {
         }
 
         return performance;
-    }
-}
-
-/**
- * Mock user feedback repository implementation
- */
-export class MockUserFeedbackRepository implements IUserFeedbackRepository {
-    private feedback: UserFeedback[] = [];
-
-    constructor(private logger: ILogger) {}
-
-    async saveFeedback(feedback: UserFeedback): Promise<UserFeedback> {
-        this.logger.debug('Saving user feedback', {
-            artistId: feedback.artistId,
-            rating: feedback.rating,
-        });
-        this.feedback.push(feedback);
-        this.logger.info('User feedback saved', {
-            artistId: feedback.artistId,
-            rating: feedback.rating,
-            sessionId: feedback.sessionId,
-        });
-        return feedback;
-    }
-
-    async getFeedbackBySessionId(sessionId: string): Promise<UserFeedback[]> {
-        this.logger.debug('Getting feedback by session ID', { sessionId });
-        const sessionFeedback = this.feedback.filter(f => f.sessionId === sessionId);
-        this.logger.info('Session feedback lookup result', {
-            sessionId,
-            foundCount: sessionFeedback.length,
-        });
-        return sessionFeedback;
-    }
-
-    async getArtistFeedbackStats(artistId: string): Promise<{
-        likes: number;
-        dislikes: number;
-        loves: number;
-        skips: number;
-    }> {
-        this.logger.debug('Getting artist feedback stats', { artistId });
-        const artistFeedback = this.feedback.filter(f => f.artistId === artistId);
-
-        const stats = {
-            likes: artistFeedback.filter(f => f.rating === 'like').length,
-            dislikes: artistFeedback.filter(f => f.rating === 'dislike').length,
-            loves: artistFeedback.filter(f => f.rating === 'love').length,
-            skips: artistFeedback.filter(f => f.rating === 'skip').length,
-        };
-
-        this.logger.info('Artist feedback stats calculated', { artistId, stats });
-        return stats;
     }
 }

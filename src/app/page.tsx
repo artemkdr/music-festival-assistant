@@ -19,7 +19,7 @@ export default function HomePage(): ReactElement {
     /**
      * Handle festival discovery request
      */
-    const handleDiscovery = async (festivalUrl: string, userPreferences: UserPreferences): Promise<void> => {
+    const handleDiscovery = async (festivalId: string, userPreferences: UserPreferences): Promise<void> => {
         setIsLoading(true);
         setError(null);
 
@@ -30,8 +30,7 @@ export default function HomePage(): ReactElement {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    festivalUrl,
-                    festivalId: 'festival-1', // Using mock festival for now
+                    festivalId,
                     userPreferences,
                 }),
             });
@@ -82,7 +81,7 @@ export default function HomePage(): ReactElement {
             <div className="text-center mb-12">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">Discover Your Next Favorite Artist</h1>
                 <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Enter a festival URL and your music preferences to get personalized artist recommendations. Never miss out on discovering amazing music again.
+                    Choose from our collection of festivals and get personalized artist recommendations based on your music preferences. Never miss out on discovering amazing music again.
                 </p>
             </div>
 

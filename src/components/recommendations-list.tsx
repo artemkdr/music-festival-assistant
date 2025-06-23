@@ -78,7 +78,7 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                     </div>
 
                                     <div className="flex flex-wrap gap-2 mb-3">
-                                        {recommendation.artist.genre.map(genre => (
+                                        {recommendation.artist.genre?.map(genre => (
                                             <span key={genre} className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">
                                                 {genre}
                                             </span>

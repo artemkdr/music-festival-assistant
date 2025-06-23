@@ -2,7 +2,7 @@
  * Core types for the Music Festival Assistant application
  */
 
-import { ArtistSchema, CalendarEventSchema, FestivalSchema, PerformanceSchema, UserFeedbackSchema, UserPreferencesSchema } from '@/schemas';
+import { ArtistSchema, CalendarEventSchema, FestivalSchema, PerformanceSchema, RecommendationSchema, UserPreferencesSchema } from '@/schemas';
 import { z } from 'zod';
 
 /**
@@ -36,15 +36,7 @@ export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 /**
  * Festival recommendation based on user preferences
  */
-export interface Recommendation {
-    artist: Artist;
-    performance: Performance;
-    score: number; // 0-1 confidence score
-    reasons: string[]; // Why this artist is recommended
-    similarArtists?: Artist[];
-    aiEnhanced?: boolean; // Whether this recommendation was enhanced by AI
-    aiTags?: string[]; // AI-generated tags for this recommendation
-}
+export type Recommendation = z.infer<typeof RecommendationSchema>;
 
 /**
  * Festival discovery request
@@ -74,11 +66,6 @@ export interface ApiResponse<T> {
     data?: T;
     errors?: string[];
 }
-
-/**
- * User feedback on recommendations
- */
-export type UserFeedback = z.infer<typeof UserFeedbackSchema>;
 
 /**
  * Calendar event for adding performances to user calendar

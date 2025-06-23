@@ -3,7 +3,7 @@
  * Seeds local repositories with sample data if they are empty
  */
 import { DIContainer } from '@/lib/container';
-import { mockArtists, mockFestival, mockPerformances } from '@/lib/mock-data';
+import { mockArtists, mockFestival } from '@/lib/mock-data';
 
 /**
  * Initialize repositories with sample data if they are empty
@@ -40,21 +40,6 @@ export async function initializeRepositories(): Promise<void> {
             logger.info('Initialized artist repository with sample data', { count: mockArtists.length });
         } else {
             logger.info('Artist repository already has data', { count: existingArtists.length });
-        }
-
-        // Initialize performances
-        const performanceRepository = container.getPerformanceRepository();
-
-        // Check if performances exist by trying to get them for the mock festival
-        const existingPerformances = await performanceRepository.getPerformancesByFestivalId(mockFestival.id);
-
-        if (existingPerformances.length === 0) {
-            for (const performance of mockPerformances) {
-                await performanceRepository.savePerformance(performance); // Cast to access savePerformance method
-            }
-            logger.info('Initialized performance repository with sample data', { count: mockPerformances.length });
-        } else {
-            logger.info('Performance repository already has data', { count: existingPerformances.length });
         }
 
         logger.info('Repository initialization completed successfully');

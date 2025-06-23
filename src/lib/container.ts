@@ -2,24 +2,23 @@
  * Dependency injection container
  * Central place to configure and wire up all services following SOLID principles
  */
-import { createLogger, type ILogger } from '@/lib/logger';
 import { getAIConfig, validateAIConfig } from '@/lib/ai-config';
-import type { IFestivalRepository, IArtistRepository, IPerformanceRepository, IUserFeedbackRepository } from '@/repositories/interfaces';
-import { LocalJsonFestivalRepository, LocalJsonArtistRepository, LocalJsonPerformanceRepository, LocalJsonUserFeedbackRepository } from '@/repositories/local-json-repositories';
-import type { IFestivalDiscoveryService, IRecommendationService, IUserFeedbackService } from '@/services/interfaces';
-import { FestivalDiscoveryService } from '@/services/festival-discovery-service';
-import { RecommendationService } from '@/services/recommendation-service';
-import { UserFeedbackService } from '@/services/user-feedback-service';
-import { FestivalDiscoveryController, UserFeedbackController } from '@/controllers';
+import { createLogger, type ILogger } from '@/lib/logger';
+import type { IArtistRepository, IFestivalRepository } from '@/repositories/interfaces';
+import { LocalJsonArtistRepository, LocalJsonFestivalRepository } from '@/repositories/local-json-repositories';
 import type { IAIService } from '@/services/ai';
 import { AIServiceFactory } from '@/services/ai';
-import type { IFestivalCrawlerService } from '@/services/crawler/interfaces';
-import { FestivalCrawlerService } from '@/services/crawler/festival-crawler-service';
-import { ArtistCrawlerService } from '@/services/crawler/artist-crawler-service';
-import { SpotifyApiService } from '@/services/spotify/spotify-api-service';
+import { IMusicalAIService } from '@/services/ai/interfaces';
+import { MusicalAIService } from '@/services/ai/musical-ai-service';
 import { AuthService } from '@/services/auth/auth-service';
 import { DummyAuthProvider } from '@/services/auth/dummy-auth-provider';
 import type { IAuthService } from '@/services/auth/interfaces';
+import { ArtistCrawlerService } from '@/services/crawler/artist-crawler-service';
+import { FestivalCrawlerService } from '@/services/crawler/festival-crawler-service';
+import type { IArtistCrawlerService, IFestivalCrawlerService } from '@/services/crawler/interfaces';
+import type { IRecommendationService } from '@/services/interfaces';
+import { RecommendationService } from '@/services/recommendation-service';
+import { SpotifyApiService } from '@/services/spotify/spotify-api-service';
 
 /**
  * Dependency injection container class
@@ -30,16 +29,11 @@ export class DIContainer {
     // Singletons
     private _logger: ILogger | null = null;
     private _aiService: IAIService | null = null;
+    private _musicalAIService: IMusicalAIService | null = null;
     private _festivalCrawlerService: IFestivalCrawlerService | null = null;
     private _festivalRepository: IFestivalRepository | null = null;
     private _artistRepository: IArtistRepository | null = null;
-    private _performanceRepository: IPerformanceRepository | null = null;
-    private _userFeedbackRepository: IUserFeedbackRepository | null = null;
     private _recommendationService: IRecommendationService | null = null;
-    private _festivalDiscoveryService: IFestivalDiscoveryService | null = null;
-    private _userFeedbackService: IUserFeedbackService | null = null;
-    private _festivalDiscoveryController: FestivalDiscoveryController | null = null;
-    private _userFeedbackController: UserFeedbackController | null = null;
     private _artistCrawlerService: ArtistCrawlerService | null = null;
     private _authService: IAuthService | null = null;
 
@@ -83,12 +77,25 @@ export class DIContainer {
     }
 
     /**
+     * Get musical AI service instance (optional - may return null if disabled or not configured)
+     */
+    public getMusicalAIService(): IMusicalAIService | null {
+        if (!this._musicalAIService) {
+            const aiService = this.getAIService();
+            if (aiService) {
+                this._musicalAIService = new MusicalAIService(aiService);
+            }
+        }
+        return this._musicalAIService;
+    }
+
+    /**
      * Get festival crawler service
      */
     public getFestivalCrawlerService(): IFestivalCrawlerService {
         if (!this._festivalCrawlerService) {
             const logger = this.getLogger();
-            const aiService = this.getAIService(); // This can return null if AI is disabled
+            const aiService = this.getMusicalAIService(); // This can return null if AI is disabled
             this._festivalCrawlerService = new FestivalCrawlerService(logger, aiService);
             logger.info('Festival crawler service initialized');
         }
@@ -116,79 +123,22 @@ export class DIContainer {
     }
 
     /**
-     * Get performance repository
-     */
-    public getPerformanceRepository(): IPerformanceRepository {
-        if (!this._performanceRepository) {
-            this._performanceRepository = new LocalJsonPerformanceRepository(this.getLogger());
-        }
-        return this._performanceRepository;
-    }
-
-    /**
-     * Get user feedback repository
-     */
-    public getUserFeedbackRepository(): IUserFeedbackRepository {
-        if (!this._userFeedbackRepository) {
-            this._userFeedbackRepository = new LocalJsonUserFeedbackRepository(this.getLogger());
-        }
-        return this._userFeedbackRepository;
-    }
-
-    /**
      * Get recommendation service
      */
     public getRecommendationService(): IRecommendationService {
         if (!this._recommendationService) {
-            this._recommendationService = new RecommendationService(this.getArtistRepository(), this.getPerformanceRepository(), this.getLogger(), this.getAIService());
+            if (!this.getMusicalAIService()) {
+                throw new Error('Musical AI service is required for recommendation service');
+            }
+            this._recommendationService = new RecommendationService(this.getLogger(), this.getMusicalAIService()!);
         }
         return this._recommendationService;
     }
 
     /**
-     * Get festival discovery service
-     */
-    public getFestivalDiscoveryService(): IFestivalDiscoveryService {
-        if (!this._festivalDiscoveryService) {
-            this._festivalDiscoveryService = new FestivalDiscoveryService(this.getFestivalRepository(), this.getRecommendationService(), this.getLogger());
-        }
-        return this._festivalDiscoveryService;
-    }
-
-    /**
-     * Get user feedback service
-     */
-    public getUserFeedbackService(): IUserFeedbackService {
-        if (!this._userFeedbackService) {
-            this._userFeedbackService = new UserFeedbackService(this.getUserFeedbackRepository(), this.getLogger());
-        }
-        return this._userFeedbackService;
-    }
-
-    /**
-     * Get festival discovery controller
-     */
-    public getFestivalDiscoveryController(): FestivalDiscoveryController {
-        if (!this._festivalDiscoveryController) {
-            this._festivalDiscoveryController = new FestivalDiscoveryController(this.getFestivalDiscoveryService(), this.getLogger());
-        }
-        return this._festivalDiscoveryController;
-    }
-
-    /**
-     * Get user feedback controller
-     */
-    public getUserFeedbackController(): UserFeedbackController {
-        if (!this._userFeedbackController) {
-            this._userFeedbackController = new UserFeedbackController(this.getUserFeedbackService(), this.getLogger());
-        }
-        return this._userFeedbackController;
-    }
-
-    /**
      * Get artist crawler service
      */
-    public getArtistCrawlerService(): ArtistCrawlerService {
+    public getArtistCrawlerService(): IArtistCrawlerService {
         if (!this._artistCrawlerService) {
             const logger = this.getLogger();
             // You may want to load the access token from env/config
@@ -196,7 +146,7 @@ export class DIContainer {
                 throw new Error('Spotify client ID and secret must be set in environment variables');
             }
             const spotifyApi = new SpotifyApiService(logger, process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
-            const aiService = this.getAIService();
+            const aiService = this.getMusicalAIService();
             this._artistCrawlerService = new ArtistCrawlerService(logger, spotifyApi, aiService!);
             logger.info('Artist crawler service initialized');
         }
@@ -224,13 +174,7 @@ export class DIContainer {
         this._aiService = null;
         this._festivalRepository = null;
         this._artistRepository = null;
-        this._performanceRepository = null;
-        this._userFeedbackRepository = null;
         this._recommendationService = null;
-        this._festivalDiscoveryService = null;
-        this._userFeedbackService = null;
-        this._festivalDiscoveryController = null;
-        this._userFeedbackController = null;
         this._artistCrawlerService = null;
         this._authService = null;
     }

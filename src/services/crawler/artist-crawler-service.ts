@@ -2,16 +2,16 @@
  * Artist crawler service: fetches artist data from Spotify and enriches with AI if needed.
  */
 import type { ILogger } from '@/lib/logger';
-import type { IAIService } from '@/services/ai';
-import { generateArtistId, type Artist } from '@/types';
+import { IMusicalAIService } from '@/services/ai/interfaces';
+import { IArtistCrawlerService } from '@/services/crawler/interfaces';
 import { SpotifyApiService, SpotifyArtist } from '@/services/spotify/spotify-api-service';
-import { ArtistSchema } from '@/schemas';
+import { type Artist } from '@/types';
 
-export class ArtistCrawlerService {
+export class ArtistCrawlerService implements IArtistCrawlerService {
     constructor(
         private readonly logger: ILogger,
         private readonly spotifyApi: SpotifyApiService,
-        private readonly aiService: IAIService
+        private readonly aiService: IMusicalAIService
     ) {}
 
     /**
@@ -20,8 +20,6 @@ export class ArtistCrawlerService {
      * @returns Complete Artist object
      */
     async crawlArtistByName(name: string): Promise<Artist> {
-        const id = generateArtistId();
-        // 1. Try Spotify
         let spotifyArtist: SpotifyArtist | null = null;
         try {
             spotifyArtist = await this.spotifyApi.searchArtistByName(name);
@@ -29,68 +27,34 @@ export class ArtistCrawlerService {
             this.logger.error('Spotify search failed', err instanceof Error ? err : new Error(String(err)));
         }
 
-        let streamingLinks: Record<string, string | undefined> = {
-            spotify: spotifyArtist?.spotifyUrl || '',
-        };
-        let socialLinks: Record<string, string | undefined> = {};
-        let description = '';
-        const popularity: Record<string, number> = {
-            spotify: spotifyArtist?.popularity || 0,
-        };
-
-        if (!spotifyArtist) {
-            this.logger.warn(`Artist not found on Spotify: ${name}`);
-            spotifyArtist = {
-                name,
-                id,
-                genres: [],
-                imageUrl: '',
-                popularity: 0,
-                followers: 0,
-                spotifyUrl: '',
-            };
-        }
-
-        // 2. Use AI to enrich description
         try {
-            const artistShortSchema = ArtistSchema.pick({
-                name: true,
-                genre: true,
-                socialLinks: true,
-                streamingLinks: true,
-                description: true,
-            });
-            const aiResult = await this.aiService.extractStructuredData<Artist>({
-                prompt: `Provide the following short information about music artist named ${spotifyArtist.name}, spotify ID: ${spotifyArtist.id}: decscription, genre, social links, streaming links.`,
-                schema: artistShortSchema, // TODO: Use a Zod schema for description
-                maxTokens: 5000,
-            });
-            // merge disctint genres
-            spotifyArtist.genres = Array.from(new Set([...(spotifyArtist.genres || []), ...(aiResult.genre || [])]));
-            // merge streaming links
-            streamingLinks = {
-                spotify: spotifyArtist.spotifyUrl,
-                ...aiResult.streamingLinks,
-            };
-            // merge social links
-            socialLinks = {
-                ...aiResult.socialLinks,
-            };
-            // description
-            description = aiResult.description || '';
+            const enrichedResult = await this.aiService.getArtistDetails([spotifyArtist?.name || name, `spotifyId: ${spotifyArtist?.id || ''}`]);
+            // take in priority the Spotify data if available
+            if (spotifyArtist) {
+                enrichedResult.name = spotifyArtist.name;
+                enrichedResult.mappingIds = {
+                    ...enrichedResult.mappingIds,
+                    ...{ spotify: spotifyArtist.id },
+                };
+                enrichedResult.streamingLinks = {
+                    ...enrichedResult.streamingLinks,
+                    ...{ spotify: spotifyArtist.spotifyUrl },
+                };
+                enrichedResult.popularity = {
+                    ...enrichedResult.popularity,
+                    spotify: {
+                        ...enrichedResult.popularity?.spotify,
+                        rating: spotifyArtist.popularity,
+                    },
+                };
+                enrichedResult.imageUrl = spotifyArtist.imageUrl || enrichedResult.imageUrl;
+            }
+            // lowercase all the genres and take unique values from both sources
+            enrichedResult.genre = Array.from(new Set([...(spotifyArtist?.genres || []).map(g => g.toLowerCase()), ...(enrichedResult.genre || []).map(g => g.toLowerCase())]));
+            return enrichedResult;
         } catch (err) {
-            this.logger.warn('AI enrichment for artist description failed', err instanceof Error ? err : new Error(String(err)));
+            this.logger.error('AI service failed to enrich artist data', err instanceof Error ? err : new Error(String(err)));
+            throw new Error(`Failed to enrich artist data: ${err instanceof Error ? err.message : 'Unknown error'}`);
         }
-        return {
-            id,
-            mappingIds: { spotify: spotifyArtist.id },
-            description,
-            name: spotifyArtist.name,
-            genre: spotifyArtist.genres,
-            imageUrl: spotifyArtist.imageUrl,
-            popularity,
-            streamingLinks,
-            socialLinks,
-        };
     }
 }

@@ -2,11 +2,11 @@
  * Local JSON file-based repository implementations
  * Stores data as JSON files on disk for persistence
  */
+import type { ILogger } from '@/lib/logger';
+import type { Artist, Festival, Performance } from '@/types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import type { Artist, Festival, Performance, UserFeedback } from '@/types';
-import type { IFestivalRepository, IArtistRepository, IPerformanceRepository, IUserFeedbackRepository } from './interfaces';
-import type { ILogger } from '@/lib/logger';
+import type { IArtistRepository, IFestivalRepository, IPerformanceRepository } from './interfaces';
 
 /**
  * Base class for JSON file repositories
@@ -141,7 +141,7 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         this.logger.debug('Getting artists by genres from local storage', { genres });
         const artists = await this.readJsonFile<Artist>(this.filename);
         const matchingArtists = artists.filter(artist =>
-            artist.genre.some(artistGenre => genres.some(userGenre => artistGenre.toLowerCase().includes(userGenre.toLowerCase()) || userGenre.toLowerCase().includes(artistGenre.toLowerCase())))
+            artist.genre?.some(artistGenre => genres.some(userGenre => artistGenre.toLowerCase().includes(userGenre.toLowerCase()) || userGenre.toLowerCase().includes(artistGenre.toLowerCase())))
         );
         this.logger.info('Local genre-based artist lookup result', {
             genres,
@@ -150,11 +150,11 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         return matchingArtists;
     }
 
-    async searchArtistsByName(name: string): Promise<Artist[]> {
+    async searchArtistsByName(name: string, exact: boolean = true): Promise<Artist[]> {
         this.logger.debug('Searching artists by name in local storage', { name });
         const searchTerm = name.toLowerCase();
         const artists = await this.readJsonFile<Artist>(this.filename);
-        const matchingArtists = artists.filter(artist => artist.name.toLowerCase().includes(searchTerm));
+        const matchingArtists = artists.filter(artist => (exact ? artist.name.toLowerCase() === searchTerm : artist.name.toLowerCase().includes(searchTerm)));
         this.logger.info('Local name-based artist search result', {
             name,
             foundCount: matchingArtists.length,
@@ -258,65 +258,5 @@ export class LocalJsonPerformanceRepository extends BaseJsonRepository implement
 
         await this.writeJsonFile(this.filename, performances);
         return performance;
-    }
-}
-
-/**
- * Local JSON user feedback repository implementation
- */
-export class LocalJsonUserFeedbackRepository extends BaseJsonRepository implements IUserFeedbackRepository {
-    private readonly filename = 'user-feedback.json';
-
-    constructor(logger: ILogger) {
-        super(logger, 'feedback');
-    }
-    async saveFeedback(feedback: UserFeedback): Promise<UserFeedback> {
-        this.logger.debug('Saving user feedback to local storage', {
-            artistId: feedback.artistId,
-            rating: feedback.rating,
-        });
-
-        const allFeedback = await this.readJsonFile<UserFeedback>(this.filename);
-        allFeedback.push(feedback);
-        await this.writeJsonFile(this.filename, allFeedback);
-
-        this.logger.info('User feedback saved to local storage', {
-            artistId: feedback.artistId,
-            rating: feedback.rating,
-            sessionId: feedback.sessionId,
-        });
-        return feedback;
-    }
-
-    async getFeedbackBySessionId(sessionId: string): Promise<UserFeedback[]> {
-        this.logger.debug('Getting feedback by session ID from local storage', { sessionId });
-        const allFeedback = await this.readJsonFile<UserFeedback>(this.filename);
-        const sessionFeedback = allFeedback.filter(f => f.sessionId === sessionId);
-        this.logger.info('Local session feedback lookup result', {
-            sessionId,
-            foundCount: sessionFeedback.length,
-        });
-        return sessionFeedback;
-    }
-
-    async getArtistFeedbackStats(artistId: string): Promise<{
-        likes: number;
-        dislikes: number;
-        loves: number;
-        skips: number;
-    }> {
-        this.logger.debug('Getting artist feedback stats from local storage', { artistId });
-        const allFeedback = await this.readJsonFile<UserFeedback>(this.filename);
-        const artistFeedback = allFeedback.filter(f => f.artistId === artistId);
-
-        const stats = {
-            likes: artistFeedback.filter(f => f.rating === 'like').length,
-            dislikes: artistFeedback.filter(f => f.rating === 'dislike').length,
-            loves: artistFeedback.filter(f => f.rating === 'love').length,
-            skips: artistFeedback.filter(f => f.rating === 'skip').length,
-        };
-
-        this.logger.info('Local artist feedback stats calculated', { artistId, stats });
-        return stats;
     }
 }
