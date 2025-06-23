@@ -12,9 +12,7 @@ import type { User } from '@/services/auth/interfaces';
  * Request schema for festival crawling
  */
 const CrawlFestivalRequestSchema = z.object({
-    urls: z.array(z.string().url('Must be a valid URL'))
-        .min(1, 'At least one URL is required')
-        .max(10, 'Maximum 10 URLs allowed'),
+    urls: z.array(z.string().url('Must be a valid URL')).min(1, 'At least one URL is required').max(10, 'Maximum 10 URLs allowed'),
 });
 
 /**

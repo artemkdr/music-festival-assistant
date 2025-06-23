@@ -63,7 +63,13 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
                 prompt: `Parse the following festival data and extract artist lineup information. Return structured data with artist name, stage, day and time`,
                 files: urls.map(url => ({
                     uri: url,
-                    mimeType: url.endsWith('.pdf') ? 'application/pdf' : 'text/html',
+                    mimeType: 
+                        url.endsWith('.pdf') ? 'application/pdf' 
+                        :
+                        url.endsWith('.json') ? 'application/json' 
+                        :
+                        url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png') || url.endsWith('.gif') || url.endsWith('.webp') ? 'image/*'
+                        : 'text/html',
                 })),
                 schema: ParsedFestivalDataSchema,
                 maxTokens: 0,

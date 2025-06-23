@@ -35,29 +35,27 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         }
 
         // Resolve artist references in performances
-        logger.debug('Resolving artist references for festival performances', { 
-            festivalId: id, 
-            performanceCount: festival.performances.length 
+        logger.debug('Resolving artist references for festival performances', {
+            festivalId: id,
+            performanceCount: festival.performances.length,
         });
 
         const enrichedPerformances = await Promise.all(
-            festival.performances.map(async (performance) => {
+            festival.performances.map(async performance => {
                 // Try to find the artist by name
                 const artistMatches = await artistRepo.searchArtistsByName(performance.artist.name);
-                
+
                 if (artistMatches.length > 0) {
                     // Use the first exact match or best match
-                    const exactMatch = artistMatches.find(artist => 
-                        artist.name.toLowerCase() === performance.artist.name.toLowerCase()
-                    );
+                    const exactMatch = artistMatches.find(artist => artist.name.toLowerCase() === performance.artist.name.toLowerCase());
                     const bestMatch = exactMatch || artistMatches[0];
-                    
+
                     if (bestMatch) {
                         logger.debug('Found artist match for performance', {
                             performanceArtistName: performance.artist.name,
                             matchedArtistId: bestMatch.id,
                             matchedArtistName: bestMatch.name,
-                            isExactMatch: !!exactMatch
+                            isExactMatch: !!exactMatch,
                         });
 
                         // Return performance with resolved artist data
@@ -68,13 +66,13 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
                         };
                     }
                 }
-                
+
                 // No artist found, keep original data but log the issue
                 logger.warn('No artist found for performance', {
                     performanceArtistName: performance.artist.name,
-                    festivalId: id
+                    festivalId: id,
                 });
-                
+
                 return performance;
             })
         );
@@ -87,14 +85,12 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         // Count how many artists were successfully resolved
         const originalArtistIds = festival.performances.map(p => p.artistId);
         const resolvedArtistIds = enrichedPerformances.map(p => p.artistId);
-        const newlyResolvedCount = resolvedArtistIds.filter((id, index) => 
-            id !== originalArtistIds[index]
-        ).length;
+        const newlyResolvedCount = resolvedArtistIds.filter((id, index) => id !== originalArtistIds[index]).length;
 
         logger.info('Festival retrieved successfully with artist resolution', {
             festivalId: id,
             performanceCount: enrichedFestival.performances.length,
-            resolvedArtists: newlyResolvedCount
+            resolvedArtists: newlyResolvedCount,
         });
 
         return NextResponse.json({

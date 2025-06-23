@@ -234,9 +234,7 @@ export class ApiClient {
      */
     async crawlFestival<T>(data: { urls: string[] } | string): Promise<ApiResponse<T>> {
         // Support backward compatibility with single URL string
-        const requestBody = typeof data === 'string' 
-            ? { urls: [data] } 
-            : data;
+        const requestBody = typeof data === 'string' ? { urls: [data] } : data;
 
         return this.request('/admin/crawl-festival', {
             method: 'POST',
