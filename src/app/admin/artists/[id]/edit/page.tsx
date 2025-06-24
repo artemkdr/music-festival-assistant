@@ -6,44 +6,21 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { ArtistDetails, artistsApi } from '@/lib/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, Usable } from 'react';
-
-interface Artist {
-    id: string;
-    name: string;
-    genre: string[];
-    mappingIds?: Record<string, string>;
-    imageUrl?: string;
-    description?: string;
-    popularity?: Record<string, number>;
-    streamingLinks?: {
-        spotify?: string;
-        appleMusic?: string;
-        youtube?: string;
-        soundcloud?: string;
-        bandcamp?: string;
-    };
-    socialLinks?: {
-        website?: string;
-        instagram?: string;
-        twitter?: string;
-        facebook?: string;
-    };
-}
 
 interface ArtistEditPageProps {
     params: Usable<{ id: string }>;
 }
 
 export default function ArtistEditPage({ params }: ArtistEditPageProps) {
-    const [artist, setArtist] = useState<Artist | null>(null);
+    const [artist, setArtist] = useState<ArtistDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [formData, setFormData] = useState<Partial<Artist>>({});
+    const [formData, setFormData] = useState<Partial<ArtistDetails>>({});
     const { id } = React.use(params);
     const router = useRouter();
 
@@ -53,13 +30,13 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                 setIsLoading(true);
                 setError(null);
 
-                const response = await apiClient.getArtist(id);
+                const response = await artistsApi.getArtist(id);
 
                 if (response.status !== 'success' || !response.data) {
                     throw new Error(response.message || 'Failed to fetch artist details');
                 }
 
-                const artistData = response.data as Artist;
+                const artistData = response.data as ArtistDetails;
                 setArtist(artistData);
                 setFormData(artistData);
             } catch (err) {
@@ -80,7 +57,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
         }));
     };
 
-    const handleNestedInputChange = (parentField: keyof Artist, childField: string, value: string) => {
+    const handleNestedInputChange = (parentField: keyof ArtistDetails, childField: string, value: string) => {
         setFormData(prev => ({
             ...prev,
             [parentField]: {
@@ -120,7 +97,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                 genre: (formData.genre || []).filter(g => g.trim() !== ''),
             };
 
-            const response = await apiClient.updateArtist(id, cleanedFormData);
+            const response = await artistsApi.updateArtist(id, cleanedFormData);
 
             if (response.status !== 'success') {
                 throw new Error(response.message || 'Failed to update artist');

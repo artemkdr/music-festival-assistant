@@ -6,7 +6,7 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { artistsApi } from '@/lib/api';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -54,7 +54,7 @@ export default function ArtistsCrawlPage() {
                           force: forceRecrawl,
                       };
 
-            const response = await apiClient.crawlArtists(data);
+            const response = await artistsApi.crawlArtists(data);
 
             if (response.status === 'success') {
                 const crawlData = response.data as CrawlResponse;

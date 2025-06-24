@@ -6,7 +6,7 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { festivalsApi } from '@/lib/api';
 import { Festival } from '@/types';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -56,7 +56,7 @@ export default function FestivalCrawlPage() {
         setResult(null);
 
         try {
-            const response = await apiClient.crawlFestival<{
+            const response = await festivalsApi.crawlFestival<{
                 festival: Festival;
             }>({ urls: validUrls });
             if (response.status === 'success' && response.data) {

@@ -6,49 +6,18 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { artistsApi } from '@/lib/api';
 import Link from 'next/link';
 import React, { useState, useEffect, Usable } from 'react';
-
-interface Artist {
-    id: string;
-    name: string;
-    genre: string[];
-    mappingIds?: Record<string, string>;
-    imageUrl?: string;
-    description?: string;
-    popularity?: Record<string, number>;
-    streamingLinks?: {
-        spotify?: string;
-        appleMusic?: string;
-        youtube?: string;
-        soundcloud?: string;
-        bandcamp?: string;
-    };
-    socialLinks?: {
-        website?: string;
-        instagram?: string;
-        twitter?: string;
-        facebook?: string;
-    };
-    followers?: number;
-}
-
-interface Performance {
-    festivalId: string;
-    festivalName: string;
-    date?: string;
-    time?: string;
-    stage?: string;
-}
+import { ArtistDetails, ArtistPerformance } from '@/lib/api/types';
 
 interface ArtistDetailPageProps {
     params: Usable<{ id: string }>;
 }
 
 export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
-    const [artist, setArtist] = useState<Artist | null>(null);
-    const [performances, setPerformances] = useState<Performance[]>([]);
+    const [artist, setArtist] = useState<ArtistDetails | null>(null);
+    const [performances, setPerformances] = useState<ArtistPerformance[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { id } = React.use(params);
@@ -60,22 +29,22 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                 setError(null);
 
                 // Fetch artist details from API
-                const artistResponse = await apiClient.getArtist(id);
+                const artistResponse = await artistsApi.getArtist(id);
 
                 if (artistResponse.status !== 'success' || !artistResponse.data) {
                     throw new Error(artistResponse.message || 'Failed to fetch artist details');
                 }
 
                 // Fetch artist performances from API
-                const performancesResponse = await apiClient.getArtistPerformances(id);
+                const performancesResponse = await artistsApi.getArtistPerformances(id);
 
                 if (performancesResponse.status !== 'success') {
                     console.warn('Failed to fetch performances:', performancesResponse.message);
                     // Continue without performances data instead of failing completely
                 }
 
-                setArtist(artistResponse.data as Artist);
-                setPerformances((performancesResponse.data as Performance[]) || []);
+                setArtist(artistResponse.data as ArtistDetails);
+                setPerformances((performancesResponse.data as ArtistPerformance[]) || []);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load artist');
                 console.error('Error loading artist:', err);

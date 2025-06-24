@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import type { UserPreferences, Festival } from '@/types';
 import { availableGenres } from '@/lib/mock-data';
-import { apiClient } from '@/lib/api/client';
+import { festivalsApi } from '@/lib/api';
 
 interface FestivalDiscoveryFormProps {
     onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;
@@ -29,7 +29,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
         const loadFestivals = async () => {
             setLoadingFestivals(true);
             try {
-                const response = await apiClient.getFestivals();
+                const response = await festivalsApi.getFestivals();
                 if (response.status === 'success' && response.data) {
                     setFestivals(response.data as Festival[]);
                 }

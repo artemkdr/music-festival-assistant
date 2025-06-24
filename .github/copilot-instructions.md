@@ -99,6 +99,7 @@
 - Use idiomatic TypeScript with strict type checking enabled, do not use `any`.
 - Use named `async` functions and avoid long inline callbacks.
 - Validate input using Zod schemas and return structured error responses.
+- Do not create very large files, keep files under 300 lines, split large files into smaller logical modules.
 - Organize code with clear separation of concerns (routes → controller → service → repository).
 - Use centralized error handling middleware.
 - Format code with Prettier and enforce standards with ESLint.

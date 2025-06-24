@@ -6,28 +6,9 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { Festival, festivalsApi } from '@/lib/api';
 import Link from 'next/link';
 import React, { useState, useEffect, Usable } from 'react';
-
-interface Festival {
-    id: string;
-    name: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-    website?: string;
-    description?: string;
-    performances: Array<{
-        id: string;
-        artistId: string;
-        artist: { name: string; id: string };
-        startTime: string; // ISO string
-        endTime: string; // ISO string
-        stage: string;
-        day: number; // Festival day (1, 2, 3, etc.)
-    }>;
-}
 
 interface FestivalDetailPageProps {
     params: Usable<{ id: string }>;
@@ -46,7 +27,7 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                 setError(null);
 
                 // Fetch festival details from API
-                const festivalResponse = await apiClient.getFestival(id);
+                const festivalResponse = await festivalsApi.getFestival(id);
 
                 if (festivalResponse.status !== 'success' || !festivalResponse.data) {
                     throw new Error(festivalResponse.message || 'Failed to fetch festival details');

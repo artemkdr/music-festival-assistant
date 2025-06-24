@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { apiClient, type AuthResponse } from '@/lib/api/client';
+import { authApi, type AuthResponse } from '@/lib/api';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 interface AuthContextType {
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const checkAuth = async () => {
         try {
             setIsLoading(true);
-            const token = apiClient.getToken();
+            const token = authApi.getToken();
 
             if (!token) {
                 setUser(null);
@@ -45,18 +45,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
 
             // Validate token with server
-            const response = await apiClient.getProfile();
+            const response = await authApi.getProfile();
 
             if (response.status === 'success' && response.data) {
                 setUser(response.data);
             } else {
                 // Token invalid, clear it
-                apiClient.clearToken();
+                authApi.clearToken();
                 setUser(null);
             }
         } catch (error) {
             console.error('Auth check failed:', error);
-            apiClient.clearToken();
+            authApi.clearToken();
             setUser(null);
         } finally {
             setIsLoading(false);
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
         try {
             setIsLoading(true);
-            const response = await apiClient.login({ email, password });
+            const response = await authApi.login({ email, password });
 
             if (response.status === 'success' && response.data) {
                 setUser(response.data.user);
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
      * Logout user
      */
     const logout = () => {
-        apiClient.logout();
+        authApi.logout();
         setUser(null);
     };
 

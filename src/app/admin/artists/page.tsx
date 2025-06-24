@@ -6,7 +6,7 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { artistsApi } from '@/lib/api';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -37,7 +37,7 @@ export default function ArtistsPage() {
             setIsLoading(true);
             setError(null);
 
-            const response = await apiClient.getArtists();
+            const response = await artistsApi.getArtists();
 
             if (response.status === 'success') {
                 setArtists(response.data as Artist[]);

@@ -6,23 +6,10 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { festivalsApi } from '@/lib/api';
+import type { Festival } from '@/lib/api/types';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-
-interface Festival {
-    id: string;
-    name: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-    website: string;
-    performances: Array<{
-        artist: { name: string; id: string };
-        time?: string;
-        stage?: string;
-    }>;
-}
+import { useEffect, useState } from 'react';
 
 export default function FestivalsPage() {
     const [festivals, setFestivals] = useState<Festival[]>([]);
@@ -39,7 +26,7 @@ export default function FestivalsPage() {
             setIsLoading(true);
             setError(null);
 
-            const response = await apiClient.getFestivals();
+            const response = await festivalsApi.getFestivals();
 
             if (response.status === 'success') {
                 setFestivals(response.data as Festival[]);

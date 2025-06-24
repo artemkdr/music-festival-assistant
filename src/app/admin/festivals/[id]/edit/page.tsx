@@ -6,41 +6,12 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient, SpotifySearchResult } from '@/lib/api/client';
+import { artistsApi, festivalsApi, spotifyApi, SpotifySearchResult } from '@/lib/api';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-
-interface Artist {
-    id: string;
-    name: string;
-    genre?: string[];
-    description?: string;
-    imageUrl?: string;
-}
-
-interface Performance {
-    id: string;
-    artistId: string;
-    artist: { name: string; id: string };
-    startTime: string; // ISO string
-    endTime: string; // ISO string
-    stage: string;
-    day: number; // Festival day (1, 2, 3, etc.)
-}
-
-interface Festival {
-    id: string;
-    name: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-    website?: string;
-    description?: string;
-    imageUrl?: string;
-    performances: Performance[];
-}
+import type { Artist, Festival, Performance } from '@/lib/api/types';
 
 interface FestivalFormData {
     name?: string;
@@ -111,7 +82,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                 setId(resolvedParams.id);
 
                 // Load festival and artists in parallel
-                const [festivalResponse, artistsResponse] = await Promise.all([apiClient.getFestival(resolvedParams.id), apiClient.getArtists()]);
+                const [festivalResponse, artistsResponse] = await Promise.all([festivalsApi.getFestival(resolvedParams.id), artistsApi.getArtists()]);
 
                 if (festivalResponse.status !== 'success' || !festivalResponse.data) {
                     throw new Error(festivalResponse.message || 'Failed to fetch festival details');
@@ -267,12 +238,12 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             // Convert dates back to ISO format
             const cleanedFormData = {
                 ...formData,
-                startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
-                endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
+                startDate: formData.startDate ? new Date(formData.startDate).toISOString() : '',
+                endDate: formData.endDate ? new Date(formData.endDate).toISOString() : '',
                 performances: performances,
             };
 
-            const response = await apiClient.updateFestival(id, cleanedFormData);
+            const response = await festivalsApi.updateFestival(id, cleanedFormData);
 
             if (response.status !== 'success') {
                 throw new Error(response.message || 'Failed to update festival');
@@ -294,8 +265,8 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         setSpotifySearchError(null);
         setSpotifySearchResults([]);
         try {
-            const artists = await apiClient.searchSpotifyArtists(query);
-            setSpotifySearchResults(artists);
+            const response = await spotifyApi.searchArtists(query);
+            setSpotifySearchResults(response.data || []);
         } catch {
             setSpotifySearchError('Spotify search failed');
         } finally {
