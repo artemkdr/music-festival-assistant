@@ -2,7 +2,7 @@
  * Artists API endpoints
  * GET /api/admin/artists - Get all artists
  */
-import { requireAdmin } from '@/lib/api/middleware/auth-middleware';
+import { requireAdmin } from '@/middleware/auth-middleware';
 import { DIContainer } from '@/lib/container';
 import { NextResponse } from 'next/server';
 

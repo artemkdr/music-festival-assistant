@@ -2,7 +2,7 @@
  * Festivals API endpoints
  * GET /api/admin/festivals - Get all festivals
  */
-import { requireAdmin } from '@/lib/api/middleware/auth-middleware';
+import { requireAdmin } from '@/middleware/auth-middleware';
 import { DIContainer } from '@/lib/container';
 import { NextResponse } from 'next/server';
 

@@ -3,7 +3,7 @@
  * This endpoint is for admin use only to add new festivals to the system
  */
 import { DIContainer } from '@/lib/container';
-import { requireAdmin } from '@/lib/api/middleware/auth-middleware';
+import { requireAdmin } from '@/middleware/auth-middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import type { User } from '@/services/auth/interfaces';
