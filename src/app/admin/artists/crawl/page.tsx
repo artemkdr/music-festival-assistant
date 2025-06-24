@@ -6,7 +6,7 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { artistsApi } from '@/lib/api';
+import { artistsApi } from '@/app/lib/api';
 import Link from 'next/link';
 import { useState } from 'react';
 

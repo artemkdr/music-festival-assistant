@@ -1,6 +1,6 @@
 'use client';
 
-import { Festival, festivalsApi } from '@/lib/api';
+import { Festival, festivalsApi } from '@/app/lib/api';
 import { availableGenres } from '@/lib/mock-data';
 import type { UserPreferences } from '@/types';
 import type { ReactElement } from 'react';

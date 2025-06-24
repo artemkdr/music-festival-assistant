@@ -6,10 +6,10 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { artistsApi } from '@/lib/api';
+import { artistsApi } from '@/app/lib/api';
 import Link from 'next/link';
 import React, { useState, useEffect, Usable } from 'react';
-import { ArtistDetails, ArtistPerformance } from '@/lib/api/types';
+import { ArtistDetails, ArtistPerformance } from '@/app/lib/api/types';
 
 interface ArtistDetailPageProps {
     params: Usable<{ id: string }>;

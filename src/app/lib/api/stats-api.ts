@@ -1,5 +1,5 @@
-import { apiClient, ApiClient } from '@/lib/api/api-client';
-import { ApiResponse } from '@/lib/api/types';
+import { apiClient, ApiClient } from '@/app/lib/api/api-client';
+import { ApiResponse } from '@/app/lib/api/types';
 
 /**
  * Admin: Get dashboard statistics

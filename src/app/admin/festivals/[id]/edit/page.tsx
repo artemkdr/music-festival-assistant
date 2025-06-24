@@ -6,12 +6,12 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { artistsApi, festivalsApi, spotifyApi, SpotifySearchResult } from '@/lib/api';
+import { artistsApi, festivalsApi, spotifyApi, SpotifySearchResult } from '@/app/lib/api';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import type { Artist, Festival, Performance } from '@/lib/api/types';
+import type { Artist, Festival, Performance } from '@/app/lib/api/types';
 
 interface FestivalFormData {
     name?: string;

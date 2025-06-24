@@ -7,7 +7,7 @@
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/contexts/auth-context';
-import { statsApi } from '@/lib/api/stats-api';
+import { statsApi } from '@/app/lib/api/stats-api';
 import { useEffect, useState } from 'react';
 
 export default function AdminDashboardPage() {

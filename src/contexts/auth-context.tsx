@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { authApi, type AuthResponse } from '@/lib/api';
+import { authApi, type AuthResponse } from '@/app/lib/api';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 interface AuthContextType {

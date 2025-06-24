@@ -43,7 +43,7 @@ export class MockFestivalRepository implements IFestivalRepository {
         // generate performance IDs if they are not set
         festival.performances
             .filter(performance => !performance.id)
-            .forEach(performance => {                
+            .forEach(performance => {
                 performance.id = generatePerformanceId(festival.name);
             });
 

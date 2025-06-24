@@ -6,7 +6,7 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { festivalsApi } from '@/lib/api';
+import { festivalsApi } from '@/app/lib/api';
 import { Festival } from '@/types';
 import Link from 'next/link';
 import { useState } from 'react';
