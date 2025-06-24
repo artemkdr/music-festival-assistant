@@ -102,7 +102,6 @@ export const mockArtists: Artist[] = [
 export const mockPerformances: Performance[] = [
     {
         id: 'perf-1',
-        artistId: 'artist-1',
         artist: mockArtists[0]!,
         startTime: '2024-07-20T20:00:00Z',
         endTime: '2024-07-20T21:30:00Z',
@@ -111,7 +110,6 @@ export const mockPerformances: Performance[] = [
     },
     {
         id: 'perf-2',
-        artistId: 'artist-2',
         artist: mockArtists[1]!,
         startTime: '2024-07-20T22:00:00Z',
         endTime: '2024-07-20T23:30:00Z',
@@ -120,7 +118,6 @@ export const mockPerformances: Performance[] = [
     },
     {
         id: 'perf-3',
-        artistId: 'artist-3',
         artist: mockArtists[2]!,
         startTime: '2024-07-21T19:00:00Z',
         endTime: '2024-07-21T20:30:00Z',
@@ -129,7 +126,6 @@ export const mockPerformances: Performance[] = [
     },
     {
         id: 'perf-4',
-        artistId: 'artist-4',
         artist: mockArtists[3]!,
         startTime: '2024-07-21T21:00:00Z',
         endTime: '2024-07-21T22:00:00Z',
@@ -138,7 +134,6 @@ export const mockPerformances: Performance[] = [
     },
     {
         id: 'perf-5',
-        artistId: 'artist-5',
         artist: mockArtists[4]!,
         startTime: '2024-07-22T18:00:00Z',
         endTime: '2024-07-22T19:30:00Z',
@@ -147,7 +142,6 @@ export const mockPerformances: Performance[] = [
     },
     {
         id: 'perf-6',
-        artistId: 'artist-6',
         artist: mockArtists[5]!,
         startTime: '2024-07-22T23:00:00Z',
         endTime: '2024-07-23T01:00:00Z',

@@ -28,7 +28,7 @@ export class ArtistCrawlerService implements IArtistCrawlerService {
         }
 
         try {
-            const enrichedResult = await this.aiService.getArtistDetails([spotifyArtist?.name || name, `spotifyId: ${spotifyArtist?.id || ''}`]);
+            const enrichedResult = await this.aiService.generateArtist([spotifyArtist?.name || name, `spotifyId: ${spotifyArtist?.id || ''}`]);
             // take in priority the Spotify data if available
             if (spotifyArtist) {
                 enrichedResult.name = spotifyArtist.name;

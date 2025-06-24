@@ -185,12 +185,12 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                         <div className="space-y-4">
                                             {/* Stats */}
                                             <div className="grid grid-cols-2 gap-4">
-                                                {artist.popularity?.spotify && (
+                                                {/*artist.popularity?.spotify && (
                                                     <div className="bg-purple-50 p-4 rounded-lg">
                                                         <div className="text-2xl font-bold text-purple-600">{artist.popularity.spotify}/100</div>
                                                         <div className="text-sm text-purple-600">Popularity</div>
                                                     </div>
-                                                )}
+                                                )*/}
 
                                                 {artist.followers && (
                                                     <div className="bg-green-50 p-4 rounded-lg">

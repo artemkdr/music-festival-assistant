@@ -198,12 +198,12 @@ export default function ArtistsPage() {
                                                     {artist.genre?.length > 3 && <span className="text-xs text-gray-500">+{artist.genre.length - 3} more</span>}
                                                 </div>
                                             </div>
-                                            {artist.popularity && (
+                                            {/*artist.popularity && (
                                                 <div className="flex items-center">
                                                     <span className="mr-2">📊</span>
                                                     Popularity: {artist.popularity.spotify}/100
                                                 </div>
-                                            )}
+                                            )*/}
                                         </div>
 
                                         <div className="flex space-x-2">

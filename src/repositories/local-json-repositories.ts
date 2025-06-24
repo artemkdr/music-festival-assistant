@@ -3,7 +3,7 @@
  * Stores data as JSON files on disk for persistence
  */
 import type { ILogger } from '@/lib/logger';
-import type { Artist, Festival, Performance } from '@/types';
+import { generatePerformanceId, type Artist, type Festival, type Performance } from '@/types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { IArtistRepository, IFestivalRepository, IPerformanceRepository } from './interfaces';
@@ -105,6 +105,13 @@ export class LocalJsonFestivalRepository extends BaseJsonRepository implements I
         this.logger.debug('Saving festival to local storage', { festivalId: festival.id });
         const festivals = await this.readJsonFile<Festival>(this.filename);
         const existingIndex = festivals.findIndex(f => f.id === festival.id);
+
+        // generate performance IDs if they are not set
+        festival.performances
+            .filter(performance => !performance.id)
+            .forEach(performance => {                
+                performance.id = generatePerformanceId(festival.name);
+            });
 
         if (existingIndex >= 0) {
             festivals[existingIndex] = festival;
@@ -230,7 +237,7 @@ export class LocalJsonPerformanceRepository extends BaseJsonRepository implement
     async getPerformancesByArtistId(artistId: string): Promise<Performance[]> {
         this.logger.debug('Getting performances by artist ID from local storage', { artistId });
         const performances = await this.readJsonFile<Performance>(this.filename);
-        const artistPerformances = performances.filter(p => p.artistId === artistId);
+        const artistPerformances = performances.filter(p => p.artist.id === artistId);
         this.logger.info('Local artist performances lookup result', {
             artistId,
             foundCount: artistPerformances.length,

@@ -32,7 +32,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             if (!this.aiService) {
                 throw new Error('AI service is not configured');
             }
-            return this.aiService.scrapeFestivalLineup(urls);
+            return this.aiService.generateFestival(urls);
         } catch (error) {
             this.logger.error('Festival crawl failed', error instanceof Error ? error : new Error(String(error)));
             throw new Error(`Festival crawl failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

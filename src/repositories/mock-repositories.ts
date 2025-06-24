@@ -4,7 +4,7 @@
  */
 import type { ILogger } from '@/lib/logger';
 import { mockArtists, mockFestival, mockPerformances } from '@/lib/mock-data';
-import type { Artist, Festival, Performance } from '@/types';
+import { generatePerformanceId, type Artist, type Festival, type Performance } from '@/types';
 import type { IArtistRepository, IFestivalRepository, IPerformanceRepository } from './interfaces';
 
 /**
@@ -39,6 +39,13 @@ export class MockFestivalRepository implements IFestivalRepository {
     async saveFestival(festival: Festival): Promise<Festival> {
         this.logger.debug('Saving festival', { festivalId: festival.id });
         const existingIndex = this.festivals.findIndex(f => f.id === festival.id);
+
+        // generate performance IDs if they are not set
+        festival.performances
+            .filter(performance => !performance.id)
+            .forEach(performance => {                
+                performance.id = generatePerformanceId(festival.name);
+            });
 
         if (existingIndex >= 0) {
             this.festivals[existingIndex] = festival;
@@ -142,7 +149,7 @@ export class MockPerformanceRepository implements IPerformanceRepository {
 
     async getPerformancesByArtistId(artistId: string): Promise<Performance[]> {
         this.logger.debug('Getting performances by artist ID', { artistId });
-        const performances = this.performances.filter(p => p.artistId === artistId);
+        const performances = this.performances.filter(p => p.artist.id === artistId);
         this.logger.info('Artist performances lookup result', {
             artistId,
             foundCount: performances.length,

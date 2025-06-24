@@ -3,7 +3,7 @@
  */
 import { ArtistSchema, FestivalShortSchema, RecommendationShortSchema, RecommentationsAIResponseSchema } from '@/schemas';
 import type { AIRequest, IAIService, IMusicalAIService } from '@/services/ai/interfaces';
-import { Artist, Festival, UserPreferences } from '@/types';
+import { Artist, Festival, generateArtistId, generateFestivalId, generatePerformanceId, UserPreferences } from '@/types';
 import { z } from 'zod';
 
 export class MusicalAIService implements IMusicalAIService {
@@ -17,7 +17,7 @@ export class MusicalAIService implements IMusicalAIService {
      * Scrape festival lineup from a URL using AI
      * @param inputs Array of strings containing festival name, website URL, and other relevant data
      */
-    public async scrapeFestivalLineup(inputs: string[]): Promise<Festival> {
+    public async generateFestival(inputs: string[]): Promise<Festival> {
         const aiRequest: AIRequest = {
             systemPrompt: 'You are a data scraper/extractor expert. Your task is to generate detailed music festival information based on the provided festival name and its website.',
             prompt: 'Scrape the lineup of the festival from the provided data.',
@@ -28,14 +28,39 @@ export class MusicalAIService implements IMusicalAIService {
             ...aiRequest,
             schema: FestivalShortSchema,
         });
-        return result as Festival;
+        // result is a partial Festival object, we need to generate a proper Festival object
+        const festival: Festival = {
+            id: generateFestivalId({
+                name: result.name,
+                location: result.location,
+                startDate: result.startDate,
+                endDate: result.endDate,
+            }),
+            name: result.name,
+            location: result.location,
+            startDate: result.startDate,
+            endDate: result.endDate,
+            description: result.description,
+            imageUrl: result.imageUrl,
+            stages: result.stages || [],
+            performances: result.performances.map(performance => ({
+                ...performance,
+                id: generatePerformanceId(result.name),
+                artist: {
+                    ...performance.artist,
+                    id: generateArtistId(),
+                },
+            })),
+            website: result.website || '',
+        };
+        return festival;
     }
 
     /**
      * Provide detailed information about an artist using AI
-     * @param inputs Array of strings containing artist name, social links, streaming links, etc.     *
+     * @param inputs Array of strings containing artist name, social links, streaming links, etc.
      */
-    public async getArtistDetails(inputs: string[]): Promise<Artist> {
+    public async generateArtist(inputs: string[]): Promise<Artist> {
         const aiRequest: AIRequest = {
             systemPrompt: `You are an expert in music and artists. 
 Your task is to generate detailed artist information based on the provided artist name and any additional data. 
@@ -53,6 +78,8 @@ Important:
             ...aiRequest,
             schema: ArtistSchema,
         });
+        // we have to intervent here and generate our own ID
+        result.id = generateArtistId();
         return result;
     }
 

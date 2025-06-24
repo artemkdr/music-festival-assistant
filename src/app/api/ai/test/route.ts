@@ -93,10 +93,10 @@ export async function POST(request: NextRequest) {
                 });
                 break;
             case 'artist':
-                result = await musicalAiService.getArtistDetails(validatedData.input);
+                result = await musicalAiService.generateArtist(validatedData.input);
                 break;
             case 'festival':
-                result = await musicalAiService.scrapeFestivalLineup(validatedData.input);
+                result = await musicalAiService.generateFestival(validatedData.input);
                 break;
 
             default:

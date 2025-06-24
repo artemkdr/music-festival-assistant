@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import type { ReactElement } from 'react';
-import type { UserPreferences, Festival } from '@/types';
+import { Festival, festivalsApi } from '@/lib/api';
 import { availableGenres } from '@/lib/mock-data';
-import { festivalsApi } from '@/lib/api';
+import type { UserPreferences } from '@/types';
+import type { ReactElement } from 'react';
+import { useEffect, useState } from 'react';
 
 interface FestivalDiscoveryFormProps {
     onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;

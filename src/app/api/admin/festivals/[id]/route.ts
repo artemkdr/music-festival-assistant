@@ -5,6 +5,7 @@
  */
 import { DIContainer } from '@/lib/container';
 import { UpdateFestivalSchema } from '@/schemas';
+import { Festival, generateArtistId, generatePerformanceId, Performance } from '@/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -83,8 +84,8 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         };
 
         // Count how many artists were successfully resolved
-        const originalArtistIds = festival.performances.map(p => p.artistId);
-        const resolvedArtistIds = enrichedPerformances.map(p => p.artistId);
+        const originalArtistIds = festival.performances.map(p => p.artist.id);
+        const resolvedArtistIds = enrichedPerformances.map(p => p.artist.id);
         const newlyResolvedCount = resolvedArtistIds.filter((id, index) => id !== originalArtistIds[index]).length;
 
         logger.info('Festival retrieved successfully with artist resolution', {
@@ -136,11 +137,51 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
         }
 
         // Update festival with validated data
-        const updatedFestival = {
-            ...existingFestival,
-            ...validatedData,
-            id, // Ensure ID doesn't change
+        const stages = new Set<string>();
+        validatedData.performances.forEach(performance => {
+            if (performance.stage) {
+                stages.add(performance.stage);
+            }
+        });
+        const updatedFestival: Festival = {
+            id: existingFestival.id,
+            name: validatedData.name || existingFestival.name,
+            location: validatedData.location || existingFestival.location,
+            startDate: validatedData.startDate || existingFestival.startDate,
+            endDate: validatedData.endDate || existingFestival.endDate,
+            description: validatedData.description || existingFestival.description,
+            website: validatedData.website || existingFestival.website,
+            imageUrl: validatedData.imageUrl || existingFestival.imageUrl,
+            performances: [] as Performance[],
+            stages: Array.from(stages), // Convert Set to Array
         };
+        // fill performances with existing data, updating only the fields that are provided
+        validatedData.performances.forEach(async performance => {
+            // find existings artist by id or name
+            let artist = performance.artist.id
+                ? await container.getArtistRepository().getArtistById(performance.artist.id)
+                : await container.getArtistRepository().searchArtistByName(performance.artist.name);
+            // if artist still not found, then we will crawl one
+            if (!artist) {
+                artist = await container.getArtistCrawlerService().crawlArtistByName(performance.artist.name);
+            }
+            // if artist still not found, then create a new one
+            if (!artist) {
+                artist = {
+                    id: generateArtistId(),
+                    name: performance.artist.name,
+                };
+            }
+
+            updatedFestival.performances.push({
+                id: performance.id || generatePerformanceId(updatedFestival.name),
+                artist,
+                startTime: performance.startTime,
+                endTime: performance.endTime,
+                stage: performance.stage,
+                day: performance.day || 1,
+            });
+        });
 
         const savedFestival = await festivalRepo.saveFestival(updatedFestival);
 

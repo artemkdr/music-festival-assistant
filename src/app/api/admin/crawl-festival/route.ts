@@ -43,6 +43,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
         // Save to database if requested and crawl was successful
         if (!!festival) {
             try {
+                // generate a unique festival ID based on metadata
                 festival.id = generateFestivalId({
                     name: festival.name,
                     startDate: festival.startDate,

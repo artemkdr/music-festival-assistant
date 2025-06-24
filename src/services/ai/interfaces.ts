@@ -140,8 +140,8 @@ export interface IAIServiceFactory {
  * Musical AI service interface
  */
 export interface IMusicalAIService {
-    scrapeFestivalLineup(inputs: string[]): Promise<Festival>;
-    getArtistDetails(inputs: string[]): Promise<Artist>;
+    generateFestival(inputs: string[]): Promise<Festival>;
+    generateArtist(inputs: string[]): Promise<Artist>;
     generateRecommendations({
         userPreferences,
         availableArtists,

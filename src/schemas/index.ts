@@ -74,7 +74,6 @@ export const UpdateArtistSchema = ArtistSchema.pick({
 // Performance schema
 export const PerformanceSchema = z.object({
     id: z.string().min(1),
-    artistId: z.string().min(1),
     artist: ArtistSchema,
     startTime: z.string().datetime(),
     endTime: z.string().datetime(),
@@ -109,6 +108,7 @@ export const FestivalShortSchema = FestivalSchema.pick({
 }).extend({
     performances: z.array(
         PerformanceSchema.pick({
+            id: true,
             artist: true,
             startTime: true,
             endTime: true,
@@ -129,8 +129,22 @@ export const UpdateFestivalSchema = FestivalSchema.pick({
     endDate: true,
     website: true,
     imageUrl: true,
-    stages: true,
-    performances: true,
+}).extend({
+    performances: z.array(
+        PerformanceSchema.pick({
+            id: true,
+            startTime: true,
+            endTime: true,
+            stage: true,
+            day: true,
+        }).extend({
+            artist: ArtistSchema.pick({
+                name: true,
+            }).extend({
+                id: z.string().optional(), // Optional for new artists
+            }),
+        })
+    ),
 });
 
 // User preferences schema

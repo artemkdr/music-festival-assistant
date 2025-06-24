@@ -11,13 +11,17 @@ import { z } from 'zod';
 export type Artist = z.infer<typeof ArtistSchema>;
 
 export const generateArtistId = (): string => {
-    return `artist-${Math.random().toString(36).substring(2, 15)}-${Date.now()}`;
+    return `artist-${Math.random().toString(36).substring(2, 15)}}`;
 };
 
 /**
  * Represents a performance slot at a festival
  */
 export type Performance = z.infer<typeof PerformanceSchema>;
+
+export const generatePerformanceId = (festivalName: string) => {
+    return `performance-${normalizeName(festivalName)}-${Math.random().toString(36).substring(2, 15)}`;
+};
 
 /**
  * Represents a music festival
