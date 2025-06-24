@@ -2,10 +2,10 @@
  * Dependency injection container
  * Central place to configure and wire up all services following SOLID principles
  */
-import { getAIConfig, validateAIConfig } from '@/lib/ai-config';
+import { getAIConfig, validateAIConfig } from '@/config/ai-config';
 import { createLogger, type ILogger } from '@/lib/logger';
 import type { IArtistRepository, IFestivalRepository } from '@/repositories/interfaces';
-import { LocalJsonArtistRepository, LocalJsonFestivalRepository } from '@/repositories/local-json-repositories';
+import { LocalJsonArtistRepository, LocalJsonFestivalRepository } from '@/repositories/providers/local';
 import type { IAIService } from '@/services/ai';
 import { AIServiceFactory } from '@/services/ai';
 import { IMusicalAIService } from '@/services/ai/interfaces';

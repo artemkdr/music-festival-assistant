@@ -1,7 +1,7 @@
 /**
  * AI-enhanced festival discovery endpoint
  */
-import { container } from '@/lib/container';
+import { container } from '@/lib/di-container';
 import { FestivalDiscoveryRequestSchema } from '@/schemas';
 import type { UserPreferences } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';

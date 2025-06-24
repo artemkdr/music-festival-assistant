@@ -3,7 +3,7 @@
  * GET /api/admin/festivals/[id] - Get festival by ID
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import { Artist, Festival, generateArtistId, generatePerformanceId, Performance, UpdateFestivalSchema } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';

@@ -2,7 +2,7 @@
  * Admin endpoint for crawling festival websites
  * This endpoint is for admin use only to add new festivals to the system
  */
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/middleware/auth-middleware';
 import type { User } from '@/services/auth/interfaces';
 import { NextRequest, NextResponse } from 'next/server';
@@ -36,10 +36,10 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
             requestedBy: user.id,
         });
 
-        // Save to database if requested and crawl was successful        
+        // Save to database if requested and crawl was successful
         try {
             const festival = await festivalService.createFestival({
-                urls: validatedRequest.urls
+                urls: validatedRequest.urls,
             });
             logger.info('Festival created', {
                 festivalId: festival.id,
@@ -70,7 +70,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
                     saveError: saveError instanceof Error ? saveError.message : 'Unknown save error',
                 },
             });
-        }    
+        }
     } catch (error) {
         logger.error('Admin festival crawl failed', error instanceof Error ? error : new Error(String(error)));
 

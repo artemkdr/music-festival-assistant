@@ -2,7 +2,7 @@
  * Admin endpoint for crawling artist data
  * Accepts a festivalId or a list of artist names, crawls missing artists, and saves them to the repository.
  */
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/middleware/auth-middleware';
 import { generateArtistId } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';

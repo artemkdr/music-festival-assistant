@@ -1,7 +1,7 @@
 /**
  * Authentication register endpoint
  */
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

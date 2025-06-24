@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 
 export async function GET(request: NextRequest) {
     const logger = DIContainer.getInstance().getLogger();

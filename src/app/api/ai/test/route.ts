@@ -1,8 +1,8 @@
 /**
  * AI service status and testing endpoint
  */
-import { getAIConfigStatus } from '@/lib/ai-config';
-import { container } from '@/lib/container';
+import { getAIConfigStatus } from '@/config/ai-config';
+import { container } from '@/lib/di-container';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

@@ -2,7 +2,7 @@
  * Authentication middleware for API routes
  */
 import { NextRequest } from 'next/server';
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import type { User } from '@/services/auth/interfaces';
 
 /**

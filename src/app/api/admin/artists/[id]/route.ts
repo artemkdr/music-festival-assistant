@@ -3,7 +3,7 @@
  * GET /api/admin/artists/[id] - Get artist by ID
  * PUT /api/admin/artists/[id] - Update artist by ID
  */
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import { UpdateArtistSchema } from '@/schemas';
 import { Artist } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';

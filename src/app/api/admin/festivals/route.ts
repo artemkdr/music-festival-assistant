@@ -3,7 +3,7 @@
  * GET /api/admin/festivals - Get all festivals
  */
 import { requireAdmin } from '@/middleware/auth-middleware';
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import { NextResponse } from 'next/server';
 
 export const GET = requireAdmin(async (): Promise<Response> => {

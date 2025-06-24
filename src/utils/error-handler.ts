@@ -2,36 +2,26 @@
  * @fileoverview Error handling utilities and middleware.
  * @author github/artemkdr
  */
-
 import { ILogger } from '@/lib/logger';
-import { ICircuitBreaker, IErrorHandler, IRetryHandler } from '@/types/error-types';
+export interface IErrorHandler {
+    handleAPIError(error: unknown, service: string, operation: string): never;
+    safeExecute<T>(operation: () => Promise<T>, operationName: string, defaultValue?: T): Promise<T | undefined>;
+    formatError(error: Error): { message: string; type: string; details?: unknown };
+}
+
+export interface IRetryHandler {
+    execute<T>(operation: () => Promise<T>, operationName: string, shouldRetry?: (error: Error) => boolean): Promise<T>;
+}
+
+export interface ICircuitBreaker {
+    execute<T>(operation: () => Promise<T>, operationName: string): Promise<T>;
+    getState(): 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+    getFailureCount(): number;
+}
 
 /**
  * Custom error classes for specific error types.
  */
-export class TranscriptionError extends Error {
-    constructor(
-        message: string,
-        public readonly recordingId?: string,
-        public readonly originalError?: Error
-    ) {
-        super(message);
-        this.name = 'TranscriptionError';
-    }
-}
-
-export class StorageError extends Error {
-    constructor(
-        message: string,
-        public readonly fileName?: string,
-        public readonly storageType?: string,
-        public readonly originalError?: Error
-    ) {
-        super(message);
-        this.name = 'StorageError';
-    }
-}
-
 export class APIError extends Error {
     constructor(
         message: string,
@@ -186,30 +176,6 @@ export class ErrorHandler implements IErrorHandler {
     }
 
     /**
-     * Handle transcription-specific errors.
-     */
-    handleTranscriptionError(error: unknown, recordingId: string): never {
-        if (error instanceof TranscriptionError) {
-            throw error;
-        }
-
-        const message = typeof error === 'object' && error && 'message' in error ? (error as { message: string }).message : 'Unknown transcription error';
-        throw new TranscriptionError(`Transcription failed for recording ${recordingId}: ${message}`, recordingId, error instanceof Error ? error : undefined);
-    }
-
-    /**
-     * Handle storage-specific errors.
-     */
-    handleStorageError(error: unknown, fileName: string, storageType: string): never {
-        if (error instanceof StorageError) {
-            throw error;
-        }
-
-        const message = typeof error === 'object' && error && 'message' in error ? (error as { message: string }).message : 'Unknown storage error';
-        throw new StorageError(`Storage operation failed for ${fileName}: ${message}`, fileName, storageType, error instanceof Error ? error : undefined);
-    }
-
-    /**
      * Safely handle promises with error logging.
      */
     async safeExecute<T>(operation: () => Promise<T>, operationName: string, defaultValue?: T): Promise<T | undefined> {
@@ -225,22 +191,6 @@ export class ErrorHandler implements IErrorHandler {
      * Format error for user-friendly display.
      */
     formatError(error: Error): { message: string; type: string; details?: unknown } {
-        if (error instanceof TranscriptionError) {
-            return {
-                message: `Transcription failed${error.recordingId ? ` for recording ${error.recordingId}` : ''}`,
-                type: 'transcription',
-                details: { recordingId: error.recordingId },
-            };
-        }
-
-        if (error instanceof StorageError) {
-            return {
-                message: `Storage operation failed${error.fileName ? ` for file ${error.fileName}` : ''}`,
-                type: 'storage',
-                details: { fileName: error.fileName, storageType: error.storageType },
-            };
-        }
-
         if (error instanceof APIError) {
             return {
                 message: `API error${error.service ? ` from ${error.service}` : ''}`,

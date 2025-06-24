@@ -2,7 +2,7 @@
  * Artist performances API endpoint
  * GET /api/admin/artists/[id]/performances - Get festivals where this artist performs
  */
-import { DIContainer } from '@/lib/container';
+import { DIContainer } from '@/lib/di-container';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
