@@ -42,6 +42,14 @@ export interface AuthResponse {
     refreshToken?: string;
 }
 
+export interface SpotifySearchResult {
+    id: string;
+    name: string;
+    genres?: string[];
+    images?: { url: string }[];
+    popularity?: number;
+}
+
 /**
  * API client class
  */
@@ -275,7 +283,7 @@ export class ApiClient {
     /**
      * Search Spotify for artists by name (calls /api/ai/spotify-artist-search)
      */
-    async searchSpotifyArtists(query: string): Promise<any[]> {
+    async searchSpotifyArtists(query: string): Promise<SpotifySearchResult[]> {
         const res = await fetch(`/api/ai/spotify-artist-search?q=${encodeURIComponent(query)}`);
         if (!res.ok) throw new Error('Failed to search Spotify');
         const data = await res.json();

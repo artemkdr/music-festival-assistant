@@ -6,7 +6,8 @@
 
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { apiClient } from '@/lib/api/client';
+import { apiClient, SpotifySearchResult } from '@/lib/api/client';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -92,10 +93,9 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         stage: '',
         day: 1,
     });
-    const [isCreatingArtist, setIsCreatingArtist] = useState(false);
 
     // --- Spotify Search State and Logic ---
-    const [spotifySearchResults, setSpotifySearchResults] = useState<any[]>([]);
+    const [spotifySearchResults, setSpotifySearchResults] = useState<SpotifySearchResult[]>([]);
     const [isSpotifySearching, setIsSpotifySearching] = useState(false);
     const [spotifySearchError, setSpotifySearchError] = useState<string | null>(null);
 
@@ -296,14 +296,14 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         try {
             const artists = await apiClient.searchSpotifyArtists(query);
             setSpotifySearchResults(artists);
-        } catch (err: any) {
-            setSpotifySearchError(err.message || 'Spotify search failed');
+        } catch {
+            setSpotifySearchError('Spotify search failed');
         } finally {
             setIsSpotifySearching(false);
         }
     };
 
-    const handleSelectSpotifyArtist = (artist: any) => {
+    const handleSelectSpotifyArtist = (artist: SpotifySearchResult) => {
         setPerformanceFormData(prev => ({
             ...prev,
             artistName: artist.name,
@@ -558,9 +558,9 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                     <div className="mt-2 bg-white border rounded shadow p-2 max-h-48 overflow-y-auto">
                                                         <div className="text-xs text-gray-500 mb-1">Select from Spotify results:</div>
                                                         <ul>
-                                                            {spotifySearchResults.map((artist: any) => (
+                                                            {spotifySearchResults.map((artist: SpotifySearchResult) => (
                                                                 <li key={artist.id} className="py-1 flex items-center border-b last:border-b-0">
-                                                                    {artist.images && artist.images[0] && <img src={artist.images[0].url} alt={artist.name} className="w-8 h-8 rounded mr-2" />}
+                                                                    {artist.images && artist.images[0] && <Image src={artist.images[0].url} alt={artist.name} className="w-8 h-8 rounded mr-2" />}
                                                                     <button type="button" className="text-left flex-1 hover:underline" onClick={() => handleSelectSpotifyArtist(artist)}>
                                                                         <span className="font-medium">{artist.name}</span>
                                                                         {artist.genres && artist.genres.length > 0 && <span className="ml-2 text-xs text-gray-500">({artist.genres.join(', ')})</span>}
@@ -698,7 +698,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                                 >
                                                                     <div>
                                                                         <p className="font-semibold">{artist.name}</p>
-                                                                        {artist.genre && <p className="text-sm text-gray-600">{artist.genre.join(', ')}</p>}
+                                                                        {artist.genres && <p className="text-sm text-gray-600">{artist.genres.join(', ')}</p>}
                                                                     </div>
                                                                     <span className="text-gray-500 text-sm">{artist.popularity}</span>
                                                                 </li>
