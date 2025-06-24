@@ -78,8 +78,11 @@ Important:
         // Create a "loose" version of ArtistSchema for AI output validation:
         // - Remove id, streamingLinks, popularity fields, because anyway AI generates fakes
         // Clone the base schema and override specific fields
-        const looseArtistSchema = ArtistSchema.omit({ 
-            id: true, popularity: true, streamingLinks: true, mappingIds: true 
+        const looseArtistSchema = ArtistSchema.omit({
+            id: true,
+            popularity: true,
+            streamingLinks: true,
+            mappingIds: true,
         });
 
         const result = await this.aiService.generateObject<Artist>({
