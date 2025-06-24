@@ -10,15 +10,17 @@ import type { IAIService } from '@/services/ai';
 import { AIServiceFactory } from '@/services/ai';
 import { IMusicalAIService } from '@/services/ai/interfaces';
 import { MusicalAIService } from '@/services/ai/musical-ai-service';
+import { ArtistService, IArtistService } from '@/services/artist-service';
 import { AuthService } from '@/services/auth/auth-service';
 import { DummyAuthProvider } from '@/services/auth/dummy-auth-provider';
 import type { IAuthService } from '@/services/auth/interfaces';
 import { ArtistCrawlerService } from '@/services/crawler/artist-crawler-service';
 import { FestivalCrawlerService } from '@/services/crawler/festival-crawler-service';
 import type { IArtistCrawlerService, IFestivalCrawlerService } from '@/services/crawler/interfaces';
+import { FestivalService, IFestivalService } from '@/services/festival-service';
 import type { IRecommendationService } from '@/services/interfaces';
 import { RecommendationService } from '@/services/recommendation-service';
-import { SpotifyApiService } from '@/services/spotify/spotify-api-service';
+import { SpotifyService } from '@/services/spotify/spotify-service';
 
 /**
  * Dependency injection container class
@@ -30,6 +32,8 @@ export class DIContainer {
     private _logger: ILogger | null = null;
     private _aiService: IAIService | null = null;
     private _musicalAIService: IMusicalAIService | null = null;
+    private _artistService: IArtistService | null = null;
+    private _festivalService: IFestivalService | null = null;
     private _festivalCrawlerService: IFestivalCrawlerService | null = null;
     private _festivalRepository: IFestivalRepository | null = null;
     private _artistRepository: IArtistRepository | null = null;
@@ -55,6 +59,34 @@ export class DIContainer {
             this._logger = createLogger();
         }
         return this._logger;
+    }
+
+    /**
+     * Get artist service instance
+     */
+    public getArtistService(): IArtistService {
+        if (!this._artistService) {
+            const logger = this.getLogger();
+            const artistRepository = this.getArtistRepository();
+            const artistCrawlerService = this.getArtistCrawlerService();
+            this._artistService = new ArtistService(artistRepository, artistCrawlerService, logger);
+            logger.info('Artist service initialized');
+        }
+        return this._artistService;
+    }
+
+    /**
+     * Get festival service instance
+     */
+    public getFestivalService(): IFestivalService {
+        if (!this._festivalService) {
+            const logger = this.getLogger();
+            const festivalRepository = this.getFestivalRepository();
+            const festivalCrawlerService = this.getFestivalCrawlerService();
+            this._festivalService = new FestivalService(festivalRepository, festivalCrawlerService, logger);
+            logger.info('Festival service initialized');
+        }
+        return this._festivalService;
     }
 
     /**
@@ -145,7 +177,7 @@ export class DIContainer {
             if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
                 throw new Error('Spotify client ID and secret must be set in environment variables');
             }
-            const spotifyApi = new SpotifyApiService(logger, process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
+            const spotifyApi = new SpotifyService(logger, process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
             const aiService = this.getMusicalAIService();
             this._artistCrawlerService = new ArtistCrawlerService(logger, spotifyApi, aiService!);
             logger.info('Artist crawler service initialized');
@@ -169,11 +201,11 @@ export class DIContainer {
     /**
      * Get Spotify API service
      */
-    public getSpotifyApiService(): SpotifyApiService {
+    public getSpotifyService(): SpotifyService {
         if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
             throw new Error('Spotify client ID and secret must be set in environment variables');
         }
-        return new SpotifyApiService(this.getLogger(), process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
+        return new SpotifyService(this.getLogger(), process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
     }
 
     /**

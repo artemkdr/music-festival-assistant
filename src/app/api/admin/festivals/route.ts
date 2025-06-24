@@ -9,13 +9,12 @@ import { NextResponse } from 'next/server';
 export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const festivalRepo = container.getFestivalRepository();
+    const festivalService = container.getFestivalService();
 
     try {
         logger.info('Admin festivals list request received');
 
-        const festivals = await festivalRepo.getAllFestivals();
-
+        const festivals = await festivalService.getAllFestivals();
         return NextResponse.json({
             status: 'success',
             message: 'Festivals retrieved successfully',

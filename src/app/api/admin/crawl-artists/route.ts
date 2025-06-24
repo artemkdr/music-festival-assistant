@@ -2,8 +2,8 @@
  * Admin endpoint for crawling artist data
  * Accepts a festivalId or a list of artist names, crawls missing artists, and saves them to the repository.
  */
-import { requireAdmin } from '@/middleware/auth-middleware';
 import { DIContainer } from '@/lib/container';
+import { requireAdmin } from '@/middleware/auth-middleware';
 import { generateArtistId } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -16,10 +16,9 @@ const CrawlArtistsRequestSchema = z.object({
 
 export const POST = requireAdmin(async (request: NextRequest): Promise<Response> => {
     const container = DIContainer.getInstance();
+    const artistService = container.getArtistService();
+    const festivalService = container.getFestivalService();
     const logger = container.getLogger();
-    const artistRepo = container.getArtistRepository();
-    const festivalRepo = container.getFestivalRepository();
-    const artistCrawler = container.getArtistCrawlerService();
 
     try {
         logger.info('Admin artist crawl request received');
@@ -28,7 +27,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
 
         let artistNames: string[] = [];
         if (validated.festivalId) {
-            const festival = await festivalRepo.getFestivalById(validated.festivalId);
+            const festival = await festivalService.getFestivalById(validated.festivalId);
             if (!festival) {
                 return NextResponse.json(
                     {
@@ -59,21 +58,19 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
             try {
                 let artistId = generateArtistId();
 
-                const existing = await artistRepo.searchArtistsByName(name);
-                if (existing.length > 0) {
-                    artistId = existing[0]!.id; // Use the first existing artist's ID
+                const existing = await artistService.searchArtistByName(name);
+                if (existing) {
+                    artistId = existing.id; // Use the first existing artist's ID
                     results.push({ name, status: 'exists' });
                     if (validated.force === false) {
                         continue;
                     }
+                    await artistService.enrichArtist(artistId);
+                } else {
+                    // crawls the artist by name
+                    await artistService.createArtist({ name });
                 }
-
-                // crawls the artist by name
-                const artist = await artistCrawler.crawlArtistByName(name);
                 results.push({ name, status: 'crawled' });
-                artist.id = artistId; // Ensure the artist has the correct ID
-                // Save the crawled artist to the repository
-                await artistRepo.saveArtist(artist);
             } catch (err) {
                 logger.error('Artist crawl failed', err instanceof Error ? err : new Error(String(err)));
                 results.push({ name, status: 'error', error: err instanceof Error ? err.message : String(err) });

@@ -4,8 +4,7 @@
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
 import { DIContainer } from '@/lib/container';
-import { UpdateFestivalSchema } from '@/schemas';
-import { Festival, generateArtistId, generatePerformanceId, Performance } from '@/schemas';
+import { Artist, Festival, generateArtistId, generatePerformanceId, Performance, UpdateFestivalSchema } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -17,13 +16,13 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
     const { id } = await context.params;
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const festivalRepo = container.getFestivalRepository();
-    const artistRepo = container.getArtistRepository();
+    const artistService = container.getArtistService();
+    const festivalService = container.getFestivalService();
 
     try {
         logger.info('Admin festival detail request received', { festivalId: id });
 
-        const festival = await festivalRepo.getFestivalById(id);
+        const festival = await festivalService.getFestivalById(id);
 
         if (!festival) {
             return NextResponse.json(
@@ -44,7 +43,7 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         const enrichedPerformances = await Promise.all(
             festival.performances.map(async performance => {
                 // Try to find the artist by name
-                const artistMatches = await artistRepo.searchArtistsByName(performance.artist.name);
+                const artistMatches = await artistService.searchArtistsByName(performance.artist.name);
 
                 if (artistMatches.length > 0) {
                     // Use the first exact match or best match
@@ -115,7 +114,8 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
     const { id } = await context.params;
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const festivalRepo = container.getFestivalRepository();
+    const festivalService = container.getFestivalService();
+    const artistService = container.getArtistService();
 
     try {
         logger.info('Admin festival update request received', { festivalId: id });
@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
         const validatedData = UpdateFestivalSchema.parse(body);
 
         // Check if festival exists
-        const existingFestival = await festivalRepo.getFestivalById(id);
+        const existingFestival = await festivalService.getFestivalById(id);
         if (!existingFestival) {
             return NextResponse.json(
                 {
@@ -156,18 +156,16 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
             stages: Array.from(stages), // Convert Set to Array
         };
         // fill performances with existing data, updating only the fields that are provided
-        validatedData.performances.forEach(async performance => {
+        for (const performance of existingFestival.performances) {
             // find existings artist by id or name
-            let artist = performance.artist.id
-                ? await container.getArtistRepository().getArtistById(performance.artist.id)
-                : await container.getArtistRepository().searchArtistByName(performance.artist.name);
+            let existingArtist: Artist | null = performance.artist.id ? await artistService.getArtistById(performance.artist.id) : await artistService.searchArtistByName(performance.artist.name);
             // if artist still not found, then we will crawl one
-            if (!artist) {
-                artist = await container.getArtistCrawlerService().crawlArtistByName(performance.artist.name);
+            if (!existingArtist) {
+                existingArtist = await artistService.createArtist({ name: performance.artist.name });
             }
             // if artist still not found, then create a new one
-            if (!artist) {
-                artist = {
+            if (!existingArtist) {
+                existingArtist = {
                     id: generateArtistId(),
                     name: performance.artist.name,
                 };
@@ -175,15 +173,15 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
 
             updatedFestival.performances.push({
                 id: performance.id || generatePerformanceId(updatedFestival.name),
-                artist,
+                artist: existingArtist,
                 startTime: performance.startTime,
                 endTime: performance.endTime,
                 stage: performance.stage,
                 day: performance.day || 1,
             });
-        });
+        }
 
-        const savedFestival = await festivalRepo.saveFestival(updatedFestival);
+        const savedFestival = await festivalService.saveFestival(updatedFestival);
 
         return NextResponse.json({
             status: 'success',

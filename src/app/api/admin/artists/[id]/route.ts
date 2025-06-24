@@ -17,13 +17,13 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     // Apply admin authentication manually since requireAdmin doesn't support route params properly
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const artistRepo = container.getArtistRepository();
+    const artistService = container.getArtistService();
     const { id } = await params;
 
     try {
         logger.info('Admin artist detail request received', { artistId: id });
 
-        const artist = await artistRepo.getArtistById(id);
+        const artist = await artistService.getArtistById(id);
 
         if (!artist) {
             return NextResponse.json(
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
 export async function PUT(request: NextRequest, { params }: RouteParams): Promise<Response> {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const artistRepo = container.getArtistRepository();
+    const artistService = container.getArtistService();
     const { id } = await params;
 
     try {
@@ -66,7 +66,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
         const validatedData = UpdateArtistSchema.parse(body);
 
         // Check if artist exists
-        const existingArtist = await artistRepo.getArtistById(id);
+        const existingArtist = await artistService.getArtistById(id);
         if (!existingArtist) {
             return NextResponse.json(
                 {
@@ -88,7 +88,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
             },
         };
 
-        const savedArtist = await artistRepo.saveArtist(updatedArtist);
+        const savedArtist = await artistService.saveArtist(updatedArtist);
 
         return NextResponse.json({
             status: 'success',

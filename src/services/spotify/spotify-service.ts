@@ -31,7 +31,7 @@ interface SpotifyArtistResponse {
     description?: string; // Not provided by Spotify, but can be added later
 }
 
-export class SpotifyApiService {
+export class SpotifyService {
     private readonly baseUrl = 'https://api.spotify.com/v1';
     private accessToken: string | null = null;
     private tokenExpiresAt: number = 0;
@@ -87,6 +87,27 @@ export class SpotifyApiService {
     }
 
     /**
+     * Compute a match score between the search query and the artist's name.
+     * Higher score means better match. Exact match gets highest score.
+     * @param queryName - The search query
+     * @param artistName - The artist's name from Spotify
+     * @returns number - match score
+     */
+    private getArtistMatchScore(queryName: string, artistName: string): number {
+        const queryWords = queryName.toLowerCase().split(/\s+/);
+        const nameWords = artistName.toLowerCase().split(/\s+/);
+        // Exact match gets highest score
+        if (artistName.toLowerCase() === queryName.toLowerCase()) return 10000;
+        // Count how many words from query are present in artist name
+        let matchCount = 0;
+        for (const word of queryWords) {
+            if (nameWords.includes(word)) matchCount++;
+        }
+        // Partial match: more words matched = higher score
+        return matchCount * 10 - Math.abs(nameWords.length - queryWords.length);
+    }
+
+    /**
      * Search for an artist by name using Spotify API
      */
     async searchArtistByName(name: string): Promise<SpotifyArtist | null> {
@@ -100,11 +121,16 @@ export class SpotifyApiService {
             throw new Error(`Spotify API error: ${res.status} ${res.statusText} - ${errorText}`);
         }
         const data = await res.json();
-        // sort by exact match first, then popularity
+        // Sort by match score, then by exact match, then by popularity
         data.artists.items.sort((a: SpotifyArtistResponse, b: SpotifyArtistResponse) => {
-            if (a.name.toLowerCase() === name.toLowerCase()) return -1; // exact match first
-            if (b.name.toLowerCase() === name.toLowerCase()) return 1; // exact match second
-            return b.popularity - a.popularity; // then by popularity
+            const scoreA = this.getArtistMatchScore(name, a.name);
+            const scoreB = this.getArtistMatchScore(name, b.name);
+            if (scoreA !== scoreB) return scoreB - scoreA; // higher score first
+            // If scores are equal, prefer exact match
+            if (a.name.toLowerCase() === name.toLowerCase()) return -1;
+            if (b.name.toLowerCase() === name.toLowerCase()) return 1;
+            // Otherwise, sort by popularity
+            return b.popularity - a.popularity;
         });
         // return the first artist that matches
         const artist = data.artists?.items?.[0];

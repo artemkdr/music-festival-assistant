@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
 
         if (validatedData.festivalId) {
             // Get festival data
-            const festivalRepository = container().getFestivalRepository();
-            const festival = await festivalRepository.getFestivalById(validatedData.festivalId);
+            const festivalService = container().getFestivalService();
+            const festival = await festivalService.getFestivalById(validatedData.festivalId);
 
             if (!festival) {
                 return NextResponse.json(

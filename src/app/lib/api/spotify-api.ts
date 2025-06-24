@@ -5,7 +5,7 @@ export class SpotifyApi {
     constructor(private client: ApiClient) {}
 
     async searchArtists(query: string): Promise<ApiResponse<SpotifySearchResult[]>> {
-        return this.client.request<SpotifySearchResult[]>(`/api/spotify/search?q=${encodeURIComponent(query)}`);
+        return this.client.request<SpotifySearchResult[]>(`/spotify/search?q=${encodeURIComponent(query)}`);
     }
 }
 

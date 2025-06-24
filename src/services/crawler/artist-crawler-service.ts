@@ -4,13 +4,13 @@
 import type { ILogger } from '@/lib/logger';
 import { IMusicalAIService } from '@/services/ai/interfaces';
 import { IArtistCrawlerService } from '@/services/crawler/interfaces';
-import { SpotifyApiService, SpotifyArtist } from '@/services/spotify/spotify-api-service';
+import { SpotifyService, SpotifyArtist } from '@/services/spotify/spotify-service';
 import { type Artist } from '@/schemas';
 
 export class ArtistCrawlerService implements IArtistCrawlerService {
     constructor(
         private readonly logger: ILogger,
-        private readonly spotifyApi: SpotifyApiService,
+        private readonly spotifyApi: SpotifyService,
         private readonly aiService: IMusicalAIService
     ) {}
 

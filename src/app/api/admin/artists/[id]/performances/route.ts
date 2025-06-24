@@ -12,14 +12,15 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams): Promise<Response> {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const festivalRepo = container.getFestivalRepository();
-    const artistRepo = container.getArtistRepository();
+    const artistService = container.getArtistService();
+    const festivalService = container.getFestivalService();
+
     const { id } = await params;
 
     try {
         logger.info('Artist performances request received', { artistId: id });
 
-        const artist = await artistRepo.getArtistById(id);
+        const artist = await artistService.getArtistById(id);
         if (!artist) {
             return NextResponse.json(
                 {
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
         }
 
         // Get all festivals and filter for ones that include this artist
-        const allFestivals = await festivalRepo.getAllFestivals();
+        const allFestivals = await festivalService.getAllFestivals();
         const performances = allFestivals
             .filter(festival => festival.performances.some(perf => perf.artist.id === artist.id || perf.artist.name.toLowerCase() === artist.name.toLowerCase()))
             .map(festival => {

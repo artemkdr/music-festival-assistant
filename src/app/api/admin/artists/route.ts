@@ -2,19 +2,19 @@
  * Artists API endpoints
  * GET /api/admin/artists - Get all artists
  */
-import { requireAdmin } from '@/middleware/auth-middleware';
 import { DIContainer } from '@/lib/container';
+import { requireAdmin } from '@/middleware/auth-middleware';
 import { NextResponse } from 'next/server';
 
 export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const artistRepo = container.getArtistRepository();
+    const artistService = container.getArtistService();
 
     try {
         logger.info('Admin artists list request received');
 
-        const artists = await artistRepo.getAllArtists();
+        const artists = await artistService.getAllArtists();
 
         return NextResponse.json({
             status: 'success',

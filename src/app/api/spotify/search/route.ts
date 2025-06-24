@@ -3,8 +3,8 @@ import { DIContainer } from '@/lib/container';
 
 export async function GET(request: NextRequest) {
     const logger = DIContainer.getInstance().getLogger();
-    const spotifyService = DIContainer.getInstance().getSpotifyApiService();
-    const query = request.nextUrl.searchParams.get('q');
+    const spotifyService = DIContainer.getInstance().getSpotifyService();
+    const query = request.nextUrl.searchParams.get('q')?.trim();
     if (!query) {
         return NextResponse.json({ status: 'error', message: 'Missing query parameter' }, { status: 400 });
     }
