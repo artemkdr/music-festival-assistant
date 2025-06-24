@@ -13,9 +13,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
     constructor(
         private readonly logger: ILogger,
         private readonly aiService?: IMusicalAIService | null
-    ) {
-        this.logger.info('Festival crawler service initialized');
-    }
+    ) {}
     /**
      * Crawl festival using a list of URLs (HTML, PDF, etc.) and extract lineup data via AI service
      * @param urls List of URLs to crawl (HTML, PDF, etc.)

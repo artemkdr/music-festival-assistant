@@ -54,11 +54,6 @@ export const ArtistSchema = z.object({
         .optional(),
 });
 
-// Simplified artist schema for AI responses
-export const ArtistShortSchema = ArtistSchema.pick({
-    name: true,
-});
-
 // Artist update schema (for PUT requests)
 export const UpdateArtistSchema = ArtistSchema.pick({
     name: true,
@@ -77,5 +72,5 @@ export const UpdateArtistSchema = ArtistSchema.pick({
 export type Artist = z.infer<typeof ArtistSchema>;
 
 export const generateArtistId = (): string => {
-    return `artist-${Math.random().toString(36).substring(2, 15)}}`;
+    return `artist-${Math.random().toString(36).substring(2, 15)}`;
 };

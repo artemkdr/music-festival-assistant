@@ -156,12 +156,15 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
             stages: Array.from(stages), // Convert Set to Array
         };
         // fill performances with existing data, updating only the fields that are provided
-        for (const performance of existingFestival.performances) {
+        for (const performance of validatedData.performances) {
             // find existings artist by id or name
             let existingArtist: Artist | null = performance.artist.id ? await artistService.getArtistById(performance.artist.id) : await artistService.searchArtistByName(performance.artist.name);
             // if artist still not found, then we will crawl one
             if (!existingArtist) {
-                existingArtist = await artistService.createArtist({ name: performance.artist.name });
+                existingArtist = await artistService.createArtist({
+                    name: performance.artist.name,
+                    festivalName: existingFestival.name,
+                });
             }
             // if artist still not found, then create a new one
             if (!existingArtist) {
@@ -177,7 +180,8 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
                 startTime: performance.startTime,
                 endTime: performance.endTime,
                 stage: performance.stage,
-                day: performance.day || 1,
+                // count day based on startTime and festival startDate if not provided
+                day: performance.day || (performance.startTime ? Math.ceil((new Date(performance.startTime).getTime() - new Date(updatedFestival.startDate).getTime()) / (1000 * 60 * 60 * 24)) : 1),
             });
         }
 

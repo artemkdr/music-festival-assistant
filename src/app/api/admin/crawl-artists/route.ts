@@ -4,7 +4,7 @@
  */
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/middleware/auth-middleware';
-import { generateArtistId } from '@/schemas';
+import { Festival, generateArtistId } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -26,8 +26,9 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         const validated = CrawlArtistsRequestSchema.parse(body);
 
         let artistNames: string[] = [];
+        let festival: Festival | null = null;
         if (validated.festivalId) {
-            const festival = await festivalService.getFestivalById(validated.festivalId);
+            festival = await festivalService.getFestivalById(validated.festivalId);
             if (!festival) {
                 return NextResponse.json(
                     {
@@ -65,10 +66,13 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     if (validated.force === false) {
                         continue;
                     }
-                    await artistService.enrichArtist(artistId);
+                    await artistService.enrichArtist(artistId, festival ? `Festival: ${festival.name}` : undefined);
                 } else {
                     // crawls the artist by name
-                    await artistService.createArtist({ name });
+                    await artistService.createArtist({
+                        name,
+                        ...(festival ? { festivalName: festival.name } : {}),
+                    });
                 }
                 results.push({ name, status: 'crawled' });
             } catch (err) {

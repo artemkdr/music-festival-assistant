@@ -87,24 +87,26 @@ export class SpotifyService {
     }
 
     /**
-     * Compute a match score between the search query and the artist's name.
-     * Higher score means better match. Exact match gets highest score.
+     * Compute a normalized match score between the search query and the artist's name.
+     * 1 = exact match, 0 = no match, partial = ratio of matching words.
      * @param queryName - The search query
      * @param artistName - The artist's name from Spotify
-     * @returns number - match score
+     * @returns number - match score between 0 and 1
      */
     private getArtistMatchScore(queryName: string, artistName: string): number {
-        const queryWords = queryName.toLowerCase().split(/\s+/);
-        const nameWords = artistName.toLowerCase().split(/\s+/);
-        // Exact match gets highest score
-        if (artistName.toLowerCase() === queryName.toLowerCase()) return 10000;
-        // Count how many words from query are present in artist name
+        const query = queryName.trim().toLowerCase();
+        const name = artistName.trim().toLowerCase();
+        if (!query || !name) return 0;
+        if (name === query) return 1;
+        const queryWords = query.split(/\s+/);
+        const nameWords = name.split(/\s+/);
+        const totalWords = Math.max(queryWords.length, nameWords.length);
+        if (totalWords === 0) return 0;
         let matchCount = 0;
         for (const word of queryWords) {
             if (nameWords.includes(word)) matchCount++;
         }
-        // Partial match: more words matched = higher score
-        return matchCount * 10 - Math.abs(nameWords.length - queryWords.length);
+        return matchCount > 0 ? matchCount / totalWords : 0;
     }
 
     /**
@@ -121,21 +123,41 @@ export class SpotifyService {
             throw new Error(`Spotify API error: ${res.status} ${res.statusText} - ${errorText}`);
         }
         const data = await res.json();
+        const normalizedName = this.normalize(name);
         // Sort by match score, then by exact match, then by popularity
         data.artists.items.sort((a: SpotifyArtistResponse, b: SpotifyArtistResponse) => {
-            const scoreA = this.getArtistMatchScore(name, a.name);
-            const scoreB = this.getArtistMatchScore(name, b.name);
+            const scoreA = this.getArtistMatchScore(normalizedName, this.normalize(a.name));
+            const scoreB = this.getArtistMatchScore(normalizedName, this.normalize(b.name));
             if (scoreA !== scoreB) return scoreB - scoreA; // higher score first
             // If scores are equal, prefer exact match
-            if (a.name.toLowerCase() === name.toLowerCase()) return -1;
-            if (b.name.toLowerCase() === name.toLowerCase()) return 1;
+            if (this.normalize(a.name) === normalizedName) return -1;
+            if (this.normalize(b.name) === normalizedName) return 1;
             // Otherwise, sort by popularity
             return b.popularity - a.popularity;
         });
         // return the first artist that matches
         const artist = data.artists?.items?.[0];
         if (!artist) return null;
+        // if found artist has a matching score less than 50%, return null
+        const matchScore = this.getArtistMatchScore(normalizedName, this.normalize(artist.name));
+        if (matchScore <= 0.5) {
+            this.logger.warn('No good match found for artist', {
+                searchedName: normalizedName,
+                foundName: this.normalize(artist.name),
+                matchScore,
+            });
+            return null;
+        }
         return this.mapSpotifyArtist(artist);
+    }
+
+    private normalize(name: string): string {
+        return name
+            .normalize('NFD') // Normalize to decompose diacritics
+            .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+            .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+            .toLowerCase()
+            .trim();
     }
 
     /**

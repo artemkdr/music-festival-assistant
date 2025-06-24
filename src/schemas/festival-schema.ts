@@ -1,8 +1,7 @@
 import { PerformanceSchema } from '@/schemas/performance-schema';
-import { ArtistSchema, ArtistShortSchema } from '@/schemas/artist-schema';
-import { z } from 'zod';
 import { UserPreferencesSchema } from '@/schemas/user-preferences-schema';
 import { normalizeName } from '@/utils/normalize-name';
+import { z } from 'zod';
 
 // Festival schema
 export const FestivalSchema = z.object({
@@ -38,7 +37,9 @@ export const FestivalShortSchema = FestivalSchema.pick({
             stage: true,
             day: true,
         }).extend({
-            artist: ArtistShortSchema,
+            artist: z.object({
+                name: z.string().min(1).max(200),
+            }),
         })
     ),
 });
@@ -61,9 +62,8 @@ export const UpdateFestivalSchema = FestivalSchema.pick({
             stage: true,
             day: true,
         }).extend({
-            artist: ArtistSchema.pick({
-                name: true,
-            }).extend({
+            artist: z.object({
+                name: z.string().min(1).max(200),
                 id: z.string().optional(), // Optional for new artists
             }),
         })

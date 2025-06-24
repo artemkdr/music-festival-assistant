@@ -74,9 +74,17 @@ Important:
             temperature: 0.8,
         };
         this.addFileContentToRequest(aiRequest, inputs);
+
+        // Create a "loose" version of ArtistSchema for AI output validation:
+        // - Remove id, streamingLinks, popularity fields, because anyway AI generates fakes
+        // Clone the base schema and override specific fields
+        const looseArtistSchema = ArtistSchema.extend({
+            description: z.string(), // removes length constraints
+        }).omit({ id: true, popularity: true, streamingLinks: true, mappingIds: true });
+
         const result = await this.aiService.generateObject<Artist>({
             ...aiRequest,
-            schema: ArtistSchema,
+            schema: looseArtistSchema,
         });
         // we have to intervent here and generate our own ID
         result.id = generateArtistId();
@@ -107,8 +115,11 @@ Important:
         this.addFileContentToRequest(aiRequest, [`User preferences: ${JSON.stringify(userPreferences)}`, `Available artists: ${JSON.stringify(availableArtists)}`]);
         const result = await this.aiService.generateObject<z.infer<typeof RecommentationsAIResponseSchema>>({
             ...aiRequest,
-            schema: RecommentationsAIResponseSchema,
-        });
+            // remove score strict requirement for 0 to 1 range, AI can return any value
+            schema: RecommentationsAIResponseSchema.extend({
+                score: z.number()
+            }),
+        });        
         return result.recommendations;
     }
 

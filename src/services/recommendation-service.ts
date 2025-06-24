@@ -54,6 +54,7 @@ export class RecommendationService implements IRecommendationService {
             // Generate AI recommendations
             const aiRecommendations = await this.aiService.generateRecommendations({
                 userPreferences: {
+                    comment: userPreferences.comment,
                     genres: userPreferences.genres,
                     preferredArtists: userPreferences.preferredArtists || [],
                     dislikedArtists: userPreferences.dislikedArtists || [],

@@ -1,8 +1,7 @@
 'use client';
 
-import { Festival, festivalsApi } from '@/app/lib/api';
+import { Festival, festivalsApi, UserPreferences } from '@/app/lib/api';
 import { availableGenres } from '@/tests/mock-data';
-import type { UserPreferences } from '@/schemas';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -23,6 +22,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
     const [discoveryMode, setDiscoveryMode] = useState<'conservative' | 'balanced' | 'adventurous'>('balanced');
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [userNotes, setUserNotes] = useState('');
 
     // Load festivals on component mount
     useEffect(() => {
@@ -80,6 +80,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
         const userPreferences: UserPreferences = {
             genres: selectedGenres,
             discoveryMode,
+            comment: userNotes.trim().substring(0, 500) ?? undefined,
         };
 
         await onSubmit(selectedFestivalId, userPreferences);
@@ -257,6 +258,23 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                             </div>
                         ))}
                     </div>
+                </div>
+
+                {/* Additional Preferences (Free Text) */}
+                <div>
+                    <label htmlFor="user-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Preferences (optional)
+                    </label>
+                    <textarea
+                        id="user-notes"
+                        value={userNotes}
+                        maxLength={500}
+                        onChange={e => setUserNotes(e.target.value)}
+                        placeholder="Tell us anything else about your music taste, artists, or festival experience..."
+                        className="input w-full min-h-[80px] resize-y border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                        disabled={isLoading}
+                    />
+                    <p className="mt-1 text-sm text-gray-500">Add any extra info to help us personalize your recommendations</p>
                 </div>
 
                 {/* Submit Button */}

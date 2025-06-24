@@ -8,6 +8,11 @@ import * as path from 'path';
 export abstract class BaseJsonRepository {
     protected readonly dataDir: string;
 
+    /**
+     * In-memory cache for JSON file contents by filename
+     */
+    private jsonCache: Map<string, unknown[]> = new Map();
+
     constructor(
         protected readonly logger: ILogger,
         dataSubDir: string
@@ -28,20 +33,36 @@ export abstract class BaseJsonRepository {
     }
 
     /**
-     * Read JSON file
+     * Read JSON file with in-memory caching by filename
+     * @param filename - JSON file name
+     * @returns Parsed array of objects from JSON file
      */
     protected async readJsonFile<T>(filename: string): Promise<T[]> {
+        if (this.jsonCache.has(filename)) {
+            return this.jsonCache.get(filename) as T[];
+        }
         const filePath = path.join(this.dataDir, filename);
         try {
             const data = await fs.readFile(filePath, 'utf-8');
-            return JSON.parse(data) as T[];
+            const parsed = JSON.parse(data) as T[];
+            this.jsonCache.set(filename, parsed);
+            return parsed;
         } catch (error) {
             if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
                 // File doesn't exist, return empty array
+                this.jsonCache.set(filename, []);
                 return [];
             }
             throw error;
         }
+    }
+
+    /**
+     * Reset the cache for a specific JSON file by filename
+     * @param filename - JSON file name to clear from cache
+     */
+    protected resetJsonCache(filename: string): void {
+        this.jsonCache.delete(filename);
     }
 
     /**

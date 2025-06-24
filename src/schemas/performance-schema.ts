@@ -1,4 +1,3 @@
-import { ArtistSchema } from '@/schemas/artist-schema';
 import { normalizeName } from '@/utils/normalize-name';
 
 import { z } from 'zod';
@@ -6,7 +5,10 @@ import { z } from 'zod';
 // Performance schema
 export const PerformanceSchema = z.object({
     id: z.string().min(1),
-    artist: ArtistSchema,
+    artist: z.object({
+        name: z.string().min(1).max(200),
+        id: z.string().min(1),
+    }),
     startTime: z.string().datetime(),
     endTime: z.string().datetime(),
     stage: z.string().min(1),

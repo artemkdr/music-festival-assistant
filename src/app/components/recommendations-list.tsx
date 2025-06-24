@@ -1,7 +1,7 @@
 'use client';
 
+import { Festival, Recommendation } from '@/app/lib/api';
 import type { ReactElement } from 'react';
-import type { Festival, Recommendation } from '@/schemas';
 
 interface RecommendationsListProps {
     festival: Festival;

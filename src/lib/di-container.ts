@@ -57,6 +57,7 @@ export class DIContainer {
     public getLogger(): ILogger {
         if (!this._logger) {
             this._logger = createLogger();
+            this._logger.info('Logger initialized');
         }
         return this._logger;
     }
@@ -116,6 +117,7 @@ export class DIContainer {
             const aiService = this.getAIService();
             if (aiService) {
                 this._musicalAIService = new MusicalAIService(aiService);
+                this.getLogger().info('Musical AI service initialized');
             }
         }
         return this._musicalAIService;
@@ -140,6 +142,7 @@ export class DIContainer {
     public getFestivalRepository(): IFestivalRepository {
         if (!this._festivalRepository) {
             this._festivalRepository = new LocalJsonFestivalRepository(this.getLogger());
+            this.getLogger().info('Festival repository initialized');
         }
         return this._festivalRepository;
     }
@@ -150,6 +153,7 @@ export class DIContainer {
     public getArtistRepository(): IArtistRepository {
         if (!this._artistRepository) {
             this._artistRepository = new LocalJsonArtistRepository(this.getLogger());
+            this.getLogger().info('Artist repository initialized');
         }
         return this._artistRepository;
     }
@@ -163,6 +167,7 @@ export class DIContainer {
                 throw new Error('Musical AI service is required for recommendation service');
             }
             this._recommendationService = new RecommendationService(this.getLogger(), this.getMusicalAIService()!, this.getArtistRepository());
+            this.getLogger().info('Recommendation service initialized');
         }
         return this._recommendationService;
     }
@@ -205,6 +210,7 @@ export class DIContainer {
         if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
             throw new Error('Spotify client ID and secret must be set in environment variables');
         }
+        this.getLogger().info('Spotify service initialized');
         return new SpotifyService(this.getLogger(), process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
     }
 
@@ -212,6 +218,7 @@ export class DIContainer {
      * Reset all singletons (useful for testing)
      */
     public reset(): void {
+        this.getLogger().info('Resetting DI container singletons');
         this._logger = null;
         this._aiService = null;
         this._festivalRepository = null;
