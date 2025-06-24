@@ -1,4 +1,6 @@
 import { ArtistSchema } from '@/schemas/artist-schema';
+import { normalizeName } from '@/utils/normalize-name';
+
 import { z } from 'zod';
 
 // Performance schema
@@ -10,3 +12,12 @@ export const PerformanceSchema = z.object({
     stage: z.string().min(1),
     day: z.number().min(1).max(30),
 });
+
+/**
+ * Types from schemas
+ */
+export type Performance = z.infer<typeof PerformanceSchema>;
+
+export const generatePerformanceId = (festivalName: string) => {
+    return `performance-${normalizeName(festivalName)}-${Math.random().toString(36).substring(2, 15)}`;
+};

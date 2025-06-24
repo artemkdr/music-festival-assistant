@@ -3,7 +3,7 @@
  */
 
 import { RecommendationShortSchema } from '@/schemas';
-import { Artist, Festival, UserPreferences } from '@/types';
+import { Artist, Festival, UserPreferences } from '@/schemas';
 import { z, ZodSchema } from 'zod';
 
 /**

@@ -3,7 +3,7 @@
  */
 import { ArtistSchema, FestivalShortSchema, RecommendationShortSchema, RecommentationsAIResponseSchema } from '@/schemas';
 import type { AIRequest, IAIService, IMusicalAIService } from '@/services/ai/interfaces';
-import { Artist, Festival, generateArtistId, generateFestivalId, generatePerformanceId, UserPreferences } from '@/types';
+import { Artist, Festival, generateArtistId, generateFestivalId, generatePerformanceId, UserPreferences } from '@/schemas';
 import { z } from 'zod';
 
 export class MusicalAIService implements IMusicalAIService {

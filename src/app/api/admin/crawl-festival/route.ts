@@ -7,7 +7,7 @@ import { requireAdmin } from '@/middleware/auth-middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import type { User } from '@/services/auth/interfaces';
-import { generateFestivalId } from '@/types';
+import { generateFestivalId } from '@/schemas';
 
 /**
  * Request schema for festival crawling

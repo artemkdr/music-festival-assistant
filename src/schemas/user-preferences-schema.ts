@@ -13,3 +13,8 @@ export const UserPreferencesSchema = z.object({
         .optional(),
     discoveryMode: z.enum(['conservative', 'balanced', 'adventurous']),
 });
+
+/**
+ * Types from schemas
+ */
+export type UserPreferences = z.infer<typeof UserPreferencesSchema>;

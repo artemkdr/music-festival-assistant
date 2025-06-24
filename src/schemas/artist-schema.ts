@@ -70,3 +70,12 @@ export const UpdateArtistSchema = ArtistSchema.pick({
     socialLinks: true,
     popularity: true,
 });
+
+/**
+ * Types from schemas
+ */
+export type Artist = z.infer<typeof ArtistSchema>;
+
+export const generateArtistId = (): string => {
+    return `artist-${Math.random().toString(36).substring(2, 15)}}`;
+};

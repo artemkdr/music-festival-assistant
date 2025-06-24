@@ -9,3 +9,8 @@ export const CalendarEventSchema = z.object({
     location: z.string().min(1).max(200),
     url: z.string().url().optional(),
 });
+
+/**
+ * Types from schemas
+ */
+export type CalendarEvent = z.infer<typeof CalendarEventSchema>;

@@ -3,7 +3,7 @@
  */
 import type { ILogger } from '@/lib/logger';
 import { IMusicalAIService } from '@/services/ai/interfaces';
-import { type Festival } from '@/types';
+import { type Festival } from '@/schemas';
 import type { IFestivalCrawlerService } from './interfaces';
 
 /**

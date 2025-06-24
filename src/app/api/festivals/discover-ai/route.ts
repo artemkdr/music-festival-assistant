@@ -3,7 +3,7 @@
  */
 import { container } from '@/lib/container';
 import { FestivalDiscoveryRequestSchema } from '@/schemas';
-import type { UserPreferences } from '@/types';
+import type { UserPreferences } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**

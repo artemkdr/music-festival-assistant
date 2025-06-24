@@ -22,3 +22,8 @@ export const RecommendationShortSchema = z.object({
 export const RecommentationsAIResponseSchema = z.object({
     recommendations: z.array(RecommendationShortSchema),
 });
+
+/**
+ * Types from schemas
+ */
+export type Recommendation = z.infer<typeof RecommendationSchema>;

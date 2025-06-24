@@ -4,7 +4,7 @@
  */
 import type { ILogger } from '@/lib/logger';
 import { mockArtists, mockFestival, mockPerformances } from '@/lib/mock-data';
-import { generatePerformanceId, type Artist, type Festival, type Performance } from '@/types';
+import { generatePerformanceId, type Artist, type Festival, type Performance } from '@/schemas';
 import type { IArtistRepository, IFestivalRepository, IPerformanceRepository } from './interfaces';
 
 /**

@@ -2,6 +2,7 @@ import { PerformanceSchema } from '@/schemas/performance-schema';
 import { ArtistSchema, ArtistShortSchema } from '@/schemas/artist-schema';
 import { z } from 'zod';
 import { UserPreferencesSchema } from '@/schemas/user-preferences-schema';
+import { normalizeName } from '@/utils/normalize-name';
 
 // Festival schema
 export const FestivalSchema = z.object({
@@ -75,3 +76,13 @@ export const FestivalDiscoveryRequestSchema = z.object({
     festivalId: z.string().optional(),
     userPreferences: UserPreferencesSchema,
 });
+
+/**
+ * Types from schemas
+ */
+
+export type Festival = z.infer<typeof FestivalSchema>;
+
+export const generateFestivalId = (festival: { name: string; location: string; startDate: string; endDate: string }): string => {
+    return `festival-${normalizeName(festival.name)}-${normalizeName(festival.location)}-${new Date(festival.startDate).toISOString().split('T')[0]}`;
+};

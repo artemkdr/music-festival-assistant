@@ -5,7 +5,7 @@
  */
 import { DIContainer } from '@/lib/container';
 import { UpdateFestivalSchema } from '@/schemas';
-import { Festival, generateArtistId, generatePerformanceId, Performance } from '@/types';
+import { Festival, generateArtistId, generatePerformanceId, Performance } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 

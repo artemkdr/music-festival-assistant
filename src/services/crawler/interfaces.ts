@@ -2,7 +2,7 @@
  * Festival web crawler service interfaces
  */
 import { ParsedFestivalData } from '@/services/ai/schemas';
-import type { Artist, Festival } from '@/types';
+import type { Artist, Festival } from '@/schemas';
 
 /**
  * Raw festival data extracted from web pages

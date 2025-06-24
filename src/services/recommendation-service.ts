@@ -4,7 +4,7 @@
  */
 import type { ILogger } from '@/lib/logger';
 import { IMusicalAIService } from '@/services/ai/interfaces';
-import type { Festival, Recommendation, UserPreferences } from '@/types';
+import type { Festival, Recommendation, UserPreferences } from '@/schemas';
 import type { IRecommendationService } from './interfaces';
 import { IArtistRepository } from '@/repositories/interfaces';
 

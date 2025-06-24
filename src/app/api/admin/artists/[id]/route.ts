@@ -5,7 +5,7 @@
  */
 import { DIContainer } from '@/lib/container';
 import { UpdateArtistSchema } from '@/schemas';
-import { Artist } from '@/types';
+import { Artist } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 

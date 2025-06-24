@@ -2,7 +2,7 @@
  * Repository interfaces for data access layer
  * Following repository pattern for clean architecture
  */
-import type { Artist, Festival, Performance } from '@/types';
+import type { Artist, Festival, Performance } from '@/schemas';
 
 /**
  * Festival repository interface

@@ -3,7 +3,7 @@
  * Stores data as JSON files on disk for persistence
  */
 import type { ILogger } from '@/lib/logger';
-import { generatePerformanceId, type Artist, type Festival, type Performance } from '@/types';
+import { generatePerformanceId, type Artist, type Festival, type Performance } from '@/schemas';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { IArtistRepository, IFestivalRepository, IPerformanceRepository } from './interfaces';

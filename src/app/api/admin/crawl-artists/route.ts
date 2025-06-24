@@ -4,7 +4,7 @@
  */
 import { requireAdmin } from '@/middleware/auth-middleware';
 import { DIContainer } from '@/lib/container';
-import { generateArtistId } from '@/types';
+import { generateArtistId } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

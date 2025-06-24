@@ -2,7 +2,7 @@
  * Service interfaces for business logic layer
  * Following clean architecture principles with dependency injection
  */
-import type { CalendarEvent, Festival, Recommendation, UserPreferences } from '@/types';
+import type { CalendarEvent, Festival, Recommendation, UserPreferences } from '@/schemas';
 
 /**
  * Recommendation engine service interface

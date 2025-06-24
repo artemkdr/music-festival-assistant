@@ -1,11 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { FestivalDiscoveryForm } from '@/app/components/festival-discovery-form';
+import { LoadingSpinner } from '@/app/components/loading-spinner';
+import { RecommendationsList } from '@/app/components/recommendations-list';
+import { Festival, Recommendation, UserPreferences } from '@/schemas';
 import type { ReactElement } from 'react';
-import { FestivalDiscoveryForm } from '@/components/festival-discovery-form';
-import { RecommendationsList } from '@/components/recommendations-list';
-import { LoadingSpinner } from '@/components/loading-spinner';
-import type { FestivalDiscoveryResponse, UserPreferences } from '@/types';
+import { useState } from 'react';
+
+interface FestivalDiscoveryResponse {
+    festival: Festival;
+    recommendations: Recommendation[];
+    totalArtists: number;
+    totalRecommendations: number;
+}
 
 /**
  * Main page component for the Music Festival Assistant
