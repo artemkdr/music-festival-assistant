@@ -2,8 +2,9 @@
  * AI service abstractions for festival parsing, matching, and recommendations
  */
 
-import { Artist, Festival, Recommendation, UserPreferences } from '@/types';
-import { ZodSchema } from 'zod';
+import { RecommendationShortSchema } from '@/schemas';
+import { Artist, Festival, UserPreferences } from '@/types';
+import { z, ZodSchema } from 'zod';
 
 /**
  * Configuration for AI provider
@@ -125,7 +126,7 @@ export interface IAIService {
 /**
  * AI provider types
  */
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'vertex' | 'azure' | 'custom';
+export type AIProvider = 'openai' | 'anthropic' | 'google' | 'vertex' | 'azure' | 'groq' | 'custom';
 
 /**
  * AI service factory interface
@@ -151,5 +152,5 @@ export interface IMusicalAIService {
             genre: string[] | undefined;
             description: string | undefined;
         }[];
-    }): Promise<Recommendation[]>;
+    }): Promise<z.infer<typeof RecommendationShortSchema>[]>;
 }

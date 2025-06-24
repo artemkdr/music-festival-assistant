@@ -162,6 +162,16 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         return matchingArtists;
     }
 
+    async searchArtistByName(name: string): Promise<Artist | null> {
+        this.logger.debug('Searching artist by name in local storage', { name });
+        const artists = await this.searchArtistsByName(name, true);
+        if (artists.length > 0 && artists[0]) {
+            return artists[0];
+        }
+        this.logger.info('No artist found by name', { name });
+        return null;
+    }
+
     async getAllArtists(): Promise<Artist[]> {
         this.logger.debug('Getting all artists from local storage');
         const artists = await this.readJsonFile<Artist>(this.filename);

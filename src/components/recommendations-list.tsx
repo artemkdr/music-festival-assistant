@@ -65,7 +65,7 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
             {/* Recommendations */}
             <div className="grid gap-6">
                 {recommendations.map(recommendation => (
-                    <div key={recommendation.performance.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div key={`${recommendation.performance.id}-${recommendation.artist.id}`} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                         <div className="p-6">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">

@@ -271,6 +271,17 @@ export class ApiClient {
             body: JSON.stringify(feedback),
         });
     }
+
+    /**
+     * Search Spotify for artists by name (calls /api/ai/spotify-artist-search)
+     */
+    async searchSpotifyArtists(query: string): Promise<any[]> {
+        const res = await fetch(`/api/ai/spotify-artist-search?q=${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error('Failed to search Spotify');
+        const data = await res.json();
+        if (data.status !== 'success' || !data.data) throw new Error(data.message || 'No results');
+        return data.data.artists || [];
+    }
 }
 
 /**

@@ -62,6 +62,13 @@ export interface IArtistRepository {
     searchArtistsByName(name: string): Promise<Artist[]>;
 
     /**
+     * Search artists by name
+     * @param name Artist name to search for
+     * @returns Promise resolving to array of matching artists
+     */
+    searchArtistByName(name: string): Promise<Artist | null>;
+
+    /**
      * Get all artists
      * @returns Promise resolving to array of all artists
      */

@@ -2,6 +2,7 @@ import { ILogger } from '@/lib/logger';
 import { AIProviderConfig, AIRequest, AIResponse, IAIService, SchemaAIRequest } from '@/services/ai/interfaces';
 import { createVertex } from '@ai-sdk/google-vertex';
 import { openai } from '@ai-sdk/openai';
+import { groq } from '@ai-sdk/groq';
 import { LanguageModelV1 } from '@ai-sdk/provider';
 import { generateObject, generateText } from 'ai';
 
@@ -18,6 +19,9 @@ export class AIService implements IAIService {
         switch (config.provider) {
             case 'openai':
                 this.model = openai(config.model); // Replace with OpenAI model initialization
+                break;
+            case 'groq':
+                this.model = groq(config.model);
                 break;
             default:
                 if (!config.projectId) {

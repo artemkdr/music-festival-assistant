@@ -130,7 +130,7 @@ export class DIContainer {
             if (!this.getMusicalAIService()) {
                 throw new Error('Musical AI service is required for recommendation service');
             }
-            this._recommendationService = new RecommendationService(this.getLogger(), this.getMusicalAIService()!);
+            this._recommendationService = new RecommendationService(this.getLogger(), this.getMusicalAIService()!, this.getArtistRepository());
         }
         return this._recommendationService;
     }
@@ -164,6 +164,16 @@ export class DIContainer {
             logger.info('Auth service initialized with dummy provider');
         }
         return this._authService;
+    }
+
+    /**
+     * Get Spotify API service
+     */
+    public getSpotifyApiService(): SpotifyApiService {
+        if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+            throw new Error('Spotify client ID and secret must be set in environment variables');
+        }
+        return new SpotifyApiService(this.getLogger(), process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
     }
 
     /**

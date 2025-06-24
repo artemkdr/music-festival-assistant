@@ -157,6 +157,17 @@ export const RecommendationSchema = z.object({
     aiTags: z.array(z.string()).optional(), // AI-generated tags for this recommendation
 });
 
+export const RecommendationShortSchema = z.object({
+    artistId: z.string().min(1),
+    artistName: z.string().min(1).max(200),
+    score: z.number().min(0).max(1), // Confidence score
+    reasons: z.array(z.string()), // Why this artist is recommended
+});
+
+export const RecommentationsAIResponseSchema = z.object({
+    recommendations: z.array(RecommendationShortSchema),
+});
+
 // Festival discovery request schema
 export const FestivalDiscoveryRequestSchema = z.object({
     festivalUrl: z.string().url().optional(),

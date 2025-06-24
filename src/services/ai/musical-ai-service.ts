@@ -1,9 +1,9 @@
 /**
  * A wrapper for AI services related to music festivals, artists and recommendations.
  */
-import { ArtistSchema, FestivalShortSchema, RecommendationSchema } from '@/schemas';
+import { ArtistSchema, FestivalShortSchema, RecommendationShortSchema, RecommentationsAIResponseSchema } from '@/schemas';
 import type { AIRequest, IAIService, IMusicalAIService } from '@/services/ai/interfaces';
-import { Artist, Festival, Recommendation, UserPreferences } from '@/types';
+import { Artist, Festival, UserPreferences } from '@/types';
 import { z } from 'zod';
 
 export class MusicalAIService implements IMusicalAIService {
@@ -67,21 +67,22 @@ Important:
     }: {
         userPreferences: UserPreferences;
         availableArtists: {
+            id: string;
             name: string;
             genre: string[] | undefined;
             description: string | undefined;
         }[];
-    }): Promise<Recommendation[]> {
+    }): Promise<z.infer<typeof RecommendationShortSchema>[]> {
         const aiRequest: AIRequest = {
-            systemPrompt: `You are an expert music recommender.`,
+            systemPrompt: `You are an expert music recommender. Stick to user preferences genres.`,
             prompt: 'Generate music recommendations based on the provided user preferences and favorite artists.',
         };
         this.addFileContentToRequest(aiRequest, [`User preferences: ${JSON.stringify(userPreferences)}`, `Available artists: ${JSON.stringify(availableArtists)}`]);
-        const result = await this.aiService.generateObject<Recommendation[]>({
+        const result = await this.aiService.generateObject<z.infer<typeof RecommentationsAIResponseSchema>>({
             ...aiRequest,
-            schema: z.array(RecommendationSchema),
+            schema: RecommentationsAIResponseSchema,
         });
-        return result;
+        return result.recommendations;
     }
 
     /**

@@ -90,6 +90,15 @@ export class MockArtistRepository implements IArtistRepository {
         return matchingArtists;
     }
 
+    async searchArtistByName(name: string): Promise<Artist | null> {
+        const artist = await this.searchArtistsByName(name);
+        if (artist.length > 0 && artist[0]) {
+            return artist[0];
+        }
+        this.logger.info('No artist found by name', { name });
+        return null;
+    }
+
     async getAllArtists(): Promise<Artist[]> {
         this.logger.debug('Getting all artists');
         this.logger.info('Retrieved all artists', { count: this.artists.length });
