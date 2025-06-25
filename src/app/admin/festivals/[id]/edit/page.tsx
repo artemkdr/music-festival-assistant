@@ -144,7 +144,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             isNewArtist: false,
             startDate: formData.startDate || '',
             startTime: '',
-            endDate: formData.endDate || '',
+            endDate: formData.startDate || '',
             endTime: '',
             stage: '',
             day: 1,
@@ -156,6 +156,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         setEditingPerformanceId(performance.id);
         const start = new Date(performance.startTime);
         const end = new Date(performance.endTime);
+
 
         setPerformanceFormData({
             id: performance.id,
@@ -302,7 +303,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                     <div className="text-center py-12">
                         <h2 className="text-2xl font-bold text-gray-900">Festival Not Found</h2>
                         <p className="text-gray-600 mt-2">The festival you&apos;re looking for doesn&apos;t exist.</p>
-                        <Link href="/admin/festivals" className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md">
+                        <Link href="/admin/festivals" className="mt-4 link-neutral">
                             Back to Festivals
                         </Link>
                     </div>
@@ -319,11 +320,11 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center space-x-3 mb-2">
-                                <Link href={`/admin/festivals/${id}`} className="text-gray-500 hover:text-gray-700">
+                                <Link href={`/admin/festivals/${id}`} className="link-neutral">
                                     ← Back to {festival.name}
                                 </Link>
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-900">Edit Festival</h1>
+                            <h1 className="text-3xl font-bold text-foreground">Edit Festival</h1>
                         </div>
                     </div>
 
@@ -347,33 +348,27 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                         <form onSubmit={handleSubmit} className="px-4 py-5 sm:p-6 space-y-6">
                             {/* Basic Information */}
                             <div>
-                                <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
+                                <h2 className="text-lg font-medium text-foreground mb-4">Basic Information</h2>
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                            Festival Name *
-                                        </label>
+                                        <label htmlFor="name">Festival Name *</label>
                                         <input
                                             type="text"
                                             id="name"
                                             required
                                             value={formData.name || ''}
                                             onChange={e => handleInputChange('name', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                                            Location *
-                                        </label>
+                                        <label htmlFor="location">Location *</label>
                                         <input
                                             type="text"
                                             id="location"
                                             required
                                             value={formData.location || ''}
                                             onChange={e => handleInputChange('location', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="City, State/Country"
                                         />
                                     </div>
@@ -381,74 +376,59 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
 
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-                                            Start Date *
-                                        </label>
+                                        <label htmlFor="startDate">Start Date *</label>
                                         <input
                                             type="date"
                                             id="startDate"
                                             required
                                             value={formData.startDate || ''}
                                             onChange={e => handleInputChange('startDate', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-                                            End Date *
-                                        </label>
+                                        <label htmlFor="endDate">End Date *</label>
                                         <input
                                             type="date"
                                             id="endDate"
                                             required
                                             value={formData.endDate || ''}
                                             onChange={e => handleInputChange('endDate', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="website" className="block text-sm font-medium text-gray-700">
-                                            Website URL
-                                        </label>
+                                        <label htmlFor="website">Website URL</label>
                                         <input
                                             type="url"
                                             id="website"
                                             value={formData.website || ''}
                                             onChange={e => handleInputChange('website', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="https://example.com"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
-                                            Image URL
-                                        </label>
+                                        <label htmlFor="imageUrl">Image URL</label>
                                         <input
                                             type="url"
                                             id="imageUrl"
                                             value={formData.imageUrl || ''}
                                             onChange={e => handleInputChange('imageUrl', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                             placeholder="https://example.com/image.jpg"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="mt-4">
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                        Description
-                                    </label>
+                                    <label htmlFor="description">Description</label>
                                     <textarea
                                         id="description"
                                         rows={4}
                                         value={formData.description || ''}
                                         onChange={e => handleInputChange('description', e.target.value)}
-                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                         placeholder="Brief description of the festival..."
                                     />
                                 </div>
@@ -456,7 +436,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
 
                             {/* Performances */}
                             <div>
-                                <h2 className="text-lg font-medium text-gray-900 mb-4">Performances</h2>
+                                <h2 className="text-lg font-medium text-foreground mb-4">Performances</h2>
 
                                 {!isEditingPerformance ? (
                                     <div>
@@ -465,32 +445,32 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                 <li key={p.id} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
                                                     <div>
                                                         <p className="font-semibold">{p.artist.name}</p>
-                                                        <p className="text-sm text-gray-600">
+                                                        <p className="text-sm text-muted-foreground">
                                                             {new Date(p.startTime).toLocaleString()} - {new Date(p.endTime).toLocaleString()} on {p.stage}
                                                         </p>
                                                     </div>
                                                     <div className="space-x-2">
-                                                        <button type="button" onClick={() => handleEditPerformance(p)} className="text-blue-600 hover:text-blue-800 font-medium">
+                                                        <button type="button" onClick={() => handleEditPerformance(p)} className="btn-primary-light">
                                                             Edit
                                                         </button>
-                                                        <button type="button" onClick={() => handleDeletePerformance(p.id)} className="text-red-600 hover:text-red-800 font-medium">
+                                                        <button type="button" onClick={() => handleDeletePerformance(p.id)} className="btn-destructive-light">
                                                             Delete
                                                         </button>
                                                     </div>
                                                 </li>
                                             ))}
                                         </ul>
-                                        <button type="button" onClick={handleAddNewPerformance} className="mt-4 bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200">
+                                        <button type="button" onClick={handleAddNewPerformance} className="mt-4 btn-primary-light">
                                             + Add Performance
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-md font-medium text-gray-800 mb-4">{editingPerformanceId ? 'Edit Performance' : 'Add New Performance'}</h3>
+                                        <h3 className="text-md font-medium text-foreground mb-4">{editingPerformanceId ? 'Edit Performance' : 'Add New Performance'}</h3>
 
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">
+                                                <label>
                                                     <input
                                                         type="checkbox"
                                                         checked={performanceFormData.isNewArtist}
@@ -504,37 +484,34 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
 
                                         {performanceFormData.isNewArtist ? (
                                             <div className="mt-4">
-                                                <label htmlFor="newArtistName" className="block text-sm font-medium text-gray-700">
-                                                    New Artist Name *
-                                                </label>
+                                                <label htmlFor="newArtistName">New Artist Name *</label>
                                                 <div className="flex space-x-2">
                                                     <input
                                                         type="text"
                                                         id="newArtistName"
                                                         value={performanceFormData.artistName}
                                                         onChange={e => handlePerformanceInputChange('artistName', e.target.value)}
-                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                                     />
                                                     <button
                                                         type="button"
-                                                        className="mt-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                                                        className="btn-secondary"
                                                         disabled={isSpotifySearching || !performanceFormData.artistName}
                                                         onClick={() => searchSpotifyArtist(performanceFormData.artistName)}
                                                     >
                                                         {isSpotifySearching ? 'Searching...' : 'Spotify Lookup'}
                                                     </button>
                                                 </div>
-                                                {spotifySearchError && <div className="text-red-600 text-xs mt-1">{spotifySearchError}</div>}
+                                                {spotifySearchError && <div className="text-destructive text-xs mt-1">{spotifySearchError}</div>}
                                                 {spotifySearchResults.length > 0 && (
                                                     <div className="mt-2 bg-white border rounded shadow p-2 max-h-48 overflow-y-auto">
-                                                        <div className="text-xs text-gray-500 mb-1">Select from Spotify results:</div>
+                                                        <div className="text-xs text-muted-foreground mb-1">Select from Spotify results:</div>
                                                         <ul>
                                                             {spotifySearchResults.map((artist: SpotifySearchResult) => (
                                                                 <li key={artist.id} className="py-1 flex items-center border-b last:border-b-0">
                                                                     {artist.images && artist.images[0] && <Image src={artist.images[0].url} alt={artist.name} className="w-8 h-8 rounded mr-2" />}
                                                                     <button type="button" className="text-left flex-1 hover:underline" onClick={() => handleSelectSpotifyArtist(artist)}>
                                                                         <span className="font-medium">{artist.name}</span>
-                                                                        {artist.genres && artist.genres.length > 0 && <span className="ml-2 text-xs text-gray-500">({artist.genres.join(', ')})</span>}
+                                                                        {artist.genres && artist.genres.length > 0 && <span className="ml-2 text-xs text-muted-foreground">({artist.genres.join(', ')})</span>}
                                                                     </button>
                                                                 </li>
                                                             ))}
@@ -544,14 +521,11 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                             </div>
                                         ) : (
                                             <div className="mt-4">
-                                                <label htmlFor="artistId" className="block text-sm font-medium text-gray-700">
-                                                    Artist *
-                                                </label>
+                                                <label htmlFor="artistId">Artist *</label>
                                                 <select
                                                     id="artistId"
                                                     value={performanceFormData.artistId}
                                                     onChange={e => handlePerformanceInputChange('artistId', e.target.value)}
-                                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                                 >
                                                     <option value="">Select an artist</option>
                                                     {availableArtists.map(artist => (
@@ -563,80 +537,52 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                             </div>
                                         )}
 
-                                        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-3">
                                             <div>
-                                                <label htmlFor="perfStartDate" className="block text-sm font-medium text-gray-700">
-                                                    Start Date *
-                                                </label>
+                                                <label htmlFor="perfStartDate">Date *</label>
                                                 <input
                                                     type="date"
                                                     id="perfStartDate"
                                                     value={performanceFormData.startDate}
                                                     onChange={e => handlePerformanceInputChange('startDate', e.target.value)}
-                                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                                 />
                                             </div>
                                             <div>
-                                                <label htmlFor="perfStartTime" className="block text-sm font-medium text-gray-700">
-                                                    Start Time *
-                                                </label>
+                                                <label htmlFor="perfStartTime">Start Time *</label>
                                                 <input
                                                     type="time"
                                                     id="perfStartTime"
                                                     value={performanceFormData.startTime}
                                                     onChange={e => handlePerformanceInputChange('startTime', e.target.value)}
-                                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                            <div>
-                                                <label htmlFor="perfEndDate" className="block text-sm font-medium text-gray-700">
-                                                    End Date *
-                                                </label>
-                                                <input
-                                                    type="date"
-                                                    id="perfEndDate"
-                                                    value={performanceFormData.endDate}
-                                                    onChange={e => handlePerformanceInputChange('endDate', e.target.value)}
-                                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                                 />
                                             </div>
                                             <div>
-                                                <label htmlFor="perfEndTime" className="block text-sm font-medium text-gray-700">
-                                                    End Time *
-                                                </label>
+                                                <label htmlFor="perfEndTime">End Time *</label>
                                                 <input
                                                     type="time"
                                                     id="perfEndTime"
                                                     value={performanceFormData.endTime}
                                                     onChange={e => handlePerformanceInputChange('endTime', e.target.value)}
-                                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                                 />
                                             </div>
-                                        </div>
+                                        </div>                                        
                                         <div className="mt-4">
-                                            <label htmlFor="stage" className="block text-sm font-medium text-gray-700">
-                                                Stage *
-                                            </label>
+                                            <label htmlFor="stage">Stage *</label>
                                             <input
                                                 type="text"
                                                 id="stage"
                                                 value={performanceFormData.stage}
                                                 onChange={e => handlePerformanceInputChange('stage', e.target.value)}
-                                                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                             />
                                         </div>
-
                                         {/* Spotify Artist Search */}
                                         {!performanceFormData.isNewArtist && (
                                             <div className="mt-6">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Search for Artist on Spotify</label>
+                                                <label className="mb-2">Search for Artist on Spotify</label>
                                                 <div className="flex space-x-2">
                                                     <input
                                                         type="text"
                                                         placeholder="Artist name..."
-                                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                                         onKeyDown={e => {
                                                             if (e.key === 'Enter' && (e.target as HTMLInputElement).value) {
                                                                 searchSpotifyArtist((e.target as HTMLInputElement).value);
@@ -646,12 +592,12 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                     <button
                                                         type="button"
                                                         onClick={() => {
-                                                            const input = document.querySelector('input[placeholder="Artist name..."]') as HTMLInputElement;
+                                                            const input = document.querySelector('input[placeholder=\"Artist name...\"]') as HTMLInputElement;
                                                             if (input.value) {
                                                                 searchSpotifyArtist(input.value);
                                                             }
                                                         }}
-                                                        className="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700"
+                                                        className="btn-primary"
                                                     >
                                                         {isSpotifySearching ? 'Searching...' : 'Search'}
                                                     </button>
@@ -669,9 +615,9 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                                 >
                                                                     <div>
                                                                         <p className="font-semibold">{artist.name}</p>
-                                                                        {artist.genres && <p className="text-sm text-gray-600">{artist.genres.join(', ')}</p>}
+                                                                        {artist.genres && <p className="text-sm text-muted-foreground">{artist.genres.join(', ')}</p>}
                                                                     </div>
-                                                                    <span className="text-gray-500 text-sm">{artist.popularity}</span>
+                                                                    <span className="text-muted-foreground text-sm">{artist.popularity}</span>
                                                                 </li>
                                                             ))}
                                                         </ul>
@@ -679,7 +625,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                 )}
 
                                                 {/* Error Message */}
-                                                {spotifySearchError && <p className="mt-2 text-sm text-red-600">{spotifySearchError}</p>}
+                                                {spotifySearchError && <p className="mt-2 text-sm text-destructive">{spotifySearchError}</p>}
                                             </div>
                                         )}
 
@@ -687,14 +633,14 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                             <button
                                                 type="button"
                                                 onClick={handleCancelEditPerformance}
-                                                className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                                className="btn-neutral"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={handleSavePerformance}
-                                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                                                className="btn-primary"
                                             >
                                                 Save Performance
                                             </button>
@@ -707,14 +653,14 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                             <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                                 <Link
                                     href={`/admin/festivals/${id}`}
-                                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    className="btn-neutral"
                                 >
                                     Cancel
                                 </Link>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                                    className="btn-primary"
                                 >
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>

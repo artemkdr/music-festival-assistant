@@ -165,7 +165,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
             <ProtectedRoute requireAdmin>
                 <AdminLayout>
                     <div className="flex justify-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
                 </AdminLayout>
             </ProtectedRoute>
@@ -179,7 +179,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                     <div className="text-center py-12">
                         <h2 className="text-2xl font-bold text-gray-900">Artist Not Found</h2>
                         <p className="text-gray-600 mt-2">The artist you&apos;re looking for doesn&apos;t exist.</p>
-                        <Link href="/admin/artists" className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md">
+                        <Link href="/admin/artists" className="mt-4 link-primary">
                             Back to Artists
                         </Link>
                     </div>
@@ -196,7 +196,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center space-x-3 mb-2">
-                                <Link href={`/admin/artists/${artistId}`} className="text-gray-500 hover:text-gray-700">
+                                <Link href={`/admin/artists/${artistId}`} className="link-neutral">
                                     ← Back to {artist.name}
                                 </Link>
                             </div>
@@ -227,7 +227,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                 <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="name">
                                             Artist Name *
                                         </label>
                                         <input
@@ -236,12 +236,12 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             required
                                             value={formData.name || ''}
                                             onChange={e => handleInputChange('name', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="imageUrl">
                                             Image URL
                                         </label>
                                         <input
@@ -249,13 +249,13 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="imageUrl"
                                             value={formData.imageUrl || ''}
                                             onChange={e => handleInputChange('imageUrl', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-ful"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="mt-4">
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="description">
                                         Description
                                     </label>
                                     <textarea
@@ -263,7 +263,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                         rows={4}
                                         value={formData.description || ''}
                                         onChange={e => handleInputChange('description', e.target.value)}
-                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                        className="mt-1 block w-full"
                                         placeholder="Brief description of the artist..."
                                     />
                                 </div>
@@ -279,15 +279,15 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                                 type="text"
                                                 value={genre}
                                                 onChange={e => handleGenreChange(index, e.target.value)}
-                                                className="flex-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                                className="flex-1"
                                                 placeholder="Genre name"
                                             />
-                                            <button type="button" onClick={() => removeGenre(index)} className="text-red-600 hover:text-red-800">
+                                            <button type="button" onClick={() => removeGenre(index)} className="btn-destructive-light">
                                                 Remove
                                             </button>
                                         </div>
                                     ))}
-                                    <button type="button" onClick={addGenre} className="text-blue-600 hover:text-blue-800 text-sm">
+                                    <button type="button" onClick={addGenre} className="btn-primary-light">
                                         + Add Genre
                                     </button>
                                 </div>
@@ -298,7 +298,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                 <h2 className="text-lg font-medium text-gray-900 mb-4">Streaming Links</h2>
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="spotify" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="spotify">
                                             Spotify URL
                                         </label>
                                         <input
@@ -306,12 +306,12 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="spotify"
                                             value={formData.streamingLinks?.spotify || ''}
                                             onChange={e => handleNestedInputChange('streamingLinks', 'spotify', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="appleMusic" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="appleMusic" >
                                             Apple Music URL
                                         </label>
                                         <input
@@ -319,12 +319,12 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="appleMusic"
                                             value={formData.streamingLinks?.appleMusic || ''}
                                             onChange={e => handleNestedInputChange('streamingLinks', 'appleMusic', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="youtube" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="youtube" >
                                             YouTube URL
                                         </label>
                                         <input
@@ -332,12 +332,12 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="youtube"
                                             value={formData.streamingLinks?.youtube || ''}
                                             onChange={e => handleNestedInputChange('streamingLinks', 'youtube', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="soundcloud" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="soundcloud" >
                                             SoundCloud URL
                                         </label>
                                         <input
@@ -345,7 +345,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="soundcloud"
                                             value={formData.streamingLinks?.soundcloud || ''}
                                             onChange={e => handleNestedInputChange('streamingLinks', 'soundcloud', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
                                 </div>
@@ -356,7 +356,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                 <h2 className="text-lg font-medium text-gray-900 mb-4">Social Links</h2>
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="website" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="website">
                                             Website
                                         </label>
                                         <input
@@ -364,12 +364,12 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="website"
                                             value={formData.socialLinks?.website || ''}
                                             onChange={e => handleNestedInputChange('socialLinks', 'website', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="instagram" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="instagram">
                                             Instagram
                                         </label>
                                         <input
@@ -377,12 +377,12 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="instagram"
                                             value={formData.socialLinks?.instagram || ''}
                                             onChange={e => handleNestedInputChange('socialLinks', 'instagram', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="twitter" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="twitter">
                                             Twitter
                                         </label>
                                         <input
@@ -390,12 +390,12 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="twitter"
                                             value={formData.socialLinks?.twitter || ''}
                                             onChange={e => handleNestedInputChange('socialLinks', 'twitter', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="facebook" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="facebook">
                                             Facebook
                                         </label>
                                         <input
@@ -403,7 +403,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="facebook"
                                             value={formData.socialLinks?.facebook || ''}
                                             onChange={e => handleNestedInputChange('socialLinks', 'facebook', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                            className="mt-1 block w-full"
                                         />
                                     </div>
                                 </div>
@@ -413,17 +413,17 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                             <div className="flex flex-wrap justify-end space-x-3 pt-6 border-t border-gray-200">
                                 <Link
                                     href={`/admin/artists/${artistId}`}
-                                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    className="btn-neutral"
                                 >
                                     Cancel
                                 </Link>
-                                <button type="button" className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md font-medium hover:bg-blue-200 ml-2" onClick={() => setShowRecrawl(v => !v)}>
+                                <button type="button" className="btn-primary-light border-1 border-primary" onClick={() => setShowRecrawl(v => !v)}>
                                     {showRecrawl ? 'Cancel Re-crawl' : 'Re-crawl Artist'}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                                    className="btn-primary"
                                 >
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
@@ -435,41 +435,38 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                             <form onSubmit={handleRecrawl} className="space-y-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Artist ID</label>
-                                        <input type="text" value={recrawlForm.id} disabled className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100" />
+                                        <label>Artist ID</label>
+                                        <input type="text" value={recrawlForm.id} disabled />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Artist Name</label>
+                                        <label>Artist Name</label>
                                         <input
                                             type="text"
                                             value={recrawlForm.name}
                                             onChange={e => handleRecrawlInput('name', e.target.value)}
                                             required
-                                            className="mt-1 block w-full border-gray-300 rounded-md"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Spotify ID</label>
+                                        <label>Spotify ID</label>
                                         <input
                                             type="text"
                                             value={recrawlForm.spotifyId}
                                             onChange={e => handleRecrawlInput('spotifyId', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Context</label>
+                                        <label>Context</label>
                                         <input
                                             type="text"
                                             value={recrawlForm.context}
                                             onChange={e => handleRecrawlInput('context', e.target.value)}
-                                            className="mt-1 block w-full border-gray-300 rounded-md"
                                         />
                                     </div>
                                 </div>
                                 {recrawlError && <div className="text-red-600 text-sm">{recrawlError}</div>}
                                 <div className="flex justify-end">
-                                    <button type="submit" disabled={recrawlLoading} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50">
+                                    <button type="submit" disabled={recrawlLoading} className="btn-primary">
                                         {recrawlLoading ? 'Re-crawling...' : 'Re-crawl'}
                                     </button>
                                 </div>

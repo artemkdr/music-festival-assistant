@@ -80,18 +80,18 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center space-x-3 mb-2">
-                                <Link href="/admin/festivals" className="text-gray-500 hover:text-gray-700">
+                                <Link href="/admin/festivals" className="link-neutral">
                                     ← Back to Festivals
                                 </Link>
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-900">{isLoading ? 'Loading...' : festival?.name || 'Festival Not Found'}</h1>
+                            <h1 className="text-3xl font-bold text-foreground">{isLoading ? 'Loading...' : festival?.name || 'Festival Not Found'}</h1>
                         </div>
                         {festival && (
                             <div className="flex space-x-3">
-                                <Link href={`/admin/festivals/${festival.id}/edit`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                <Link href={`/admin/festivals/${festival.id}/edit`} className="btn-primary">
                                     Edit Festival
                                 </Link>
-                                <Link href={`/admin/artists/crawl?festivalId=${festival.id}`} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                <Link href={`/admin/artists/crawl?festivalId=${festival.id}`} className="btn-secondary">
                                     Crawl Artists
                                 </Link>
                             </div>
@@ -101,7 +101,7 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                     {/* Loading State */}
                     {isLoading && (
                         <div className="flex justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         </div>
                     )}
 
@@ -126,22 +126,22 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                             {/* Overview Card */}
                             <div className="bg-white shadow rounded-lg">
                                 <div className="px-4 py-5 sm:p-6">
-                                    <h2 className="text-lg font-medium text-gray-900 mb-4">Festival Overview</h2>
+                                    <h2 className="text-lg font-medium text-foreground mb-4">Festival Overview</h2>
                                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                         <div>
                                             <div className="space-y-3">
                                                 <div className="flex items-center">
                                                     <span className="mr-3 text-lg">📍</span>
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-500">Location</div>
-                                                        <div className="text-sm text-gray-900">{festival.location}</div>
+                                                        <div className="text-sm font-medium text-muted-foreground">Location</div>
+                                                        <div className="text-sm text-foreground">{festival.location}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center">
                                                     <span className="mr-3 text-lg">📅</span>
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-500">Dates</div>
-                                                        <div className="text-sm text-gray-900">
+                                                        <div className="text-sm font-medium text-muted-foreground">Dates</div>
+                                                        <div className="text-sm text-foreground">
                                                             {formatDate(festival.startDate)} - {formatDate(festival.endDate)}
                                                         </div>
                                                     </div>
@@ -150,8 +150,8 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                     <div className="flex items-center">
                                                         <span className="mr-3 text-lg">🌐</span>
                                                         <div>
-                                                            <div className="text-sm font-medium text-gray-500">Website</div>
-                                                            <Link href={festival.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800">
+                                                            <div className="text-sm font-medium text-muted-foreground">Website</div>
+                                                            <Link href={festival.website} target="_blank" rel="noopener noreferrer" className="link-primary text-sm">
                                                                 {festival.website}
                                                             </Link>
                                                         </div>
@@ -164,22 +164,22 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                 <div className="flex items-center">
                                                     <span className="mr-3 text-lg">🎤</span>
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-500">Total Artists</div>
-                                                        <div className="text-sm text-gray-900">{festival.performances.length}</div>
+                                                        <div className="text-sm font-medium text-muted-foreground">Total Artists</div>
+                                                        <div className="text-sm text-foreground">{festival.performances.length}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center">
                                                     <span className="mr-3 text-lg">🎭</span>
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-500">Performances</div>
-                                                        <div className="text-sm text-gray-900">{festival.performances.length}</div>
+                                                        <div className="text-sm font-medium text-muted-foreground">Performances</div>
+                                                        <div className="text-sm text-foreground">{festival.performances.length}</div>
                                                     </div>
                                                 </div>
                                             </div>
                                             {festival.description && (
                                                 <div className="mt-4">
-                                                    <div className="text-sm font-medium text-gray-500 mb-1">Description</div>
-                                                    <p className="text-sm text-gray-900">{festival.description}</p>
+                                                    <div className="text-sm font-medium text-muted-foreground mb-1">Description</div>
+                                                    <p className="text-sm text-foreground">{festival.description}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -190,27 +190,27 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                             {/* Schedule by Date */}
                             <div className="bg-white shadow rounded-lg">
                                 <div className="px-4 py-5 sm:p-6">
-                                    <h2 className="text-lg font-medium text-gray-900 mb-4">Festival Schedule</h2>
+                                    <h2 className="text-lg font-medium text-foreground mb-4">Festival Schedule</h2>
                                     <div className="space-y-6">
                                         {Object.entries(performancesByDate).map(([date, performances]) => (
                                             <div key={date}>
-                                                <h3 className="text-md font-medium text-gray-900 mb-3">{formatDate(date)}</h3>
+                                                <h3 className="text-md font-medium text-foreground mb-3">{formatDate(date)}</h3>
                                                 <div className="space-y-2">
                                                     {performances
                                                         .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
                                                         .map((performance, index) => (
                                                             <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                                 <div className="flex items-center space-x-4">
-                                                                    <div className="text-sm font-medium text-gray-900">{performance.startTime ?? 'TBA'}</div>
+                                                                    <div className="text-sm font-medium text-foreground">{performance.startTime ?? 'TBA'}</div>
                                                                     <div>
-                                                                        <Link href={`/admin/artists/${performance.artist.id}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                                                                        <Link href={`/admin/artists/${performance.artist.id}`} className="link-primary font-medium">
                                                                             {performance.artist.name}
                                                                         </Link>
                                                                     </div>
-                                                                    {performance.stage && <div className="text-sm text-gray-500">@ {performance.stage}</div>}
+                                                                    {performance.stage && <div className="text-sm text-muted-foreground">@ {performance.stage}</div>}
                                                                 </div>
                                                                 <div className="flex space-x-2">
-                                                                    <Link href={`/admin/artists/${performance.artist.id}`} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                                                    <Link href={`/admin/artists/${performance.artist.id}`} className="btn-primary-light bg-primary/10 px-3 py-2 rounded-3xl text-sm">
                                                                         View Artist
                                                                     </Link>
                                                                 </div>

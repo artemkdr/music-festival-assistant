@@ -101,7 +101,7 @@ export default function FestivalCrawlPage() {
                         <div className="px-4 py-5 sm:p-6">
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                                    <label>
                                         Festival Website URLs ({urls.length}/{10})
                                     </label>
 
@@ -113,8 +113,7 @@ export default function FestivalCrawlPage() {
                                                         type="url"
                                                         required={index === 0}
                                                         value={url}
-                                                        onChange={e => handleUrlChange(index, e.target.value)}
-                                                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                        onChange={e => handleUrlChange(index, e.target.value)}                                                        
                                                         placeholder={`https://festival-${index + 1}.com`}
                                                         disabled={isLoading}
                                                     />
@@ -125,7 +124,7 @@ export default function FestivalCrawlPage() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleRemoveUrl(index)}
-                                                            className="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-400 hover:text-red-500 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                                            className="inline-flex items-center btn-destructive-light border-1 border-destructive"
                                                             disabled={isLoading}
                                                             title="Remove URL"
                                                         >
@@ -144,7 +143,7 @@ export default function FestivalCrawlPage() {
                                                         <button
                                                             type="button"
                                                             onClick={handleAddUrl}
-                                                            className="inline-flex items-center p-2 border border-gray-300 rounded-md text-gray-400 hover:text-blue-500 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                            className="inline-flex items-center btn-primary-light border-1 border-primary"
                                                             disabled={isLoading}
                                                             title="Add another URL"
                                                         >
@@ -167,7 +166,7 @@ export default function FestivalCrawlPage() {
                                     <button
                                         type="button"
                                         onClick={handleReset}
-                                        className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        className="btn-neutral"
                                         disabled={isLoading}
                                     >
                                         Reset
@@ -175,7 +174,7 @@ export default function FestivalCrawlPage() {
                                     <button
                                         type="submit"
                                         disabled={isLoading || urls.filter(u => u.trim()).length === 0}
-                                        className="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="btn-primary"
                                     >
                                         {isLoading ? (
                                             <>
@@ -244,10 +243,10 @@ export default function FestivalCrawlPage() {
                                             </div>
 
                                             <div className="mt-4 flex space-x-3">
-                                                <Link href="/admin/festivals" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                                <Link href="/admin/festivals" className="link-primary">
                                                     View All Festivals
                                                 </Link>
-                                                <button onClick={handleReset} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                                <button onClick={handleReset} className="btn-primary">
                                                     Crawl Another
                                                 </button>
                                             </div>
@@ -259,14 +258,14 @@ export default function FestivalCrawlPage() {
                     )}
 
                     {/* Instructions */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                    <div className="bg-primary/10 border border-primary/20 rounded-md p-4">
                         <div className="flex">
                             <div className="flex-shrink-0">
-                                <span className="text-blue-400">ℹ️</span>
+                                <span className="text-primary">ℹ️</span>
                             </div>
                             <div className="ml-3">
-                                <h3 className="text-sm font-medium text-blue-800">How it works</h3>
-                                <div className="mt-2 text-sm text-blue-700">
+                                <h3 className="text-sm font-medium text-primary">How it works</h3>
+                                <div className="mt-2 text-sm text-primary">
                                     <ol className="list-decimal list-inside space-y-1">
                                         <li>Enter one or more festival website URLs (up to 10)</li>
                                         <li>Our AI crawls and analyzes each website content</li>
@@ -274,7 +273,7 @@ export default function FestivalCrawlPage() {
                                         <li>The festival(s) are added to your database</li>
                                         <li>You can then crawl artist data separately</li>
                                     </ol>
-                                    <div className="mt-3 p-2 bg-blue-100 rounded text-xs">
+                                    <div className="mt-3 p-2 bg-primary/15 rounded text-xs">
                                         <strong>Pro tip:</strong> Use multiple URLs to get more complete data - different sources might have different details about the same festival!
                                     </div>
                                 </div>

@@ -60,7 +60,7 @@ export default function ArtistsPage() {
                             <p className="mt-2 text-gray-600">Manage artist data and crawl new artists from Spotify</p>
                         </div>
                         <div className="flex space-x-3">
-                            <Link href="/admin/artists/crawl" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <Link href="/admin/artists/crawl" className="btn-secondary">
                                 🎤 Crawl Artists
                             </Link>
                         </div>
@@ -70,7 +70,7 @@ export default function ArtistsPage() {
                     <div className="bg-white shadow rounded-lg p-4">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label htmlFor="search" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="search">
                                     Search Artists
                                 </label>
                                 <input
@@ -79,7 +79,7 @@ export default function ArtistsPage() {
                                     id="search"
                                     value={searchTerm}
                                     onChange={e => setSearchTerm(e.target.value)}
-                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    className="mt-1 block w-full"
                                     placeholder="Search by artist name..."
                                 />
                             </div>
@@ -198,13 +198,13 @@ export default function ArtistsPage() {
                                         <div className="flex space-x-2">
                                             <Link
                                                 href={`/admin/artists/${artist.id}`}
-                                                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium text-center"
+                                                className="flex-1 text-center text-sm px-3 py-2 link-primary link-primary bg-primary/20 rounded-3xl"
                                             >
                                                 View Details
                                             </Link>
                                             <Link
                                                 href={`/admin/artists/${artist.id}/edit`}
-                                                className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-md text-sm font-medium text-center"
+                                                className="flex-1 text-center text-sm px-3 py-2 link-secondary bg-secondary/20 rounded-3xl"
                                             >
                                                 Edit
                                             </Link>

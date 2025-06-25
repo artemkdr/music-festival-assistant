@@ -88,7 +88,7 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center space-x-3 mb-2">
-                                <Link href="/admin/artists" className="text-gray-500 hover:text-gray-700">
+                                <Link href="/admin/artists" className="link-neutral">
                                     ← Back to Artists
                                 </Link>
                             </div>
@@ -96,7 +96,7 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                         </div>
                         {artist && (
                             <div className="flex space-x-3">
-                                <Link href={`/admin/artists/${artist.id}/edit`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                <Link href={`/admin/artists/${artist.id}/edit`} className="btn-primary">
                                     Edit Artist
                                 </Link>
                                 {artist.streamingLinks?.spotify && (
@@ -104,7 +104,7 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                         href={artist.streamingLinks.spotify}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                                        className="btn-secondary"
                                     >
                                         View on Spotify
                                     </Link>
@@ -232,9 +232,9 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <a href={`/admin/festivals/${performance.festivalId}`} className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                                    <Link href={`/admin/festivals/${performance.festivalId}`} className="btn-primary-light border-1 border-primary">
                                                         View Festival
-                                                    </a>
+                                                    </Link>
                                                 </div>
                                             ))}
                                         </div>

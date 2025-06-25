@@ -8,7 +8,8 @@ import { AdminLayout } from '@/app/components/admin/admin-layout';
 import { ProtectedRoute } from '@/app/components/protected-route';
 import { artistsApi } from '@/app/lib/api';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import React, { Usable, useState } from 'react';
 
 interface CrawlResult {
     name: string;
@@ -20,10 +21,11 @@ interface CrawlResponse {
     results: CrawlResult[];
 }
 
-export default function ArtistsCrawlPage() {
+
+export default function ArtistsCrawlPage() {    
     const [crawlMode, setCrawlMode] = useState<'names' | 'festival'>('names');
     const [artistNames, setArtistNames] = useState('');
-    const [festivalId, setFestivalId] = useState('');
+    const [festivalId, setFestivalId] = useState(useSearchParams().get('festivalId') || '');
     const [forceRecrawl, setForceRecrawl] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [results, setResults] = useState<CrawlResult[]>([]);
@@ -130,7 +132,7 @@ export default function ArtistsCrawlPage() {
                                             value="names"
                                             checked={crawlMode === 'names'}
                                             onChange={e => setCrawlMode(e.target.value as 'names' | 'festival')}
-                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                            className="h-4 w-4 "
                                         />
                                         <div className="ml-3">
                                             <div className="text-sm font-medium text-gray-900">🎤 Crawl by Artist Names</div>
@@ -145,7 +147,7 @@ export default function ArtistsCrawlPage() {
                                             value="festival"
                                             checked={crawlMode === 'festival'}
                                             onChange={e => setCrawlMode(e.target.value as 'names' | 'festival')}
-                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                            className="h-4 w-4 "
                                         />
                                         <div className="ml-3">
                                             <div className="text-sm font-medium text-gray-900">🎪 Crawl from Festival Lineup</div>
@@ -163,7 +165,7 @@ export default function ArtistsCrawlPage() {
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {crawlMode === 'names' && (
                                     <div>
-                                        <label htmlFor="artistNames" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="artistNames">
                                             Artist Names (one per line)
                                         </label>
                                         <div className="mt-1">
@@ -173,8 +175,7 @@ export default function ArtistsCrawlPage() {
                                                 rows={8}
                                                 required
                                                 value={artistNames}
-                                                onChange={e => setArtistNames(e.target.value)}
-                                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                onChange={e => setArtistNames(e.target.value)}                                                
                                                 placeholder="Arctic Monkeys&#10;Tame Impala&#10;Glass Animals&#10;..."
                                                 disabled={isLoading}
                                             />
@@ -185,7 +186,7 @@ export default function ArtistsCrawlPage() {
 
                                 {crawlMode === 'festival' && (
                                     <div>
-                                        <label htmlFor="festivalId" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="festivalId">
                                             Festival ID
                                         </label>
                                         <div className="mt-1">
@@ -195,9 +196,8 @@ export default function ArtistsCrawlPage() {
                                                 id="festivalId"
                                                 required
                                                 value={festivalId}
-                                                onChange={e => setFestivalId(e.target.value)}
-                                                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                                placeholder="fest-1"
+                                                onChange={e => setFestivalId(e.target.value)}                                                
+                                                placeholder="festival-id"
                                                 disabled={isLoading}
                                             />
                                         </div>
@@ -212,9 +212,8 @@ export default function ArtistsCrawlPage() {
                                         type="checkbox"
                                         checked={forceRecrawl}
                                         onChange={e => setForceRecrawl(e.target.checked)}
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                     />
-                                    <label htmlFor="forceRecrawl" className="ml-2 block text-sm text-gray-900">
+                                    <label htmlFor="forceRecrawl" className="ml-2">
                                         Force re-crawl existing artists
                                     </label>
                                 </div>
@@ -223,7 +222,7 @@ export default function ArtistsCrawlPage() {
                                     <button
                                         type="button"
                                         onClick={handleReset}
-                                        className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        className="btn-neutral"
                                         disabled={isLoading}
                                     >
                                         Reset
@@ -231,7 +230,7 @@ export default function ArtistsCrawlPage() {
                                     <button
                                         type="submit"
                                         disabled={isLoading || (crawlMode === 'names' && !artistNames.trim()) || (crawlMode === 'festival' && !festivalId.trim())}
-                                        className="bg-green-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="btn-primary"
                                     >
                                         {isLoading ? (
                                             <>
@@ -300,10 +299,10 @@ export default function ArtistsCrawlPage() {
                                 </div>
 
                                 <div className="mt-6 flex space-x-3">
-                                    <Link href="/admin/artists" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <Link href="/admin/artists" className="btn-primary">
                                         View All Artists
                                     </Link>
-                                    <button onClick={handleReset} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <button onClick={handleReset} className="btn-neutral">
                                         Crawl More Artists
                                     </button>
                                 </div>
