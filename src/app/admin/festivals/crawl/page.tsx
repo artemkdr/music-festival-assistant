@@ -8,7 +8,7 @@ import { AdminLayout } from '@/app/components/admin/admin-layout';
 import { ProtectedRoute } from '@/app/components/protected-route';
 import { Festival, festivalsApi } from '@/app/lib/api';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 
 interface CrawlResult {
     success: boolean;
@@ -21,11 +21,22 @@ interface CrawlResult {
     error?: string;
 }
 
+// Add a type for the crawl request payload
+interface CrawlFestivalRequest {
+    urls: string[];
+    forcedName?: string | undefined;
+    files?: { name: string; type: string; base64: string }[] | undefined;
+}
+
 export default function FestivalCrawlPage() {
     const [urls, setUrls] = useState<string[]>(['']);
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<CrawlResult | null>(null);
     const [error, setError] = useState<string | null>(null);
+    // New state for forced festival name
+    const [forcedName, setForcedName] = useState<string>('');
+    // New state for files (base64 encoded)
+    const [files, setFiles] = useState<{ name: string; type: string; base64: string }[]>([]);
 
     const handleAddUrl = () => {
         if (urls.length < 10) {
@@ -45,6 +56,34 @@ export default function FestivalCrawlPage() {
         setUrls(newUrls);
     };
 
+    // File input handler
+    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        const fileList = e.target.files;
+        if (!fileList) return;
+        const fileArr = Array.from(fileList);
+        const base64Files = await Promise.all(
+            fileArr.map(
+                file =>
+                    new Promise<{ name: string; type: string; base64: string }>((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const result = reader.result as string | undefined;
+                            // add base64 data prefix
+                            const base64 = `data:${file.type};base64,${result?.split(',')[1]}`;
+                            resolve({
+                                name: file.name,
+                                type: file.type,
+                                base64,
+                            });
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    })
+            )
+        );
+        setFiles(base64Files);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const validUrls = urls.filter(url => url.trim());
@@ -55,9 +94,13 @@ export default function FestivalCrawlPage() {
         setResult(null);
 
         try {
-            const response = await festivalsApi.crawlFestival<{
-                festival: Festival;
-            }>({ urls: validUrls });
+            // Use the new type for clarity
+            const payload: CrawlFestivalRequest = {
+                urls: validUrls,
+                forcedName: forcedName.trim(),
+                files,
+            };
+            const response = await festivalsApi.crawlFestival<{ festival: Festival }>(payload);
             if (response.status === 'success' && response.data) {
                 setResult({
                     success: true,
@@ -84,6 +127,8 @@ export default function FestivalCrawlPage() {
         setUrls(['']);
         setResult(null);
         setError(null);
+        setForcedName('');
+        setFiles([]);
     };
 
     return (
@@ -162,6 +207,37 @@ export default function FestivalCrawlPage() {
                                     </p>
                                 </div>
 
+                                {/* File Upload Input */}
+                                <div>
+                                    <label htmlFor="fileUpload">Attach Files (PDF or Images, optional)</label>
+                                    <input id="fileUpload" type="file" accept=".pdf,image/*" multiple className="mt-1" onChange={handleFileChange} disabled={isLoading} />
+                                    {files.length > 0 && (
+                                        <ul className="mt-2 text-xs text-gray-600 list-disc ml-5">
+                                            {files.map(f => (
+                                                <li key={f.name}>
+                                                    {f.name} ({f.type})
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    <p className="mt-2 text-sm text-gray-500">You can attach PDF or image files to help the AI extract lineup/schedule data.</p>
+                                </div>
+
+                                {/* Forced Festival Name Input */}
+                                <div>
+                                    <label htmlFor="forcedName">Forced Festival Name (optional)</label>
+                                    <input
+                                        id="forcedName"
+                                        type="text"
+                                        className="mt-1 w-full"
+                                        placeholder="Override detected festival name"
+                                        value={forcedName}
+                                        onChange={e => setForcedName(e.target.value)}
+                                        disabled={isLoading}
+                                    />
+                                    <p className="mt-2 text-sm text-gray-500">If provided, this name will override the name detected from the website(s).</p>
+                                </div>
+
                                 <div className="flex justify-end space-x-3">
                                     <button type="button" onClick={handleReset} className="btn-neutral" disabled={isLoading}>
                                         Reset
@@ -234,7 +310,7 @@ export default function FestivalCrawlPage() {
                                             </div>
 
                                             <div className="mt-4 flex space-x-3">
-                                                <Link href="/admin/festivals" className="link-primary">
+                                                <Link href="/admin/festivals" className="btn-primary-light">
                                                     View All Festivals
                                                 </Link>
                                                 <button onClick={handleReset} className="btn-primary">

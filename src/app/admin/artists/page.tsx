@@ -195,11 +195,28 @@ export default function ArtistsPage() {
 
                                         <div className="flex space-x-2">
                                             <Link href={`/admin/artists/${artist.id}`} className="flex-1 text-center text-sm px-3 py-2 link-primary link-primary bg-primary/20 rounded-3xl">
-                                                View Details
+                                                View
                                             </Link>
                                             <Link href={`/admin/artists/${artist.id}/edit`} className="flex-1 text-center text-sm px-3 py-2 link-secondary bg-secondary/20 rounded-3xl">
                                                 Edit
                                             </Link>
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm(`Are you sure you want to delete artist "${artist.name}"? This action cannot be undone.`)) {
+                                                        artistsApi
+                                                            .deleteArtist(artist.id)
+                                                            .then(() => {
+                                                                setArtists(prev => prev.filter(a => a.id !== artist.id));
+                                                            })
+                                                            .catch(() => {
+                                                                setError('Failed to delete artist');
+                                                            });
+                                                    }
+                                                }}
+                                                className="flex-1 text-center text-sm link-destructive bg-destructive/20 px-3 py-2 rounded-3xl"
+                                            >
+                                                Delete
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

@@ -80,4 +80,11 @@ export interface IArtistRepository {
      * @returns Promise resolving to saved artist
      */
     saveArtist(artist: Artist): Promise<Artist>;
+
+    /**
+     *  Delete artist by ID
+     * @param id Artist identifier
+     * @returns Promise resolving to void
+     */
+    deleteArtist(id: string): Promise<void>;
 }

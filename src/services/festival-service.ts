@@ -5,6 +5,14 @@ import { IFestivalCrawlerService } from '@/services/crawler/interfaces';
 
 interface CreateFestivalData {
     urls: string[];
+    name?: string | undefined; // Optional name, can be used if the crawler does not provide it
+    files?:
+        | {
+              name: string;
+              type: string;
+              base64: string;
+          }[]
+        | undefined; // Optional files, can be used for additional data
 }
 
 export interface IFestivalService {
@@ -34,13 +42,21 @@ export class FestivalService implements IFestivalService {
 
     async createFestival(data: CreateFestivalData): Promise<Festival> {
         this.logger.info(`Creating new festival...`);
-        const newFestival = await this.festivalCrawlerService.crawlFestival(data.urls);
+        const inputs = data.urls;
+        if (data.files && data.files.length > 0) {
+            inputs.push(...data.files.map(file => file.base64));
+        }
+        const newFestival = await this.festivalCrawlerService.crawlFestival(inputs);
         newFestival.id = generateFestivalId({
             name: newFestival.name,
             startDate: newFestival.startDate,
             endDate: newFestival.endDate,
             location: newFestival.location,
         });
+        if (data.name) {
+            this.logger.info(`Overriding festival name with provided name: ${data.name}`);
+            newFestival.name = data.name;
+        }
         return this.festivalRepository.saveFestival(newFestival);
     }
 

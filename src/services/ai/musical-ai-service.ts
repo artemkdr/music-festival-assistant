@@ -5,7 +5,7 @@ import {
     Artist,
     ArtistSchema,
     Festival,
-    FestivalShortSchema,
+    FestivalLooseSchema,
     generateArtistId,
     generateFestivalId,
     generatePerformanceId,
@@ -51,28 +51,71 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
         // add the most important instructions to the end of the prompt
         aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
 
-        const result = await this.aiService.generateObject<z.infer<typeof FestivalShortSchema>>({
+        const result = await this.aiService.generateStreamObject<z.infer<typeof FestivalLooseSchema>>({
             ...aiRequest,
-            schema: FestivalShortSchema,
+            schema: FestivalLooseSchema,
         });
+
+        // check if the result has general information about the festival,
+        // if not, then try to extract it one more time, but only the name, location, start and end dates
+        if (!result.name || !result.location || !result.startDate || !result.endDate) {
+            const festivalInfoSchema = z.object({
+                name: z.string().min(1).max(200),
+                location: z.string().min(1).max(200).optional(),
+                startDate: z.string().datetime().optional(),
+                endDate: z.string().datetime().optional(),
+            });
+            const info = await this.aiService.generateStreamObject<z.infer<typeof festivalInfoSchema>>({
+                ...aiRequest,
+                schema: festivalInfoSchema,
+            });
+            // if we have some information, then use it
+            if (!result.name && info.name) {
+                result.name = info.name;
+            }
+            if (!result.location && info.location) {
+                result.location = info.location;
+            }
+            if (!result.startDate && info.startDate) {
+                result.startDate = info.startDate;
+            }
+            if (!result.endDate && info.endDate) {
+                result.endDate = info.endDate;
+            }
+        }
+
+        // try to extract stages from performances if they are not present
+        if (!result.stages) {
+            const stages = new Set<string>();
+            result.performances.forEach(performance => {
+                if (performance.stage) {
+                    stages.add(performance.stage);
+                }
+            });
+            result.stages = Array.from(stages);
+        }
+
         // result is a partial Festival object, we need to generate a proper Festival object
         const festival: Festival = {
             id: generateFestivalId({
                 name: result.name,
-                location: result.location,
-                startDate: result.startDate,
-                endDate: result.endDate,
+                location: result.location || 'N/A',
+                startDate: result.startDate || new Date().toISOString(),
+                endDate: result.endDate || new Date().toISOString(),
             }),
             name: result.name,
-            location: result.location,
-            startDate: result.startDate,
-            endDate: result.endDate,
+            location: result.location || 'N/A',
+            startDate: result.startDate || 'N/A',
+            endDate: result.endDate || 'N/A',
             description: result.description,
             imageUrl: result.imageUrl,
             stages: result.stages || [],
             performances: result.performances.map(performance => ({
-                ...performance,
                 id: generatePerformanceId(result.name),
+                startTime: performance.startTime || '',
+                endTime: performance.endTime || '',
+                stage: performance.stage || '',
+                day: performance.day || 0,
                 artist: {
                     ...performance.artist,
                     id: generateArtistId(),

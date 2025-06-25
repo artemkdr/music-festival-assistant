@@ -97,8 +97,7 @@ export class ArtistService implements IArtistService {
 
     async deleteArtist(id: string): Promise<void> {
         this.logger.info(`Deleting artist with ID: ${id}`);
-        throw new Error('Delete operation is not implemented yet.');
-        //await this.repository.deleteArtist(id);
+        await this.repository.deleteArtist(id);
     }
 
     async getAllArtists(): Promise<Artist[]> {

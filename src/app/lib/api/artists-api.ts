@@ -12,6 +12,12 @@ class ArtistsApi {
         return this.client.request<ArtistDetails>(`/admin/artists/${id}`);
     }
 
+    async deleteArtist(id: string): Promise<ApiResponse> {
+        return this.client.request(`/admin/artists/${id}`, {
+            method: 'DELETE',
+        });
+    }
+
     async updateArtist(id: string, artistData: Partial<ArtistDetails>): Promise<ApiResponse<ArtistDetails>> {
         return this.client.request<ArtistDetails>(`/admin/artists/${id}`, {
             method: 'PUT',

@@ -117,3 +117,43 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
         );
     }
 }
+
+export async function DELETE(request: NextRequest, { params }: RouteParams): Promise<Response> {
+    const container = DIContainer.getInstance();
+    const logger = container.getLogger();
+    const artistService = container.getArtistService();
+    const { id } = await params;
+
+    try {
+        logger.info('Admin artist delete request received', { artistId: id });
+
+        // Check if artist exists
+        const existingArtist = await artistService.getArtistById(id);
+        if (!existingArtist) {
+            return NextResponse.json(
+                {
+                    status: 'error',
+                    message: `Artist not found: ${id}`,
+                },
+                { status: 404 }
+            );
+        }
+
+        // Delete artist
+        await artistService.deleteArtist(id);
+
+        return NextResponse.json({
+            status: 'success',
+            message: 'Artist deleted successfully',
+        });
+    } catch (error) {
+        logger.error('Failed to delete artist', error instanceof Error ? error : new Error(String(error)));
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Failed to delete artist',
+            },
+            { status: 500 }
+        );
+    }
+}

@@ -13,6 +13,16 @@ import { z } from 'zod';
  */
 const CrawlFestivalRequestSchema = z.object({
     urls: z.array(z.string().url('Must be a valid URL')).min(1, 'At least one URL is required').max(10, 'Maximum 10 URLs allowed'),
+    forcedName: z.string().min(2).max(200).optional(),
+    files: z
+        .array(
+            z.object({
+                name: z.string().min(2).max(100),
+                type: z.string().min(2).max(100),
+                base64: z.string().min(2).max(50000),
+            })
+        )
+        .optional(),
 });
 
 /**
@@ -40,6 +50,8 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
         try {
             const festival = await festivalService.createFestival({
                 urls: validatedRequest.urls,
+                name: validatedRequest.forcedName,
+                files: validatedRequest.files,
             });
             logger.info('Festival created', {
                 festivalId: festival.id,

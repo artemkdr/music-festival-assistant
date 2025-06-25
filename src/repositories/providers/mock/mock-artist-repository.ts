@@ -70,4 +70,15 @@ export class MockArtistRepository implements IArtistRepository {
 
         return artist;
     }
+
+    async deleteArtist(id: string): Promise<void> {
+        this.logger.debug('Deleting artist', { artistId: id });
+        const index = this.artists.findIndex(a => a.id === id);
+        if (index >= 0) {
+            this.artists.splice(index, 1);
+            this.logger.info('Deleted artist', { artistId: id });
+        } else {
+            this.logger.warn('Artist not found for deletion', { artistId: id });
+        }
+    }
 }

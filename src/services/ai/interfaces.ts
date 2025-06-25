@@ -100,6 +100,11 @@ export interface IAIService {
     generateObject<T>(request: SchemaAIRequest<T>): Promise<T>;
 
     /**
+     * Extract structured data using AI as a stream
+     */
+    generateStreamObject<T>(request: SchemaAIRequest<T>): Promise<T>;
+
+    /**
      * Match and normalize artist names
     
     matchArtist(request: ArtistMatchingRequest): Promise<{

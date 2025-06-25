@@ -201,9 +201,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                                 key={genre}
                                 type="button"
                                 onClick={() => handleGenreToggle(genre)}
-                                className={`text-sm transition-colors ${
-                                    selectedGenres.includes(genre) ? 'btn-primary' : 'btn-primary-light border-1 border-primary/30'
-                                }`}
+                                className={`text-sm transition-colors ${selectedGenres.includes(genre) ? 'btn-primary' : 'btn-primary-light border-1 border-primary/30'}`}
                                 disabled={isLoading}
                             >
                                 {genre}
@@ -279,7 +277,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
                 {/* Submit Button */}
                 <div className="flex justify-center">
-                    <button type="submit" disabled={isLoading} className='btn-primary w-full md:w-auto px-6 py-4'>
+                    <button type="submit" disabled={isLoading} className="btn-primary w-full md:w-auto px-6 py-4">
                         {isLoading ? (
                             <span className="flex items-center justify-center">
                                 <span className="animate-spin mr-2">⏳</span>

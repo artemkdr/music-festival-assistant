@@ -7,11 +7,12 @@
 import { AdminLayout } from '@/app/components/admin/admin-layout';
 import { ProtectedRoute } from '@/app/components/protected-route';
 import { artistsApi, festivalsApi, spotifyApi, SpotifySearchResult } from '@/app/lib/api';
+import type { Artist, Festival, Performance } from '@/app/lib/api/types';
+import { buildDateTimeRange, formatDate, formatDateTime, formatTime, parseDate } from '@/utils/date-util';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
-import type { Artist, Festival, Performance } from '@/app/lib/api/types';
+import React, { useEffect, useState } from 'react';
 
 interface FestivalFormData {
     name?: string;
@@ -100,8 +101,8 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                 setAvailableArtists(artistsData);
 
                 // Convert ISO dates to date input format (YYYY-MM-DD)
-                const startDateForInput = festivalData.startDate ? festivalData.startDate.split('T')[0] : '';
-                const endDateForInput = festivalData.endDate ? festivalData.endDate.split('T')[0] : '';
+                const startDateForInput = formatDate(parseDate(festivalData.startDate, new Date()));
+                const endDateForInput = formatDate(parseDate(festivalData.endDate, new Date()));
 
                 setFormData({
                     name: festivalData.name,
@@ -143,9 +144,9 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             artistName: '',
             isNewArtist: false,
             startDate: formData.startDate || '',
-            startTime: '',
+            startTime: '20:00',
             endDate: formData.startDate || '',
-            endTime: '',
+            endTime: '21:00',
             stage: '',
             day: 1,
         });
@@ -154,18 +155,20 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
 
     const handleEditPerformance = (performance: Performance) => {
         setEditingPerformanceId(performance.id);
-        const start = new Date(performance.startTime);
-        const end = new Date(performance.endTime);
+        const performanceStartDate = parseDate(festival?.startDate || '', new Date());
+        // add perforance days
+        performanceStartDate.setDate(performanceStartDate.getDate() + performance.day - 1);
+        const [start, end] = buildDateTimeRange(performanceStartDate, performance.startTime, performance.endTime);
 
         setPerformanceFormData({
             id: performance.id,
             artistId: performance.artistId,
             artistName: performance.artist.name,
             isNewArtist: false,
-            startDate: start.toISOString().split('T')[0] || '',
-            startTime: start.toTimeString().substring(0, 5),
-            endDate: end.toISOString().split('T')[0] || '',
-            endTime: end.toTimeString().substring(0, 5),
+            startDate: formatDate(start) || '',
+            startTime: formatTime(start) || '',
+            endDate: formatDate(end) || '',
+            endTime: formatTime(end) || '',
             stage: performance.stage,
             day: performance.day,
         });
@@ -235,18 +238,40 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             setIsSaving(true);
             setError(null);
 
-            // Convert dates back to ISO format
+            // Prepare form data
             const cleanedFormData = {
-                ...formData,
+                name: formData.name?.trim() || '',
+                location: formData.location?.trim() || '',
+                description: formData.description?.trim() || '',
+                website: formData.website?.trim() || undefined,
+                imageUrl: formData.imageUrl?.trim() || undefined,
                 startDate: formData.startDate ? new Date(formData.startDate).toISOString() : '',
                 endDate: formData.endDate ? new Date(formData.endDate).toISOString() : '',
-                performances: performances,
+                performances: performances.map(performance => {
+                    const performanceStartDate = parseDate(festival?.startDate || '', new Date());
+                    performanceStartDate.setDate(performanceStartDate.getDate() + performance.day - 1); // Adjust start date based on performance day
+                    const [start, end] = buildDateTimeRange(performanceStartDate, performance.startTime, performance.endTime);
+                    const artistId = performance.artistId || performance.artist.id;
+                    return {
+                        id: performance.id,
+                        artistId: artistId,
+                        startTime: start.toISOString(),
+                        endTime: end.toISOString(),
+                        stage: performance.stage,
+                        day: performance.day || 1,
+                        artist: {
+                            id: artistId,
+                            name: performance.artist.name,
+                        },
+                    };
+                }),
             };
 
             const response = await festivalsApi.updateFestival(id, cleanedFormData);
 
             if (response.status !== 'success') {
-                throw new Error(response.message || 'Failed to update festival');
+                setError(response.message || 'Failed to save festival');
+                return;
             }
 
             // Redirect back to festival detail page
@@ -416,24 +441,30 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                 {!isEditingPerformance ? (
                                     <div>
                                         <ul className="space-y-3">
-                                            {performances.map(p => (
-                                                <li key={p.id} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
-                                                    <div>
-                                                        <p className="font-semibold">{p.artist.name}</p>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {new Date(p.startTime).toLocaleString()} - {new Date(p.endTime).toLocaleString()} on {p.stage}
-                                                        </p>
-                                                    </div>
-                                                    <div className="space-x-2">
-                                                        <button type="button" onClick={() => handleEditPerformance(p)} className="btn-primary-light">
-                                                            Edit
-                                                        </button>
-                                                        <button type="button" onClick={() => handleDeletePerformance(p.id)} className="btn-destructive-light">
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                            ))}
+                                            {performances.map(p => {
+                                                const performanceStartDate = parseDate(festival?.startDate || '', new Date());
+                                                performanceStartDate.setDate(performanceStartDate.getDate() + p.day - 1); // Adjust start date based on performance day
+                                                // Build start and end times
+                                                const [startDate, endDate] = buildDateTimeRange(performanceStartDate, p.startTime, p.endTime);
+                                                return (
+                                                    <li key={p.id} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
+                                                        <div>
+                                                            <p className="font-semibold">{p.artist.name}</p>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {formatDateTime(startDate)} - {formatDateTime(endDate)} on {p.stage}
+                                                            </p>
+                                                        </div>
+                                                        <div className="space-x-2">
+                                                            <button type="button" onClick={() => handleEditPerformance(p)} className="btn-primary-light">
+                                                                Edit
+                                                            </button>
+                                                            <button type="button" onClick={() => handleDeletePerformance(p.id)} className="btn-destructive-light">
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                         <button type="button" onClick={handleAddNewPerformance} className="mt-4 btn-primary-light">
                                             + Add Performance

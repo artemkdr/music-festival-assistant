@@ -18,25 +18,23 @@ export const FestivalSchema = z.object({
 });
 
 // Simplified festival schema for AI responses
-export const FestivalShortSchema = FestivalSchema.pick({
-    name: true,
-    description: true,
-    location: true,
-    startDate: true,
-    endDate: true,
-    website: true,
-    imageUrl: true,
-    stages: true,
-}).extend({
+export const FestivalLooseSchema = z.object({
+    id: z.string().min(1),
+    name: z.string().min(1).max(200),
+    description: z.string().max(2000).optional(),
+    location: z.string().min(1).max(200).optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
+    website: z.string().url().optional(),
+    imageUrl: z.string().url().optional(),
+    stages: z.array(z.string()).min(1).optional(),
     performances: z.array(
-        PerformanceSchema.pick({
-            id: true,
-            artist: true,
-            startTime: true,
-            endTime: true,
-            stage: true,
-            day: true,
-        }).extend({
+        z.object({
+            id: z.string().optional(),
+            startTime: z.string().optional(),
+            endTime: z.string().optional(),
+            stage: z.string().optional(),
+            day: z.number().optional(),
             artist: z.object({
                 name: z.string().min(1).max(200),
             }),

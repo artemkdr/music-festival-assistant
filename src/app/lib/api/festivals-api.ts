@@ -22,7 +22,7 @@ class FestivalsApi {
     /**
      * Admin: Crawl festival
      */
-    async crawlFestival<T>(data: { urls: string[] } | string): Promise<ApiResponse<T>> {
+    async crawlFestival<T>(data: { urls: string[]; forcedName?: string | undefined; files?: { name: string; type: string; base64: string }[] | undefined }): Promise<ApiResponse<T>> {
         // Support backward compatibility with single URL string
         const requestBody = typeof data === 'string' ? { urls: [data] } : data;
 

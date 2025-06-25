@@ -82,4 +82,22 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         await this.writeJsonFile(this.filename, artists);
         return artist;
     }
+
+    /**
+     * Delete artist from local storage
+     * @param id Artist identifier
+     */
+    async deleteArtist(id: string): Promise<void> {
+        this.logger.debug('Deleting artist from local storage', { artistId: id });
+        const artists = await this.readJsonFile<Artist>(this.filename);
+        const index = artists.findIndex(a => a.id === id);
+
+        if (index >= 0) {
+            artists.splice(index, 1);
+            await this.writeJsonFile(this.filename, artists);
+            this.logger.info('Deleted artist from local storage', { artistId: id });
+        } else {
+            this.logger.warn('Artist not found for deletion', { artistId: id });
+        }
+    }
 }

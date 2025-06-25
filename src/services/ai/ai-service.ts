@@ -4,7 +4,7 @@ import { createVertex } from '@ai-sdk/google-vertex';
 import { openai } from '@ai-sdk/openai';
 import { groq } from '@ai-sdk/groq';
 import { LanguageModelV1 } from '@ai-sdk/provider';
-import { generateObject, generateText } from 'ai';
+import { generateObject, generateText, streamObject } from 'ai';
 
 export class AIService implements IAIService {
     private readonly maxTokens: number;
@@ -114,6 +114,55 @@ export class AIService implements IAIService {
                 maxRetries: this.maxRetries,
             });
             return result.object as T;
+        } catch (error) {
+            this.logger.error('AI object generation failed', error instanceof Error ? error : new Error(String(error)));
+            throw new Error(`AI object generation failed: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
+
+    /**
+     * Extract structured data using AI service
+     */
+    async generateStreamObject<T>(request: SchemaAIRequest<T>): Promise<T> {
+        try {
+            const result = streamObject<T>({
+                model: this.model,
+                messages: [
+                    {
+                        role: 'system',
+                        content: request.systemPrompt || 'You are an AI assistant that extracts structured data.',
+                    },
+                    {
+                        role: 'user',
+                        content: [
+                            {
+                                type: 'text',
+                                text: request.prompt,
+                            },
+                            ...(request.files
+                                ? request.files
+                                      .filter(file => !!file.uri || !!file.data)
+                                      .map(file => ({
+                                          type: 'file' as const,
+                                          mimeType: file.mimeType,
+                                          data: (file.uri ?? file.data)!,
+                                      }))
+                                : []),
+                        ],
+                    },
+                ],
+                schema: request.schema,
+                maxTokens: this.maxTokens,
+                temperature: this.temperature,
+                maxRetries: this.maxRetries,
+            });
+            let chunkCount = 0;
+            for await (const chunk of result.partialObjectStream) {
+                console.log('chunk received:', chunkCount, chunk);
+                chunkCount++;
+            }
+
+            return (await result.object) as T;
         } catch (error) {
             this.logger.error('AI object generation failed', error instanceof Error ? error : new Error(String(error)));
             throw new Error(`AI object generation failed: ${error instanceof Error ? error.message : String(error)}`);
