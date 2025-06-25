@@ -100,12 +100,7 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                     Edit Artist
                                 </Link>
                                 {artist.streamingLinks?.spotify && (
-                                    <Link
-                                        href={artist.streamingLinks.spotify}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn-secondary"
-                                    >
+                                    <Link href={artist.streamingLinks.spotify} target="_blank" rel="noopener noreferrer" className="btn-secondary">
                                         View on Spotify
                                     </Link>
                                 )}

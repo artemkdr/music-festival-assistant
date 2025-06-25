@@ -9,7 +9,7 @@ import { ProtectedRoute } from '@/app/components/protected-route';
 import { artistsApi } from '@/app/lib/api';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { Usable, useState } from 'react';
+import React, { useState } from 'react';
 
 interface CrawlResult {
     name: string;
@@ -21,8 +21,7 @@ interface CrawlResponse {
     results: CrawlResult[];
 }
 
-
-export default function ArtistsCrawlPage() {    
+export default function ArtistsCrawlPage() {
     const [crawlMode, setCrawlMode] = useState<'names' | 'festival'>('names');
     const [artistNames, setArtistNames] = useState('');
     const [festivalId, setFestivalId] = useState(useSearchParams().get('festivalId') || '');
@@ -165,9 +164,7 @@ export default function ArtistsCrawlPage() {
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {crawlMode === 'names' && (
                                     <div>
-                                        <label htmlFor="artistNames">
-                                            Artist Names (one per line)
-                                        </label>
+                                        <label htmlFor="artistNames">Artist Names (one per line)</label>
                                         <div className="mt-1">
                                             <textarea
                                                 name="artistNames"
@@ -175,7 +172,7 @@ export default function ArtistsCrawlPage() {
                                                 rows={8}
                                                 required
                                                 value={artistNames}
-                                                onChange={e => setArtistNames(e.target.value)}                                                
+                                                onChange={e => setArtistNames(e.target.value)}
                                                 placeholder="Arctic Monkeys&#10;Tame Impala&#10;Glass Animals&#10;..."
                                                 disabled={isLoading}
                                             />
@@ -186,9 +183,7 @@ export default function ArtistsCrawlPage() {
 
                                 {crawlMode === 'festival' && (
                                     <div>
-                                        <label htmlFor="festivalId">
-                                            Festival ID
-                                        </label>
+                                        <label htmlFor="festivalId">Festival ID</label>
                                         <div className="mt-1">
                                             <input
                                                 type="text"
@@ -196,7 +191,7 @@ export default function ArtistsCrawlPage() {
                                                 id="festivalId"
                                                 required
                                                 value={festivalId}
-                                                onChange={e => setFestivalId(e.target.value)}                                                
+                                                onChange={e => setFestivalId(e.target.value)}
                                                 placeholder="festival-id"
                                                 disabled={isLoading}
                                             />
@@ -206,25 +201,14 @@ export default function ArtistsCrawlPage() {
                                 )}
 
                                 <div className="flex items-center">
-                                    <input
-                                        id="forceRecrawl"
-                                        name="forceRecrawl"
-                                        type="checkbox"
-                                        checked={forceRecrawl}
-                                        onChange={e => setForceRecrawl(e.target.checked)}
-                                    />
+                                    <input id="forceRecrawl" name="forceRecrawl" type="checkbox" checked={forceRecrawl} onChange={e => setForceRecrawl(e.target.checked)} />
                                     <label htmlFor="forceRecrawl" className="ml-2">
                                         Force re-crawl existing artists
                                     </label>
                                 </div>
 
                                 <div className="flex justify-end space-x-3">
-                                    <button
-                                        type="button"
-                                        onClick={handleReset}
-                                        className="btn-neutral"
-                                        disabled={isLoading}
-                                    >
+                                    <button type="button" onClick={handleReset} className="btn-neutral" disabled={isLoading}>
                                         Reset
                                     </button>
                                     <button

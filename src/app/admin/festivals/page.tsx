@@ -114,16 +114,10 @@ export default function FestivalsPage() {
                                         </div>
 
                                         <div className="flex space-x-2">
-                                            <Link
-                                                href={`/admin/festivals/${festival.id}`}
-                                                className="flex-1 btn-primary-light border-1 border-primary/50 bg-primary/10 text-center"
-                                            >
+                                            <Link href={`/admin/festivals/${festival.id}`} className="flex-1 btn-primary-light border-1 border-primary/50 bg-primary/10 text-center">
                                                 View Details
                                             </Link>
-                                            <Link
-                                                href={`/admin/festivals/${festival.id}/edit`}
-                                                className="flex-1 btn-secondary-light border-1 border-secondary/50 bg-secondary/10 text-center"
-                                            >
+                                            <Link href={`/admin/festivals/${festival.id}/edit`} className="flex-1 btn-secondary-light border-1 border-secondary/50 bg-secondary/10 text-center">
                                                 Edit
                                             </Link>
                                         </div>

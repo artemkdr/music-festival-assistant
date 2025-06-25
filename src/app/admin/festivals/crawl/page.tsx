@@ -113,7 +113,7 @@ export default function FestivalCrawlPage() {
                                                         type="url"
                                                         required={index === 0}
                                                         value={url}
-                                                        onChange={e => handleUrlChange(index, e.target.value)}                                                        
+                                                        onChange={e => handleUrlChange(index, e.target.value)}
                                                         placeholder={`https://festival-${index + 1}.com`}
                                                         disabled={isLoading}
                                                     />
@@ -163,19 +163,10 @@ export default function FestivalCrawlPage() {
                                 </div>
 
                                 <div className="flex justify-end space-x-3">
-                                    <button
-                                        type="button"
-                                        onClick={handleReset}
-                                        className="btn-neutral"
-                                        disabled={isLoading}
-                                    >
+                                    <button type="button" onClick={handleReset} className="btn-neutral" disabled={isLoading}>
                                         Reset
                                     </button>
-                                    <button
-                                        type="submit"
-                                        disabled={isLoading || urls.filter(u => u.trim()).length === 0}
-                                        className="btn-primary"
-                                    >
+                                    <button type="submit" disabled={isLoading || urls.filter(u => u.trim()).length === 0} className="btn-primary">
                                         {isLoading ? (
                                             <>
                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>

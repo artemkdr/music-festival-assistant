@@ -201,8 +201,8 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                                 key={genre}
                                 type="button"
                                 onClick={() => handleGenreToggle(genre)}
-                                className={`px-3 py-2 text-sm rounded-md border transition-colors ${
-                                    selectedGenres.includes(genre) ? 'bg-primary text-primary-foreground border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                className={`text-sm transition-colors ${
+                                    selectedGenres.includes(genre) ? 'btn-primary' : 'btn-primary-light border-1 border-primary/30'
                                 }`}
                                 disabled={isLoading}
                             >
@@ -212,6 +212,23 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                     </div>
                     {errors.genres && <p className="mt-2 text-sm text-red-600">{errors.genres}</p>}
                     <p className="mt-2 text-sm text-gray-500">Select genres you enjoy ({selectedGenres.length} selected)</p>
+                </div>
+
+                {/* Additional Preferences (Free Text) */}
+                <div>
+                    <label htmlFor="user-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Preferences
+                    </label>
+                    <textarea
+                        id="user-notes"
+                        value={userNotes}
+                        maxLength={500}
+                        onChange={e => setUserNotes(e.target.value)}
+                        placeholder="Tell us anything else about your music taste, artists, or festival experience..."
+                        className="input w-full min-h-[80px] resize-y border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                        disabled={isLoading}
+                    />
+                    <p className="mt-1 text-sm text-gray-500">Add any extra info to help us personalize your recommendations</p>
                 </div>
 
                 {/* Discovery Mode */}
@@ -260,26 +277,9 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                     </div>
                 </div>
 
-                {/* Additional Preferences (Free Text) */}
-                <div>
-                    <label htmlFor="user-notes" className="block text-sm font-medium text-gray-700 mb-2">
-                        Additional Preferences (optional)
-                    </label>
-                    <textarea
-                        id="user-notes"
-                        value={userNotes}
-                        maxLength={500}
-                        onChange={e => setUserNotes(e.target.value)}
-                        placeholder="Tell us anything else about your music taste, artists, or festival experience..."
-                        className="input w-full min-h-[80px] resize-y border-gray-300 rounded-md focus:ring-primary focus:border-primary"
-                        disabled={isLoading}
-                    />
-                    <p className="mt-1 text-sm text-gray-500">Add any extra info to help us personalize your recommendations</p>
-                </div>
-
                 {/* Submit Button */}
-                <div className="pt-4">
-                    <button type="submit" disabled={isLoading} className={`btn-primary w-full md:w-auto ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <div className="flex justify-center">
+                    <button type="submit" disabled={isLoading} className='btn-primary w-full md:w-auto px-6 py-4'>
                         {isLoading ? (
                             <span className="flex items-center justify-center">
                                 <span className="animate-spin mr-2">⏳</span>

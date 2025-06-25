@@ -157,7 +157,6 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         const start = new Date(performance.startTime);
         const end = new Date(performance.endTime);
 
-
         setPerformanceFormData({
             id: performance.id,
             artistId: performance.artistId,
@@ -352,13 +351,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
                                         <label htmlFor="name">Festival Name *</label>
-                                        <input
-                                            type="text"
-                                            id="name"
-                                            required
-                                            value={formData.name || ''}
-                                            onChange={e => handleInputChange('name', e.target.value)}
-                                        />
+                                        <input type="text" id="name" required value={formData.name || ''} onChange={e => handleInputChange('name', e.target.value)} />
                                     </div>
 
                                     <div>
@@ -377,37 +370,19 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
                                         <label htmlFor="startDate">Start Date *</label>
-                                        <input
-                                            type="date"
-                                            id="startDate"
-                                            required
-                                            value={formData.startDate || ''}
-                                            onChange={e => handleInputChange('startDate', e.target.value)}
-                                        />
+                                        <input type="date" id="startDate" required value={formData.startDate || ''} onChange={e => handleInputChange('startDate', e.target.value)} />
                                     </div>
 
                                     <div>
                                         <label htmlFor="endDate">End Date *</label>
-                                        <input
-                                            type="date"
-                                            id="endDate"
-                                            required
-                                            value={formData.endDate || ''}
-                                            onChange={e => handleInputChange('endDate', e.target.value)}
-                                        />
+                                        <input type="date" id="endDate" required value={formData.endDate || ''} onChange={e => handleInputChange('endDate', e.target.value)} />
                                     </div>
                                 </div>
 
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
                                         <label htmlFor="website">Website URL</label>
-                                        <input
-                                            type="url"
-                                            id="website"
-                                            value={formData.website || ''}
-                                            onChange={e => handleInputChange('website', e.target.value)}
-                                            placeholder="https://example.com"
-                                        />
+                                        <input type="url" id="website" value={formData.website || ''} onChange={e => handleInputChange('website', e.target.value)} placeholder="https://example.com" />
                                     </div>
 
                                     <div>
@@ -511,7 +486,9 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                                     {artist.images && artist.images[0] && <Image src={artist.images[0].url} alt={artist.name} className="w-8 h-8 rounded mr-2" />}
                                                                     <button type="button" className="text-left flex-1 hover:underline" onClick={() => handleSelectSpotifyArtist(artist)}>
                                                                         <span className="font-medium">{artist.name}</span>
-                                                                        {artist.genres && artist.genres.length > 0 && <span className="ml-2 text-xs text-muted-foreground">({artist.genres.join(', ')})</span>}
+                                                                        {artist.genres && artist.genres.length > 0 && (
+                                                                            <span className="ml-2 text-xs text-muted-foreground">({artist.genres.join(', ')})</span>
+                                                                        )}
                                                                     </button>
                                                                 </li>
                                                             ))}
@@ -522,11 +499,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                         ) : (
                                             <div className="mt-4">
                                                 <label htmlFor="artistId">Artist *</label>
-                                                <select
-                                                    id="artistId"
-                                                    value={performanceFormData.artistId}
-                                                    onChange={e => handlePerformanceInputChange('artistId', e.target.value)}
-                                                >
+                                                <select id="artistId" value={performanceFormData.artistId} onChange={e => handlePerformanceInputChange('artistId', e.target.value)}>
                                                     <option value="">Select an artist</option>
                                                     {availableArtists.map(artist => (
                                                         <option key={artist.id} value={artist.id}>
@@ -540,40 +513,20 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                         <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-3">
                                             <div>
                                                 <label htmlFor="perfStartDate">Date *</label>
-                                                <input
-                                                    type="date"
-                                                    id="perfStartDate"
-                                                    value={performanceFormData.startDate}
-                                                    onChange={e => handlePerformanceInputChange('startDate', e.target.value)}
-                                                />
+                                                <input type="date" id="perfStartDate" value={performanceFormData.startDate} onChange={e => handlePerformanceInputChange('startDate', e.target.value)} />
                                             </div>
                                             <div>
                                                 <label htmlFor="perfStartTime">Start Time *</label>
-                                                <input
-                                                    type="time"
-                                                    id="perfStartTime"
-                                                    value={performanceFormData.startTime}
-                                                    onChange={e => handlePerformanceInputChange('startTime', e.target.value)}
-                                                />
+                                                <input type="time" id="perfStartTime" value={performanceFormData.startTime} onChange={e => handlePerformanceInputChange('startTime', e.target.value)} />
                                             </div>
                                             <div>
                                                 <label htmlFor="perfEndTime">End Time *</label>
-                                                <input
-                                                    type="time"
-                                                    id="perfEndTime"
-                                                    value={performanceFormData.endTime}
-                                                    onChange={e => handlePerformanceInputChange('endTime', e.target.value)}
-                                                />
+                                                <input type="time" id="perfEndTime" value={performanceFormData.endTime} onChange={e => handlePerformanceInputChange('endTime', e.target.value)} />
                                             </div>
-                                        </div>                                        
+                                        </div>
                                         <div className="mt-4">
                                             <label htmlFor="stage">Stage *</label>
-                                            <input
-                                                type="text"
-                                                id="stage"
-                                                value={performanceFormData.stage}
-                                                onChange={e => handlePerformanceInputChange('stage', e.target.value)}
-                                            />
+                                            <input type="text" id="stage" value={performanceFormData.stage} onChange={e => handlePerformanceInputChange('stage', e.target.value)} />
                                         </div>
                                         {/* Spotify Artist Search */}
                                         {!performanceFormData.isNewArtist && (
@@ -630,18 +583,10 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                         )}
 
                                         <div className="mt-6 flex justify-end space-x-3">
-                                            <button
-                                                type="button"
-                                                onClick={handleCancelEditPerformance}
-                                                className="btn-neutral"
-                                            >
+                                            <button type="button" onClick={handleCancelEditPerformance} className="btn-neutral">
                                                 Cancel
                                             </button>
-                                            <button
-                                                type="button"
-                                                onClick={handleSavePerformance}
-                                                className="btn-primary"
-                                            >
+                                            <button type="button" onClick={handleSavePerformance} className="btn-primary">
                                                 Save Performance
                                             </button>
                                         </div>
@@ -651,17 +596,10 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
 
                             {/* Submit Buttons */}
                             <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                                <Link
-                                    href={`/admin/festivals/${id}`}
-                                    className="btn-neutral"
-                                >
+                                <Link href={`/admin/festivals/${id}`} className="btn-neutral">
                                     Cancel
                                 </Link>
-                                <button
-                                    type="submit"
-                                    disabled={isSaving}
-                                    className="btn-primary"
-                                >
+                                <button type="submit" disabled={isSaving} className="btn-primary">
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
                             </div>

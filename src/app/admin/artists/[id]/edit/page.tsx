@@ -227,37 +227,18 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                 <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="name">
-                                            Artist Name *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="name"
-                                            required
-                                            value={formData.name || ''}
-                                            onChange={e => handleInputChange('name', e.target.value)}
-                                            className="mt-1 block w-full"
-                                        />
+                                        <label htmlFor="name">Artist Name *</label>
+                                        <input type="text" id="name" required value={formData.name || ''} onChange={e => handleInputChange('name', e.target.value)} className="mt-1 block w-full" />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="imageUrl">
-                                            Image URL
-                                        </label>
-                                        <input
-                                            type="url"
-                                            id="imageUrl"
-                                            value={formData.imageUrl || ''}
-                                            onChange={e => handleInputChange('imageUrl', e.target.value)}
-                                            className="mt-1 block w-ful"
-                                        />
+                                        <label htmlFor="imageUrl">Image URL</label>
+                                        <input type="url" id="imageUrl" value={formData.imageUrl || ''} onChange={e => handleInputChange('imageUrl', e.target.value)} className="mt-1 block w-ful" />
                                     </div>
                                 </div>
 
                                 <div className="mt-4">
-                                    <label htmlFor="description">
-                                        Description
-                                    </label>
+                                    <label htmlFor="description">Description</label>
                                     <textarea
                                         id="description"
                                         rows={4}
@@ -275,13 +256,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                 <div className="space-y-2">
                                     {(formData.genre || []).map((genre, index) => (
                                         <div key={index} className="flex items-center space-x-2">
-                                            <input
-                                                type="text"
-                                                value={genre}
-                                                onChange={e => handleGenreChange(index, e.target.value)}
-                                                className="flex-1"
-                                                placeholder="Genre name"
-                                            />
+                                            <input type="text" value={genre} onChange={e => handleGenreChange(index, e.target.value)} className="flex-1" placeholder="Genre name" />
                                             <button type="button" onClick={() => removeGenre(index)} className="btn-destructive-light">
                                                 Remove
                                             </button>
@@ -298,9 +273,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                 <h2 className="text-lg font-medium text-gray-900 mb-4">Streaming Links</h2>
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="spotify">
-                                            Spotify URL
-                                        </label>
+                                        <label htmlFor="spotify">Spotify URL</label>
                                         <input
                                             type="url"
                                             id="spotify"
@@ -311,9 +284,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="appleMusic" >
-                                            Apple Music URL
-                                        </label>
+                                        <label htmlFor="appleMusic">Apple Music URL</label>
                                         <input
                                             type="url"
                                             id="appleMusic"
@@ -324,9 +295,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="youtube" >
-                                            YouTube URL
-                                        </label>
+                                        <label htmlFor="youtube">YouTube URL</label>
                                         <input
                                             type="url"
                                             id="youtube"
@@ -337,9 +306,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="soundcloud" >
-                                            SoundCloud URL
-                                        </label>
+                                        <label htmlFor="soundcloud">SoundCloud URL</label>
                                         <input
                                             type="url"
                                             id="soundcloud"
@@ -356,9 +323,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                 <h2 className="text-lg font-medium text-gray-900 mb-4">Social Links</h2>
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <label htmlFor="website">
-                                            Website
-                                        </label>
+                                        <label htmlFor="website">Website</label>
                                         <input
                                             type="url"
                                             id="website"
@@ -369,9 +334,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="instagram">
-                                            Instagram
-                                        </label>
+                                        <label htmlFor="instagram">Instagram</label>
                                         <input
                                             type="url"
                                             id="instagram"
@@ -382,9 +345,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="twitter">
-                                            Twitter
-                                        </label>
+                                        <label htmlFor="twitter">Twitter</label>
                                         <input
                                             type="url"
                                             id="twitter"
@@ -395,9 +356,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="facebook">
-                                            Facebook
-                                        </label>
+                                        <label htmlFor="facebook">Facebook</label>
                                         <input
                                             type="url"
                                             id="facebook"
@@ -411,20 +370,13 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
 
                             {/* Submit Buttons */}
                             <div className="flex flex-wrap justify-end space-x-3 pt-6 border-t border-gray-200">
-                                <Link
-                                    href={`/admin/artists/${artistId}`}
-                                    className="btn-neutral"
-                                >
+                                <Link href={`/admin/artists/${artistId}`} className="btn-neutral">
                                     Cancel
                                 </Link>
                                 <button type="button" className="btn-primary-light border-1 border-primary" onClick={() => setShowRecrawl(v => !v)}>
                                     {showRecrawl ? 'Cancel Re-crawl' : 'Re-crawl Artist'}
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={isSaving}
-                                    className="btn-primary"
-                                >
+                                <button type="submit" disabled={isSaving} className="btn-primary">
                                     {isSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
                             </div>
@@ -440,28 +392,15 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                     </div>
                                     <div>
                                         <label>Artist Name</label>
-                                        <input
-                                            type="text"
-                                            value={recrawlForm.name}
-                                            onChange={e => handleRecrawlInput('name', e.target.value)}
-                                            required
-                                        />
+                                        <input type="text" value={recrawlForm.name} onChange={e => handleRecrawlInput('name', e.target.value)} required />
                                     </div>
                                     <div>
                                         <label>Spotify ID</label>
-                                        <input
-                                            type="text"
-                                            value={recrawlForm.spotifyId}
-                                            onChange={e => handleRecrawlInput('spotifyId', e.target.value)}
-                                        />
+                                        <input type="text" value={recrawlForm.spotifyId} onChange={e => handleRecrawlInput('spotifyId', e.target.value)} />
                                     </div>
                                     <div>
                                         <label>Context</label>
-                                        <input
-                                            type="text"
-                                            value={recrawlForm.context}
-                                            onChange={e => handleRecrawlInput('context', e.target.value)}
-                                        />
+                                        <input type="text" value={recrawlForm.context} onChange={e => handleRecrawlInput('context', e.target.value)} />
                                     </div>
                                 </div>
                                 {recrawlError && <div className="text-red-600 text-sm">{recrawlError}</div>}

@@ -70,9 +70,7 @@ export default function ArtistsPage() {
                     <div className="bg-white shadow rounded-lg p-4">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <label htmlFor="search">
-                                    Search Artists
-                                </label>
+                                <label htmlFor="search">Search Artists</label>
                                 <input
                                     type="text"
                                     name="search"
@@ -196,16 +194,10 @@ export default function ArtistsPage() {
                                         </div>
 
                                         <div className="flex space-x-2">
-                                            <Link
-                                                href={`/admin/artists/${artist.id}`}
-                                                className="flex-1 text-center text-sm px-3 py-2 link-primary link-primary bg-primary/20 rounded-3xl"
-                                            >
+                                            <Link href={`/admin/artists/${artist.id}`} className="flex-1 text-center text-sm px-3 py-2 link-primary link-primary bg-primary/20 rounded-3xl">
                                                 View Details
                                             </Link>
-                                            <Link
-                                                href={`/admin/artists/${artist.id}/edit`}
-                                                className="flex-1 text-center text-sm px-3 py-2 link-secondary bg-secondary/20 rounded-3xl"
-                                            >
+                                            <Link href={`/admin/artists/${artist.id}/edit`} className="flex-1 text-center text-sm px-3 py-2 link-secondary bg-secondary/20 rounded-3xl">
                                                 Edit
                                             </Link>
                                         </div>
