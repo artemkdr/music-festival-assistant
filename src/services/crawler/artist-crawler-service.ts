@@ -19,16 +19,26 @@ export class ArtistCrawlerService implements IArtistCrawlerService {
      * @param name Artist name (assumed unique for this context)
      * @returns Complete Artist object
      */
-    async crawlArtistByName(name: string, context?: string): Promise<Artist> {
+    async crawlArtistByName(
+        name: string,
+        data?: {
+            spotifyId?: string | undefined;
+            context?: string | undefined;
+        }
+    ): Promise<Artist> {
         let spotifyArtist: SpotifyArtist | null = null;
         try {
-            spotifyArtist = await this.spotifyApi.searchArtistByName(name);
+            spotifyArtist = data?.spotifyId ? await this.spotifyApi.getArtistById(data.spotifyId) : await this.spotifyApi.searchArtistByName(name);
         } catch (err) {
             this.logger.error('Spotify search failed', err instanceof Error ? err : new Error(String(err)));
         }
 
         try {
-            const enrichedResult = await this.aiService.generateArtist([spotifyArtist?.name || name, `spotifyId: ${spotifyArtist?.id || ''}`, ...(context ? [`context: ${context}`] : [])]);
+            const enrichedResult = await this.aiService.generateArtist([
+                `Name: ${spotifyArtist?.name || name}`,
+                `Spotify id: ${spotifyArtist?.id || ''}`,
+                ...(data?.context ? [`Context: ${data?.context}`] : []),
+            ]);
             // take in priority the Spotify data if available
             if (spotifyArtist) {
                 enrichedResult.name = spotifyArtist.name;

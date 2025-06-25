@@ -9,7 +9,7 @@ export const ArtistSchema = z.object({
     name: z.string().min(1).max(200),
     genre: z.array(z.string()).optional(),
     description: z.string().max(5000).optional(),
-    imageUrl: z.string().url().optional(),
+    imageUrl: z.string().optional(),
     mappingIds: z
         .object({
             spotify: z.string().optional(),
@@ -19,15 +19,15 @@ export const ArtistSchema = z.object({
         .optional(),
     streamingLinks: z
         .object({
-            spotify: z.string().url().optional(),
-            appleMusic: z.string().url().optional(),
-            youtube: z.string().url().optional(),
+            spotify: z.string().optional(),
+            appleMusic: z.string().optional(),
+            youtube: z.string().optional(),
         })
         .optional(),
     socialLinks: z
         .object({
-            website: z.string().url().optional(),
-            instagram: z.string().url().optional(),
+            website: z.string().optional(),
+            instagram: z.string().optional(),
         })
         .optional(),
     popularity: z
@@ -40,7 +40,7 @@ export const ArtistSchema = z.object({
                         .object({
                             name: z.string().min(1).max(200).optional(),
                             listens: z.number().min(0).optional(),
-                            url: z.string().url().optional(),
+                            url: z.string().optional(),
                         })
                         .optional(),
                 })

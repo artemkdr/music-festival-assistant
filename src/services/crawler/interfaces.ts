@@ -66,5 +66,11 @@ export interface IArtistCrawlerService {
      * @param name Artist name (assumed unique for this context)
      * @returns Complete Artist object
      */
-    crawlArtistByName(name: string, context?: string): Promise<Artist>;
+    crawlArtistByName(
+        name: string,
+        data?: {
+            spotifyId?: string | undefined;
+            context?: string | undefined;
+        }
+    ): Promise<Artist>;
 }

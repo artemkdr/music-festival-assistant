@@ -16,12 +16,21 @@ interface ArtistEditPageProps {
 }
 
 export default function ArtistEditPage({ params }: ArtistEditPageProps) {
+    const artistId = React.use(params).id;
     const [artist, setArtist] = useState<ArtistDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState<Partial<ArtistDetails>>({});
-    const { id } = React.use(params);
+    const [showRecrawl, setShowRecrawl] = useState(false);
+    const [recrawlLoading, setRecrawlLoading] = useState(false);
+    const [recrawlError, setRecrawlError] = useState<string | null>(null);
+    const [recrawlForm, setRecrawlForm] = useState({
+        id: artistId,
+        name: '',
+        spotifyId: '',
+        context: '',
+    });
     const router = useRouter();
 
     useEffect(() => {
@@ -30,7 +39,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                 setIsLoading(true);
                 setError(null);
 
-                const response = await artistsApi.getArtist(id);
+                const response = await artistsApi.getArtist(artistId);
 
                 if (response.status !== 'success' || !response.data) {
                     throw new Error(response.message || 'Failed to fetch artist details');
@@ -48,7 +57,18 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
         };
 
         loadArtist();
-    }, [id]);
+    }, [artistId]);
+
+    useEffect(() => {
+        if (artist) {
+            setRecrawlForm({
+                id: artist.id,
+                name: artist.name || '',
+                spotifyId: artist.streamingLinks?.spotify?.split('/').pop() || '',
+                context: '',
+            });
+        }
+    }, [artist]);
 
     const handleInputChange = (field: string, value: string | number | string[]) => {
         setFormData(prev => ({
@@ -84,6 +104,33 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
         handleInputChange('genre', newGenres);
     };
 
+    const handleRecrawlInput = (field: string, value: string) => {
+        setRecrawlForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleRecrawl = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setRecrawlLoading(true);
+        setRecrawlError(null);
+        try {
+            const response = await artistsApi.recrawlArtist({
+                id: recrawlForm.id,
+                name: recrawlForm.name,
+                spotifyId: recrawlForm.spotifyId || undefined,
+                context: recrawlForm.context || undefined,
+            });
+            if (response.status !== 'success' || !response.data) {
+                throw new Error(response.message || 'Failed to recrawl artist');
+            }
+            setFormData(response.data as ArtistDetails);
+            setShowRecrawl(false);
+        } catch (err) {
+            setRecrawlError(err instanceof Error ? err.message : 'Failed to recrawl artist');
+        } finally {
+            setRecrawlLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -97,14 +144,14 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                 genre: (formData.genre || []).filter(g => g.trim() !== ''),
             };
 
-            const response = await artistsApi.updateArtist(id, cleanedFormData);
+            const response = await artistsApi.updateArtist(artistId, cleanedFormData);
 
             if (response.status !== 'success') {
                 throw new Error(response.message || 'Failed to update artist');
             }
 
             // Redirect back to artist detail page
-            router.push(`/admin/artists/${id}`);
+            router.push(`/admin/artists/${artistId}`);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save artist');
             console.error('Error saving artist:', err);
@@ -149,7 +196,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                     <div className="flex justify-between items-start">
                         <div>
                             <div className="flex items-center space-x-3 mb-2">
-                                <Link href={`/admin/artists/${id}`} className="text-gray-500 hover:text-gray-700">
+                                <Link href={`/admin/artists/${artistId}`} className="text-gray-500 hover:text-gray-700">
                                     ← Back to {artist.name}
                                 </Link>
                             </div>
@@ -363,13 +410,16 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                             </div>
 
                             {/* Submit Buttons */}
-                            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                            <div className="flex flex-wrap justify-end space-x-3 pt-6 border-t border-gray-200">
                                 <Link
-                                    href={`/admin/artists/${id}`}
+                                    href={`/admin/artists/${artistId}`}
                                     className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                 >
                                     Cancel
                                 </Link>
+                                <button type="button" className="bg-blue-100 text-blue-700 px-4 py-2 rounded-md font-medium hover:bg-blue-200 ml-2" onClick={() => setShowRecrawl(v => !v)}>
+                                    {showRecrawl ? 'Cancel Re-crawl' : 'Re-crawl Artist'}
+                                </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
@@ -380,6 +430,52 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                             </div>
                         </form>
                     </div>
+                    {showRecrawl && (
+                        <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mb-4">
+                            <form onSubmit={handleRecrawl} className="space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Artist ID</label>
+                                        <input type="text" value={recrawlForm.id} disabled className="mt-1 block w-full border-gray-300 rounded-md bg-gray-100" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Artist Name</label>
+                                        <input
+                                            type="text"
+                                            value={recrawlForm.name}
+                                            onChange={e => handleRecrawlInput('name', e.target.value)}
+                                            required
+                                            className="mt-1 block w-full border-gray-300 rounded-md"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Spotify ID</label>
+                                        <input
+                                            type="text"
+                                            value={recrawlForm.spotifyId}
+                                            onChange={e => handleRecrawlInput('spotifyId', e.target.value)}
+                                            className="mt-1 block w-full border-gray-300 rounded-md"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Context</label>
+                                        <input
+                                            type="text"
+                                            value={recrawlForm.context}
+                                            onChange={e => handleRecrawlInput('context', e.target.value)}
+                                            className="mt-1 block w-full border-gray-300 rounded-md"
+                                        />
+                                    </div>
+                                </div>
+                                {recrawlError && <div className="text-red-600 text-sm">{recrawlError}</div>}
+                                <div className="flex justify-end">
+                                    <button type="submit" disabled={recrawlLoading} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50">
+                                        {recrawlLoading ? 'Re-crawling...' : 'Re-crawl'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
                 </div>
             </AdminLayout>
         </ProtectedRoute>

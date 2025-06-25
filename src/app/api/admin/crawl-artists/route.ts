@@ -66,7 +66,10 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     if (validated.force === false) {
                         continue;
                     }
-                    await artistService.enrichArtist(artistId, festival ? `Festival: ${festival.name}` : undefined);
+                    const populatedArtist = await artistService.populateArtistDetails(artistId, {
+                        context: festival ? `Festival: ${festival.name}` : undefined,
+                    });
+                    await artistService.saveArtist(populatedArtist);
                 } else {
                     // crawls the artist by name
                     await artistService.createArtist({

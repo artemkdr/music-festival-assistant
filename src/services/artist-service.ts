@@ -18,7 +18,13 @@ export interface IArtistService {
     searchArtistsByName(name: string): Promise<Artist[]>;
     saveArtist(artist: Artist): Promise<void>;
     createArtist(artistData: CreateArtistData): Promise<Artist>;
-    enrichArtist(id: string, context?: string): Promise<Artist>;
+    populateArtistDetails(
+        id: string,
+        data?: {
+            context?: string | undefined;
+            spotifyId?: string | undefined;
+        }
+    ): Promise<Artist>;
     deleteArtist(id: string): Promise<void>;
     getAllArtists(): Promise<Artist[]>;
 }
@@ -45,16 +51,25 @@ export class ArtistService implements IArtistService {
         return this.repository.searchArtistsByName(name);
     }
 
-    async enrichArtist(id: string, context?: string): Promise<Artist> {
+    async populateArtistDetails(
+        id: string,
+        data?: {
+            context?: string | undefined;
+            spotifyId?: string | undefined;
+        }
+    ): Promise<Artist> {
         this.logger.info(`Enriching artist with ID: ${id}`);
         const artist = await this.repository.getArtistById(id);
         if (!artist) {
             throw new Error(`Artist with ID ${id} not found`);
         }
-        const enrichedArtist = await this.crawler.crawlArtistByName(artist.name, context);
+        const enrichedArtist = await this.crawler.crawlArtistByName(artist.name, {
+            spotifyId: data?.spotifyId,
+            context: data?.context,
+        });
         enrichedArtist.name = artist.name; // Ensure we keep the original name
         enrichedArtist.id = artist.id; // Ensure we keep the original ID
-        return this.repository.saveArtist(enrichedArtist);
+        return enrichedArtist;
     }
 
     async saveArtist(artist: Artist): Promise<void> {
@@ -73,7 +88,9 @@ export class ArtistService implements IArtistService {
      */
     async createArtist(data: CreateArtistData): Promise<Artist> {
         this.logger.info(`Creating new artist: ${data.name}`);
-        const newArtist = await this.crawler.crawlArtistByName(data.name, data.festivalName);
+        const newArtist = await this.crawler.crawlArtistByName(data.name, {
+            context: data.festivalName,
+        });
         newArtist.id = generateArtistId();
         return this.repository.saveArtist(newArtist);
     }

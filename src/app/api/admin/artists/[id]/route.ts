@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
         const updatedArtist: Artist = {
             ...existingArtist,
             ...validatedData,
-            id: params.id, // Ensure ID doesn't change
+            id,
             popularity: {
                 ...existingArtist.popularity,
                 ...(validatedData.popularity || {}),

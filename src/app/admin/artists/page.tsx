@@ -6,23 +6,12 @@
 
 import { AdminLayout } from '@/app/components/admin/admin-layout';
 import { ProtectedRoute } from '@/app/components/protected-route';
-import { artistsApi } from '@/app/lib/api';
+import { ArtistDetails, artistsApi } from '@/app/lib/api';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-interface Artist {
-    id: string;
-    name: string;
-    genre: string[];
-    mappingIds?: Record<string, string>; // e.g. { spotify: 'spotifyId' }
-    imageUrl?: string;
-    description?: string;
-    popularity?: Record<string, number>; // e.g. { spotify: 75 }
-    followers?: Record<string, number>; // e.g. { spotify: 1000 }
-}
-
 export default function ArtistsPage() {
-    const [artists, setArtists] = useState<Artist[]>([]);
+    const [artists, setArtists] = useState<ArtistDetails[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -39,8 +28,8 @@ export default function ArtistsPage() {
 
             const response = await artistsApi.getArtists();
 
-            if (response.status === 'success') {
-                setArtists(response.data as Artist[]);
+            if (response.status === 'success' && response.data) {
+                setArtists(response.data);
             } else {
                 setError(response.message || 'Failed to load artists');
             }
