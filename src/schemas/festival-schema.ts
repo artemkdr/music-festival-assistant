@@ -19,15 +19,14 @@ export const FestivalSchema = z.object({
 
 // Simplified festival schema for AI responses
 export const FestivalLooseSchema = z.object({
-    id: z.string().min(1),
     name: z.string().min(1).max(200),
     description: z.string().max(2000).optional(),
-    location: z.string().min(1).max(200).optional(),
-    startDate: z.string().datetime().optional(),
-    endDate: z.string().datetime().optional(),
-    website: z.string().url().optional(),
-    imageUrl: z.string().url().optional(),
-    stages: z.array(z.string()).min(1).optional(),
+    location: z.string().max(200).optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
+    website: z.string().optional(),
+    imageUrl: z.string().optional(),
+    stages: z.array(z.string()).optional(),
     performances: z.array(
         z.object({
             id: z.string().optional(),
@@ -82,5 +81,6 @@ export const FestivalDiscoveryRequestSchema = z.object({
 export type Festival = z.infer<typeof FestivalSchema>;
 
 export const generateFestivalId = (festival: { name: string; location: string; startDate: string; endDate: string }): string => {
-    return `festival-${normalizeName(festival.name)}-${normalizeName(festival.location)}-${new Date(festival.startDate).toISOString().split('T')[0]}`;
+    const randomString = Math.random().toString(36).substring(2, 10);
+    return `festival-${normalizeName(festival.name)}-${normalizeName(festival.location)}-${randomString}`;
 };

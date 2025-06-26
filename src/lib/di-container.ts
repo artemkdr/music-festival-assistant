@@ -3,7 +3,7 @@
  * Central place to configure and wire up all services following SOLID principles
  */
 import { getAIConfig, validateAIConfig } from '@/config/ai-config';
-import { createLogger, type ILogger } from '@/lib/logger';
+import { type ILogger } from '@/lib/logger';
 import type { IArtistRepository, IFestivalRepository } from '@/repositories/interfaces';
 import { LocalJsonArtistRepository, LocalJsonFestivalRepository } from '@/repositories/providers/local';
 import type { IAIService } from '@/services/ai';
@@ -21,6 +21,8 @@ import { FestivalService, IFestivalService } from '@/services/festival-service';
 import type { IRecommendationService } from '@/services/interfaces';
 import { RecommendationService } from '@/services/recommendation-service';
 import { SpotifyService } from '@/services/spotify/spotify-service';
+import { ErrorHandler, IErrorHandler, IRetryHandler, RetryHandler } from '@/utils/error-handler';
+import { createAppLogger } from '@/utils/logger';
 
 /**
  * Dependency injection container class
@@ -56,7 +58,10 @@ export class DIContainer {
      */
     public getLogger(): ILogger {
         if (!this._logger) {
-            this._logger = createLogger();
+            this._logger = createAppLogger({
+                name: 'Music-Festival-Assistant',
+                level: 'info' as const,
+            });
             this._logger.info('Logger initialized');
         }
         return this._logger;
@@ -124,13 +129,32 @@ export class DIContainer {
     }
 
     /**
+     * Get error handler
+     */
+    public getErrorHandler(): IErrorHandler {
+        // Assuming you have an error handler implementation
+        return new ErrorHandler(this.getLogger());
+    }
+
+    /**
+     * Get retry handler
+     */
+    public getRetryHandler(): IRetryHandler {
+        // Assuming you have a retry handler implementation
+        return new RetryHandler(this.getLogger());
+    }
+
+    /**
      * Get festival crawler service
      */
     public getFestivalCrawlerService(): IFestivalCrawlerService {
         if (!this._festivalCrawlerService) {
             const logger = this.getLogger();
             const aiService = this.getMusicalAIService(); // This can return null if AI is disabled
-            this._festivalCrawlerService = new FestivalCrawlerService(logger, aiService);
+            if (!aiService) {
+                throw new Error('Musical AI service is required for festival crawler service');
+            }
+            this._festivalCrawlerService = new FestivalCrawlerService(logger, this.getErrorHandler(), this.getRetryHandler(), aiService);
             logger.info('Festival crawler service initialized');
         }
         return this._festivalCrawlerService;

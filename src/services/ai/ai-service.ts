@@ -44,11 +44,11 @@ export class AIService implements IAIService {
             const response = await generateText({
                 model: this.model,
                 messages: [
+                    ...(request.systemPrompt ? [{ role: 'system' as const, content: request.systemPrompt }] : []),
                     {
                         role: 'user',
                         content: request.prompt,
                     },
-                    ...(request.systemPrompt ? [{ role: 'system' as const, content: request.systemPrompt }] : []),
                     ...(request.files
                         ? request.files
                               .filter(file => !!file.uri || !!file.data)

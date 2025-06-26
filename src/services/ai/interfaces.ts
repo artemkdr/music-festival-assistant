@@ -105,20 +105,6 @@ export interface IAIService {
     generateStreamObject<T>(request: SchemaAIRequest<T>): Promise<T>;
 
     /**
-     * Match and normalize artist names
-    
-    matchArtist(request: ArtistMatchingRequest): Promise<{
-        matchedArtist?: string;
-        confidence: number;
-        suggestions: string[];
-    }>;
-
-    /**
-     * Generate personalized recommendations
-    
-    generateRecommendations(request: RecommendationRequest): Promise<unknown[]>;*/
-
-    /**
      * Get provider information
      */
     getProviderInfo(): {
@@ -158,4 +144,5 @@ export interface IMusicalAIService {
             description: string | undefined;
         }[];
     }): Promise<z.infer<typeof RecommendationShortSchema>[]>;
+    generateFestivalParserFunction(html: string, url: string): Promise<string>;
 }

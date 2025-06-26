@@ -15,6 +15,7 @@ import {
 } from '@/schemas';
 import type { AIRequest, IAIService, IMusicalAIService } from '@/services/ai/interfaces';
 import { z } from 'zod';
+import zodToJsonSchema from 'zod-to-json-schema';
 
 export class MusicalAIService implements IMusicalAIService {
     constructor(protected readonly aiService: IAIService) {
@@ -227,6 +228,48 @@ Generate music recommendations based on the provided user preferences:
             }),
         });
         return result.recommendations;
+    }
+
+    /**
+     * Generate a parser function for a given HTML schema
+     * @param schema Zod schema to generate the parser function for
+     * @returns Function that takes HTML content and URL, returns parsed data as a string
+     */
+    async generateFestivalParserFunction(html: string, url: string): Promise<string> {
+        // simplified schema for AI
+        const schema = z.object({
+            festivalName: z.string().optional(),
+            festivalLocation: z.string().optional(),
+            lineup: z.array(
+                z.object({
+                    date: z.string(),
+                    list: z.array(
+                        z.object({
+                            artist: z.string().min(1),
+                            time: z.string().optional(),
+                            stage: z.string().optional(),
+                        })
+                    ),
+                })
+            ),
+        });
+        const aiRequest = {
+            systemPrompt: `Provide a scraping function in JavaScript that extracts and returns data according to a schema from the current page. The function must be IIFE. No comments or imports. No console.log. The code you generate will be executed straight away, you shouldn't output anything besides runnable code`,
+            prompt: `
+                Website: ${url}
+                Schema: ${JSON.stringify(zodToJsonSchema(schema))}
+                Content: ${html}
+            `,
+        };
+        const parserFunction = await this.aiService.generateCompletion(aiRequest);
+        return this.stripMarkdownBackticks(parserFunction.content);
+    }
+
+    private stripMarkdownBackticks(text: string) {
+        let trimmed = text.trim();
+        trimmed = trimmed.replace(/^```(?:javascript)?\s*/i, '');
+        trimmed = trimmed.replace(/\s*```$/i, '');
+        return trimmed;
     }
 
     /**

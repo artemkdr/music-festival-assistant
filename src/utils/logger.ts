@@ -20,13 +20,13 @@ const logLevelMap = {
  * @param config Logging config from app config
  * @returns ILogger instance
  */
-export function createAppLogger(config: { level: keyof typeof logLevelMap; logToFile: boolean; logFilePath: string }): ILogger {
+export function createAppLogger(config: { level: keyof typeof logLevelMap; name?: string; logToFile?: boolean; logFilePath?: string }): ILogger {
     const minLevel = logLevelMap[config.level] ?? 3; // default to 'info'
     const tslogLogger = new Logger({
         type: 'pretty',
-        name: '3CX-Transcriber',
+        name: config.name || 'TSLog',
         minLevel,
-        prettyLogTemplate: '{{yyyy}}-{{mm}}-{{dd}} {{hh}}:{{MM}}:{{ss}}:{{ms}}\t{{logLevelName}}\t[{{filePathWithLine}}]\t',
+        prettyLogTemplate: '{{yyyy}}-{{mm}}-{{dd}} {{hh}}:{{MM}}:{{ss}}:{{ms}}\t{{logLevelName}}\t',
         prettyErrorTemplate: '\n{{errorName}} {{errorMessage}}\nerror stack:\n{{errorStack}}',
         prettyErrorStackTemplate: '  • {{fileName}}\t{{method}}\n\t{{filePathWithLine}}',
         prettyErrorParentNamesSeparator: ':',
@@ -55,7 +55,7 @@ export function createAppLogger(config: { level: keyof typeof logLevelMap; logTo
     });
     if (config.logToFile) {
         tslogLogger.attachTransport((logObj: unknown) => {
-            appendFileSync(config.logFilePath, JSON.stringify(logObj) + '\n');
+            appendFileSync(config.logFilePath || 'logs', JSON.stringify(logObj) + '\n');
         });
     }
     return tslogLogger as unknown as ILogger;
