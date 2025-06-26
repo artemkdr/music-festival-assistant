@@ -38,7 +38,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     { status: 404 }
                 );
             }
-            artistNames = festival.performances.map(p => p.artist.name);
+            artistNames = festival.lineup.map(item => item.list.map(item => item.artistName)).flat();
         } else if (validated.artistNames) {
             artistNames = validated.artistNames;
         } else {

@@ -4,15 +4,12 @@ import { z } from 'zod';
 
 // Performance schema
 export const PerformanceSchema = z.object({
-    id: z.string().min(1),
-    artist: z.object({
-        name: z.string().min(1).max(200),
-        id: z.string().min(1),
-    }),
-    startTime: z.string().datetime(),
-    endTime: z.string().datetime(),
-    stage: z.string().min(1),
-    day: z.number().min(1).max(30),
+    artistName: z.string(),
+    festivalId: z.string(),
+    festivalName: z.string(),
+    date: z.string().optional(),
+    time: z.string().optional(),
+    stage: z.string().optional(),
 });
 
 /**

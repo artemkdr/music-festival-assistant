@@ -34,6 +34,7 @@ export interface ArtistDetails {
 export interface ArtistPerformance {
     festivalId: string;
     festivalName: string;
+    artistName: string;
     date?: string;
     time?: string;
     stage?: string;

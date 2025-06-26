@@ -49,9 +49,7 @@ export class FestivalService implements IFestivalService {
         const newFestival = await this.festivalCrawlerService.crawlFestival(inputs);
         newFestival.id = generateFestivalId({
             name: newFestival.name,
-            startDate: newFestival.startDate,
-            endDate: newFestival.endDate,
-            location: newFestival.location,
+            location: newFestival.location || 'unknown-location',
         });
         if (data.name) {
             this.logger.info(`Overriding festival name with provided name: ${data.name}`);
@@ -66,9 +64,7 @@ export class FestivalService implements IFestivalService {
             this.logger.warn(`Festival ID is missing, generating a new one.`);
             festival.id = generateFestivalId({
                 name: festival.name,
-                startDate: festival.startDate,
-                endDate: festival.endDate,
-                location: festival.location,
+                location: festival.location || 'unknown-location',
             });
         }
         await this.festivalRepository.saveFestival(festival);

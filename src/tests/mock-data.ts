@@ -2,7 +2,7 @@
  * Mock data for festivals and artists
  * This will be replaced with real data sources in production
  */
-import type { Artist, Festival, Performance } from '@/schemas';
+import type { Artist, Festival } from '@/schemas';
 
 /**
  * Mock artists data
@@ -97,60 +97,6 @@ export const mockArtists: Artist[] = [
 ];
 
 /**
- * Mock performances data
- */
-export const mockPerformances: Performance[] = [
-    {
-        id: 'perf-1',
-        artist: mockArtists[0]!,
-        startTime: '2024-07-20T20:00:00Z',
-        endTime: '2024-07-20T21:30:00Z',
-        stage: 'Main Stage',
-        day: 1,
-    },
-    {
-        id: 'perf-2',
-        artist: mockArtists[1]!,
-        startTime: '2024-07-20T22:00:00Z',
-        endTime: '2024-07-20T23:30:00Z',
-        stage: 'Electronic Stage',
-        day: 1,
-    },
-    {
-        id: 'perf-3',
-        artist: mockArtists[2]!,
-        startTime: '2024-07-21T19:00:00Z',
-        endTime: '2024-07-21T20:30:00Z',
-        stage: 'Main Stage',
-        day: 2,
-    },
-    {
-        id: 'perf-4',
-        artist: mockArtists[3]!,
-        startTime: '2024-07-21T21:00:00Z',
-        endTime: '2024-07-21T22:00:00Z',
-        stage: 'Indie Stage',
-        day: 2,
-    },
-    {
-        id: 'perf-5',
-        artist: mockArtists[4]!,
-        startTime: '2024-07-22T18:00:00Z',
-        endTime: '2024-07-22T19:30:00Z',
-        stage: 'Main Stage',
-        day: 3,
-    },
-    {
-        id: 'perf-6',
-        artist: mockArtists[5]!,
-        startTime: '2024-07-22T23:00:00Z',
-        endTime: '2024-07-23T01:00:00Z',
-        stage: 'Electronic Stage',
-        day: 3,
-    },
-];
-
-/**
  * Mock festival data
  */
 export const mockFestival: Festival = {
@@ -158,12 +104,25 @@ export const mockFestival: Festival = {
     name: 'Summer Sound Festival 2024',
     description: 'A three-day celebration of the best in indie, electronic, and alternative music. Join us for an unforgettable weekend of music, art, and community.',
     location: 'Victoria Park, London, UK',
-    startDate: '2024-07-20T00:00:00Z',
-    endDate: '2024-07-22T23:59:59Z',
     website: 'https://summersoundfestival.com',
     imageUrl: 'https://example.com/summer-sound-festival.jpg',
-    stages: ['Main Stage', 'Electronic Stage', 'Indie Stage', 'Acoustic Stage'],
-    performances: mockPerformances,
+    lineup: [
+        {
+            date: '2024-07-20',
+            list: [
+                {
+                    artistName: 'Arctic Monkeys',
+                    time: '20:00 - 21:30',
+                    stage: 'Main Stage',
+                },
+                {
+                    artistName: 'Disclosure',
+                    time: '22:00 - 23:30',
+                    stage: 'Electronic Stage',
+                },
+            ],
+        },
+    ],
 };
 
 /**

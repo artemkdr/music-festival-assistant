@@ -8,7 +8,7 @@ import { AdminLayout } from '@/app/components/admin/admin-layout';
 import { ProtectedRoute } from '@/app/components/protected-route';
 import { Festival, festivalsApi } from '@/app/lib/api';
 import Link from 'next/link';
-import { useState, ChangeEvent } from 'react';
+import { ChangeEvent, useState } from 'react';
 
 interface CrawlResult {
     success: boolean;
@@ -108,9 +108,12 @@ export default function FestivalCrawlPage() {
                     festival: {
                         name: response.data.festival.name,
                         location: response.data.festival.location,
-                        performances: response.data.festival.performances.map(perf => ({
-                            artist: { name: perf.artist.name },
-                        })),
+                        performances:
+                            response.data.festival.lineup?.flatMap(days =>
+                                days.list.map(item => ({
+                                    artist: { name: item.artistName },
+                                }))
+                            ) || [],
                     },
                 });
             } else {

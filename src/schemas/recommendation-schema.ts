@@ -1,10 +1,14 @@
 import { ArtistSchema } from '@/schemas/artist-schema';
-import { PerformanceSchema } from '@/schemas/performance-schema';
 import { z } from 'zod';
 
 export const RecommendationSchema = z.object({
     artist: ArtistSchema,
-    performance: PerformanceSchema,
+    performance: z.object({
+        artistName: z.string().min(1).max(200), // Name of the artist
+        date: z.string().optional(), // Optional performance date
+        time: z.string().optional(), // Optional performance time
+        stage: z.string().optional(), // Optional stage/venue
+    }),
     score: z.number().min(0).max(1), // Confidence score
     reasons: z.array(z.string()), // Why this artist is recommended
     similarArtists: z.array(ArtistSchema).optional(), // Optional similar artists

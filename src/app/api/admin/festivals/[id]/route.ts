@@ -4,7 +4,7 @@
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { Artist, Festival, generateArtistId, generatePerformanceId, Performance, UpdateFestivalSchema } from '@/schemas';
+import { Festival, getFestivalPerformances, UpdateFestivalSchema } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -34,25 +34,27 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
             );
         }
 
+        const performances = getFestivalPerformances(festival);
+
         // Resolve artist references in performances
         logger.debug('Resolving artist references for festival performances', {
             festivalId: id,
-            performanceCount: festival.performances.length,
+            performanceCount: performances.length,
         });
 
         const enrichedPerformances = await Promise.all(
-            festival.performances.map(async performance => {
+            performances.map(async performance => {
                 // Try to find the artist by name
-                const artistMatches = await artistService.searchArtistsByName(performance.artist.name);
+                const artistMatches = await artistService.searchArtistsByName(performance.artistName);
 
                 if (artistMatches.length > 0) {
                     // Use the first exact match or best match
-                    const exactMatch = artistMatches.find(artist => artist.name.toLowerCase() === performance.artist.name.toLowerCase());
+                    const exactMatch = artistMatches.find(artist => artist.name.toLowerCase() === performance.artistName.toLowerCase());
                     const bestMatch = exactMatch || artistMatches[0];
 
                     if (bestMatch) {
                         logger.debug('Found artist match for performance', {
-                            performanceArtistName: performance.artist.name,
+                            performanceArtistName: performance.artistName,
                             matchedArtistId: bestMatch.id,
                             matchedArtistName: bestMatch.name,
                             isExactMatch: !!exactMatch,
@@ -69,7 +71,7 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
 
                 // No artist found, keep original data but log the issue
                 logger.warn('No artist found for performance', {
-                    performanceArtistName: performance.artist.name,
+                    performanceArtistName: performance.artistName,
                     festivalId: id,
                 });
 
@@ -81,17 +83,6 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
             ...festival,
             performances: enrichedPerformances,
         };
-
-        // Count how many artists were successfully resolved
-        const originalArtistIds = festival.performances.map(p => p.artist.id);
-        const resolvedArtistIds = enrichedPerformances.map(p => p.artist.id);
-        const newlyResolvedCount = resolvedArtistIds.filter((id, index) => id !== originalArtistIds[index]).length;
-
-        logger.info('Festival retrieved successfully with artist resolution', {
-            festivalId: id,
-            performanceCount: enrichedFestival.performances.length,
-            resolvedArtists: newlyResolvedCount,
-        });
 
         return NextResponse.json({
             status: 'success',
@@ -115,7 +106,6 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const festivalService = container.getFestivalService();
-    const artistService = container.getArtistService();
 
     try {
         logger.info('Admin festival update request received', { festivalId: id });
@@ -136,54 +126,15 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
             );
         }
 
-        // Update festival with validated data
-        const stages = new Set<string>();
-        validatedData.performances.forEach(performance => {
-            if (performance.stage) {
-                stages.add(performance.stage);
-            }
-        });
         const updatedFestival: Festival = {
             id: existingFestival.id,
             name: validatedData.name || existingFestival.name,
             location: validatedData.location || existingFestival.location,
-            startDate: validatedData.startDate || existingFestival.startDate,
-            endDate: validatedData.endDate || existingFestival.endDate,
             description: validatedData.description || existingFestival.description,
             website: validatedData.website || existingFestival.website,
             imageUrl: validatedData.imageUrl || existingFestival.imageUrl,
-            performances: [] as Performance[],
-            stages: Array.from(stages), // Convert Set to Array
+            lineup: validatedData.lineup,
         };
-        // fill performances with existing data, updating only the fields that are provided
-        for (const performance of validatedData.performances) {
-            // find existings artist by id or name
-            let existingArtist: Artist | null = performance.artist.id ? await artistService.getArtistById(performance.artist.id) : await artistService.searchArtistByName(performance.artist.name);
-            // if artist still not found, then we will crawl one
-            if (!existingArtist) {
-                existingArtist = await artistService.createArtist({
-                    name: performance.artist.name,
-                    festivalName: existingFestival.name,
-                });
-            }
-            // if artist still not found, then create a new one
-            if (!existingArtist) {
-                existingArtist = {
-                    id: generateArtistId(),
-                    name: performance.artist.name,
-                };
-            }
-
-            updatedFestival.performances.push({
-                id: performance.id || generatePerformanceId(updatedFestival.name),
-                artist: existingArtist,
-                startTime: performance.startTime,
-                endTime: performance.endTime,
-                stage: performance.stage,
-                // count day based on startTime and festival startDate if not provided
-                day: performance.day || (performance.startTime ? Math.ceil((new Date(performance.startTime).getTime() - new Date(updatedFestival.startDate).getTime()) / (1000 * 60 * 60 * 24)) : 1),
-            });
-        }
 
         const savedFestival = await festivalService.saveFestival(updatedFestival);
 

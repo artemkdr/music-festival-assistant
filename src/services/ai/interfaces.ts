@@ -139,6 +139,7 @@ export interface IMusicalAIService {
     }: {
         userPreferences: UserPreferences;
         availableArtists: {
+            festivalName: string;
             name: string;
             genre: string[] | undefined;
             description: string | undefined;

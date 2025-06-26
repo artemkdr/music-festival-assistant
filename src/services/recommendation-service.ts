@@ -3,10 +3,10 @@
  * Core business logic for generating music recommendations
  */
 import type { ILogger } from '@/lib/logger';
-import { IMusicalAIService } from '@/services/ai/interfaces';
-import type { Festival, Recommendation, UserPreferences } from '@/schemas';
-import type { IRecommendationService } from './interfaces';
 import { IArtistRepository } from '@/repositories/interfaces';
+import { Artist, getPerformanceByArtistName, getFestivalArtists, type Festival, type Recommendation, type UserPreferences } from '@/schemas';
+import { IMusicalAIService } from '@/services/ai/interfaces';
+import type { IRecommendationService } from './interfaces';
 
 /**
  * Recommendation engine implementation using collaborative filtering and content-based approaches
@@ -32,24 +32,22 @@ export class RecommendationService implements IRecommendationService {
 
         try {
             // Prepare data for AI processing
-            const festivalArtists = await Promise.all(
-                festival.performances.map(async p => {
-                    const artist = await this.artistRepository.searchArtistByName(p.artist.name);
-                    if (artist) {
-                        return {
-                            id: artist.id,
-                            name: artist.name,
-                            genre: artist.genre,
-                            description: artist.description,
-                        };
+            const festivalArtists = getFestivalArtists(festival);
+            const artistsMap: Record<string, Artist> = {};
+            const artistInfos = await Promise.all(
+                festivalArtists.map(async artist => {
+                    const detailedArtist = await this.artistRepository.searchArtistByName(artist.name);
+                    if (detailedArtist) {
+                        artistsMap[artist.name] = detailedArtist;
                     }
-                    // Explicitly return null if no artist found
-                    return null;
+                    return {
+                        festivalName: festival.name,
+                        name: detailedArtist?.name || artist.name,
+                        genre: detailedArtist?.genre || undefined,
+                        description: detailedArtist?.description || undefined,
+                    };
                 })
             );
-
-            // Filter out nulls (artists not found)
-            const filteredFestivalArtists = festivalArtists.filter(a => a !== null);
 
             // Generate AI recommendations
             const aiRecommendations = await this.aiService.generateRecommendations({
@@ -60,7 +58,7 @@ export class RecommendationService implements IRecommendationService {
                     dislikedArtists: userPreferences.dislikedArtists || [],
                     discoveryMode: userPreferences.discoveryMode,
                 },
-                availableArtists: filteredFestivalArtists,
+                availableArtists: artistInfos,
             });
 
             this.logger.info('AI-enhanced recommendations generated', {
@@ -71,12 +69,13 @@ export class RecommendationService implements IRecommendationService {
 
             const recommendations: Recommendation[] = [];
             for (const rec of aiRecommendations) {
-                const artist = (await this.artistRepository.getArtistById(rec.artistId)) ?? (await this.artistRepository.searchArtistByName(rec.artistName));
-                const performance = festival.performances.find(p => p.artist.name.toLowerCase() === artist?.name.toLowerCase());
+                const artist = artistsMap[rec.artistName];
+                const artistName = artist?.name ?? rec.artistName;
+                const performance = getPerformanceByArtistName(festival, artistName);
                 if (artist && performance) {
                     recommendations.push({
                         artist: artist,
-                        performance: performance,
+                        performance,
                         score: rec.score,
                         reasons: rec.reasons,
                         aiEnhanced: true,

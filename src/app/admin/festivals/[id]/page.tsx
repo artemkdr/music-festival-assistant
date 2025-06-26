@@ -52,26 +52,6 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
         });
     };
 
-    // Helper function to get date for a performance based on festival start date and day
-    const getPerformanceDate = (festival: Festival, day: number): string => {
-        const startDate = new Date(festival.startDate);
-        const performanceDate = new Date(startDate);
-        performanceDate.setDate(startDate.getDate() + (day - 1));
-        return performanceDate.toISOString().split('T')[0] || festival.startDate;
-    };
-
-    // Group performances by date and stage
-    const performancesByDate =
-        festival?.performances.reduce(
-            (acc, perf) => {
-                const date = getPerformanceDate(festival, perf.day);
-                if (!acc[date]) acc[date] = [];
-                acc[date].push(perf);
-                return acc;
-            },
-            {} as Record<string, typeof festival.performances>
-        ) || {};
-
     return (
         <ProtectedRoute requireAdmin>
             <AdminLayout>
@@ -137,15 +117,6 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                         <div className="text-sm text-foreground">{festival.location}</div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center">
-                                                    <span className="mr-3 text-lg">📅</span>
-                                                    <div>
-                                                        <div className="text-sm font-medium text-muted-foreground">Dates</div>
-                                                        <div className="text-sm text-foreground">
-                                                            {formatDate(festival.startDate)} - {formatDate(festival.endDate)}
-                                                        </div>
-                                                    </div>
-                                                </div>
                                                 {festival.website && (
                                                     <div className="flex items-center">
                                                         <span className="mr-3 text-lg">🌐</span>
@@ -165,14 +136,14 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                     <span className="mr-3 text-lg">🎤</span>
                                                     <div>
                                                         <div className="text-sm font-medium text-muted-foreground">Total Artists</div>
-                                                        <div className="text-sm text-foreground">{festival.performances.length}</div>
+                                                        <div className="text-sm text-foreground">{festival.lineup.reduce((total, day) => total + day.list.length, 0)}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center">
                                                     <span className="mr-3 text-lg">🎭</span>
                                                     <div>
-                                                        <div className="text-sm font-medium text-muted-foreground">Performances</div>
-                                                        <div className="text-sm text-foreground">{festival.performances.length}</div>
+                                                        <div className="text-sm font-medium text-muted-foreground">Festival Days</div>
+                                                        <div className="text-sm text-foreground">{festival.lineup.length}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -192,27 +163,35 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                 <div className="px-4 py-5 sm:p-6">
                                     <h2 className="text-lg font-medium text-foreground mb-4">Festival Schedule</h2>
                                     <div className="space-y-6">
-                                        {Object.entries(performancesByDate).map(([date, performances]) => (
-                                            <div key={date}>
-                                                <h3 className="text-md font-medium text-foreground mb-3">{formatDate(date)}</h3>
+                                        {festival.lineup.map((dayLineup, dayIndex) => (
+                                            <div key={dayIndex}>
+                                                <h3 className="text-md font-medium text-foreground mb-3">{formatDate(dayLineup.date)}</h3>
                                                 <div className="space-y-2">
-                                                    {performances
-                                                        .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
-                                                        .map((performance, index) => (
+                                                    {dayLineup.list
+                                                        .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+                                                        .map((artist, index) => (
                                                             <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                                 <div className="flex items-center space-x-4">
-                                                                    <div className="text-sm font-medium text-foreground">{performance.startTime ?? 'TBA'}</div>
+                                                                    <div className="text-sm font-medium text-foreground">{artist.time ?? 'TBA'}</div>
                                                                     <div>
-                                                                        <Link href={`/admin/artists/${performance.artist.id}`} className="link-primary font-medium">
-                                                                            {performance.artist.name}
-                                                                        </Link>
+                                                                        {artist.artistId ? (
+                                                                            <Link href={`/admin/artists/${artist.artistId}`} className="link-primary font-medium">
+                                                                                {artist.artistName}
+                                                                            </Link>
+                                                                        ) : (
+                                                                            <span className="font-medium text-foreground">{artist.artistName}</span>
+                                                                        )}
                                                                     </div>
-                                                                    {performance.stage && <div className="text-sm text-muted-foreground">@ {performance.stage}</div>}
+                                                                    {artist.stage && <div className="text-sm text-muted-foreground">@ {artist.stage}</div>}
                                                                 </div>
                                                                 <div className="flex space-x-2">
-                                                                    <Link href={`/admin/artists/${performance.artist.id}`} className="btn-primary-light bg-primary/10 px-3 py-2 rounded-3xl text-sm">
-                                                                        View Artist
-                                                                    </Link>
+                                                                    {artist.artistId ? (
+                                                                        <Link href={`/admin/artists/${artist.artistId}`} className="btn-primary-light bg-primary/10 px-3 py-2 rounded-3xl text-sm">
+                                                                            View Artist
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <span className="text-sm text-muted-foreground bg-gray-100 px-3 py-2 rounded-3xl">No Artist Profile</span>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         ))}

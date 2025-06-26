@@ -2,7 +2,7 @@
  * AI-enhanced festival discovery endpoint
  */
 import { container } from '@/lib/di-container';
-import { FestivalDiscoveryRequestSchema } from '@/schemas';
+import { FestivalDiscoveryRequestSchema, getFestivalPerformances } from '@/schemas';
 import type { UserPreferences } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     festival,
                     recommendations: aiRecommendations,
-                    totalArtists: festival.performances.length,
+                    totalArtists: getFestivalPerformances(festival).length,
                     totalRecommendations: aiRecommendations.length,
                     aiEnhanced: true,
                     enhancedCount: aiRecommendations.filter(r => r.aiEnhanced).length,

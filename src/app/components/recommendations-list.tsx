@@ -13,22 +13,6 @@ interface RecommendationsListProps {
  * Component to display festival recommendations
  */
 export function RecommendationsList({ festival, recommendations, onFeedback }: RecommendationsListProps): ReactElement {
-    const formatTime = (timeString: string): string => {
-        return new Date(timeString).toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-        });
-    };
-
-    const formatDate = (timeString: string): string => {
-        return new Date(timeString).toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
     const getScoreColor = (score: number): string => {
         if (score >= 0.8) return 'text-green-600 bg-green-100';
         if (score >= 0.6) return 'text-blue-600 bg-blue-100';
@@ -53,9 +37,11 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                         <p className="text-gray-600 mb-4">{festival.description}</p>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                             <span>📍 {festival.location}</span>
-                            <span>
-                                📅 {formatDate(festival.startDate)} - {formatDate(festival.endDate)}
-                            </span>
+                            {festival.lineup.length > 0 && (
+                                <span>
+                                    📅 {festival.lineup[0].date} - {festival.lineup[festival.lineup.length - 1]!.date}
+                                </span>
+                            )}
                             <span>🎵 {recommendations.length} recommendations</span>
                         </div>
                     </div>
@@ -105,13 +91,11 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                     </div>
                                     <div>
                                         <span className="text-gray-500">Day:</span>
-                                        <span className="ml-2 font-medium">Day {recommendation.performance.day}</span>
+                                        <span className="ml-2 font-medium">{recommendation.performance.date}</span>
                                     </div>
                                     <div>
                                         <span className="text-gray-500">Time:</span>
-                                        <span className="ml-2 font-medium">
-                                            {formatTime(recommendation.performance.startTime)} - {formatTime(recommendation.performance.endTime)}
-                                        </span>
+                                        <span className="ml-2 font-medium">{recommendation.performance.date}</span>
                                     </div>
                                 </div>
                             </div>

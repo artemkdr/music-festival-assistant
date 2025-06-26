@@ -4,6 +4,7 @@
  */
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/middleware/auth-middleware';
+import { getFestivalArtists, getFestivalPerformances, getFestivalStages } from '@/schemas';
 import type { User } from '@/services/auth/interfaces';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -66,9 +67,9 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
                     festival: festival,
                     crawlResult: {
                         success: true,
-                        artistCount: festival.performances.reduce((acc, p) => acc + (p.artist ? 1 : 0), 0),
-                        stageCount: festival.stages.length,
-                        scheduleItemCount: festival.performances.length,
+                        artistCount: getFestivalArtists(festival).length,
+                        stageCount: getFestivalStages(festival).length,
+                        scheduleItemCount: getFestivalPerformances(festival).length,
                     },
                 },
             });

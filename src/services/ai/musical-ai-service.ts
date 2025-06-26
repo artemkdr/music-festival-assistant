@@ -1,18 +1,7 @@
 /**
  * A wrapper for AI services related to music festivals, artists and recommendations.
  */
-import {
-    Artist,
-    ArtistSchema,
-    Festival,
-    FestivalLooseSchema,
-    generateArtistId,
-    generateFestivalId,
-    generatePerformanceId,
-    RecommendationShortSchema,
-    RecommentationsAIResponseSchema,
-    UserPreferences,
-} from '@/schemas';
+import { Artist, ArtistSchema, Festival, generateArtistId, generateFestivalId, LooseFestivalSchema, RecommendationShortSchema, RecommentationsAIResponseSchema, UserPreferences } from '@/schemas';
 import type { AIRequest, IAIService, IMusicalAIService } from '@/services/ai/interfaces';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -52,77 +41,50 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
         // add the most important instructions to the end of the prompt
         aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
 
-        const result = await this.aiService.generateStreamObject<z.infer<typeof FestivalLooseSchema>>({
+        const result = await this.aiService.generateStreamObject<z.infer<typeof LooseFestivalSchema>>({
             ...aiRequest,
-            schema: FestivalLooseSchema,
+            schema: LooseFestivalSchema,
         });
 
         // check if the result has general information about the festival,
         // if not, then try to extract it one more time, but only the name, location, start and end dates
-        if (!result.name || !result.location || !result.startDate || !result.endDate) {
+        if (!result.festivalName || !result.festivalLocation) {
             const festivalInfoSchema = z.object({
-                name: z.string().min(1).max(200),
-                location: z.string().min(1).max(200).optional(),
-                startDate: z.string().datetime().optional(),
-                endDate: z.string().datetime().optional(),
+                festivalName: z.string().min(1).max(200),
+                festivalLocation: z.string().min(1).max(200).optional(),
             });
             const info = await this.aiService.generateStreamObject<z.infer<typeof festivalInfoSchema>>({
                 ...aiRequest,
                 schema: festivalInfoSchema,
             });
             // if we have some information, then use it
-            if (!result.name && info.name) {
-                result.name = info.name;
+            if (!result.festivalName && info.festivalName) {
+                result.festivalName = info.festivalName;
             }
-            if (!result.location && info.location) {
-                result.location = info.location;
+            if (!result.festivalLocation && info.festivalLocation) {
+                result.festivalLocation = info.festivalLocation;
             }
-            if (!result.startDate && info.startDate) {
-                result.startDate = info.startDate;
-            }
-            if (!result.endDate && info.endDate) {
-                result.endDate = info.endDate;
-            }
-        }
-
-        // try to extract stages from performances if they are not present
-        if (!result.stages) {
-            const stages = new Set<string>();
-            result.performances.forEach(performance => {
-                if (performance.stage) {
-                    stages.add(performance.stage);
-                }
-            });
-            result.stages = Array.from(stages);
         }
 
         // result is a partial Festival object, we need to generate a proper Festival object
         const festival: Festival = {
             id: generateFestivalId({
-                name: result.name,
-                location: result.location || 'N/A',
-                startDate: result.startDate || new Date().toISOString(),
-                endDate: result.endDate || new Date().toISOString(),
+                name: result.festivalName || 'unknown-festival',
+                location: result.festivalLocation || 'unknown-location',
             }),
-            name: result.name,
-            location: result.location || 'N/A',
-            startDate: result.startDate || 'N/A',
-            endDate: result.endDate || 'N/A',
-            description: result.description,
-            imageUrl: result.imageUrl,
-            stages: result.stages || [],
-            performances: result.performances.map(performance => ({
-                id: generatePerformanceId(result.name),
-                startTime: performance.startTime || '',
-                endTime: performance.endTime || '',
-                stage: performance.stage || '',
-                day: performance.day || 0,
-                artist: {
-                    ...performance.artist,
-                    id: generateArtistId(),
-                },
+            name: result.festivalName || 'Unknown Festival',
+            location: result.festivalLocation || 'Unknown Location',
+            description: result.festivalDescription,
+            website: result.festivalWebsite,
+            lineup: result.lineup?.map(day => ({
+                date: day.date,
+                list: day.list.map(item => ({
+                    artistName: item.artist,
+                    artistId: generateArtistId(),
+                    time: item.time,
+                    stage: item.stage,
+                })),
             })),
-            website: result.website || '',
         };
         return festival;
     }
@@ -191,7 +153,7 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
     }: {
         userPreferences: UserPreferences;
         availableArtists: {
-            id: string;
+            festivalName: string;
             name: string;
             genre: string[] | undefined;
             description: string | undefined;
@@ -231,7 +193,10 @@ Generate music recommendations based on the provided user preferences:
     }
 
     /**
-     * Generate a parser function for a given HTML schema
+     * Generate a parser function for a given HTML schema.
+     * It works much better than generating a full festival object from an url or HTML content.
+     * This one generates only a parser function that can be used to extract data from the HTML content.
+     * It uses much less output tokens and is more reliable.
      * @param schema Zod schema to generate the parser function for
      * @returns Function that takes HTML content and URL, returns parsed data as a string
      */

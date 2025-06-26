@@ -158,9 +158,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                                         >
                                             <div className="font-medium text-gray-900">{festival.name}</div>
                                             <div className="text-sm text-gray-500">{festival.location}</div>
-                                            <div className="text-xs text-gray-400">
-                                                {new Date(festival.startDate).toLocaleDateString()} - {new Date(festival.endDate).toLocaleDateString()}
-                                            </div>
+                                            <div className="text-xs text-gray-400">{festival.lineup.length} days</div>
                                         </button>
                                     ))
                                 ) : (
@@ -183,7 +181,6 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                                 <div>
                                     <div className="font-medium text-blue-900">{selectedFestival.name}</div>
                                     <div className="text-sm text-blue-700">{selectedFestival.location}</div>
-                                    <div className="text-xs text-blue-600">{selectedFestival.performances.length} artists performing</div>
                                 </div>
                             </div>
                         </div>

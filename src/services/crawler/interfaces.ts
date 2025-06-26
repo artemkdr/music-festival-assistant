@@ -1,7 +1,6 @@
 /**
  * Festival web crawler service interfaces
  */
-import { ParsedFestivalData } from '@/services/ai/schemas';
 import type { Artist, Festival } from '@/schemas';
 
 /**
@@ -27,7 +26,7 @@ export interface FestivalCrawlResult {
     success: boolean;
     festival?: Festival;
     rawData: RawFestivalData;
-    parsedData?: ParsedFestivalData;
+    parsedData?: unknown;
     errors?: string[];
     warnings?: string[];
     aiProcessingTime?: number;

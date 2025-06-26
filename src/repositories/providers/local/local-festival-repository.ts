@@ -1,7 +1,7 @@
 import { ILogger } from '@/lib/logger';
 import { IFestivalRepository } from '@/repositories/interfaces';
 import { BaseJsonRepository } from '@/repositories/providers/local/base-json-repository';
-import { Festival, generatePerformanceId } from '@/schemas';
+import { Festival } from '@/schemas';
 
 /**
  * Local JSON festival repository implementation
@@ -40,13 +40,6 @@ export class LocalJsonFestivalRepository extends BaseJsonRepository implements I
         this.logger.debug('Saving festival to local storage', { festivalId: festival.id });
         const festivals = await this.readJsonFile<Festival>(this.filename);
         const existingIndex = festivals.findIndex(f => f.id === festival.id);
-
-        // generate performance IDs if they are not set
-        festival.performances
-            .filter(performance => !performance.id)
-            .forEach(performance => {
-                performance.id = generatePerformanceId(festival.name);
-            });
 
         if (existingIndex >= 0) {
             festivals[existingIndex] = festival;

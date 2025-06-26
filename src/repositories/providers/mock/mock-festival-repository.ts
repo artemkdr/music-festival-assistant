@@ -1,6 +1,6 @@
 import { ILogger } from '@/lib/logger';
 import { IFestivalRepository } from '@/repositories/interfaces';
-import { Festival, generatePerformanceId } from '@/schemas';
+import { Festival } from '@/schemas';
 import { mockFestival } from '@/tests/mock-data';
 
 /**
@@ -36,13 +36,6 @@ export class MockFestivalRepository implements IFestivalRepository {
     async saveFestival(festival: Festival): Promise<Festival> {
         this.logger.debug('Saving festival', { festivalId: festival.id });
         const existingIndex = this.festivals.findIndex(f => f.id === festival.id);
-
-        // generate performance IDs if they are not set
-        festival.performances
-            .filter(performance => !performance.id)
-            .forEach(performance => {
-                performance.id = generatePerformanceId(festival.name);
-            });
 
         if (existingIndex >= 0) {
             this.festivals[existingIndex] = festival;

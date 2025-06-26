@@ -3,6 +3,7 @@
  * GET /api/admin/artists/[id]/performances - Get festivals where this artist performs
  */
 import { DIContainer } from '@/lib/di-container';
+import { getPerformanceByArtistName, isFestivalFinished, Performance } from '@/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
@@ -33,18 +34,16 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
 
         // Get all festivals and filter for ones that include this artist
         const allFestivals = await festivalService.getAllFestivals();
-        const performances = allFestivals
-            .filter(festival => festival.performances.some(perf => perf.artist.id === artist.id || perf.artist.name.toLowerCase() === artist.name.toLowerCase()))
-            .map(festival => {
-                const performance = festival.performances.find(perf => perf.artist.id === artist.id || perf.artist.name.toLowerCase() === artist.name.toLowerCase());
-                return {
-                    festivalId: festival.id,
-                    festivalName: festival.name,
-                    date: performance?.startTime ? festival.startDate : undefined,
-                    time: performance?.startTime,
-                    stage: performance?.stage,
-                };
-            });
+        const performances: Performance[] = [];
+        for (const festival of allFestivals) {
+            if (!isFestivalFinished(festival)) {
+                // Check if the artist is performing in this festival
+                const performance = getPerformanceByArtistName(festival, artist.name);
+                if (performance) {
+                    performances.push(performance);
+                }
+            }
+        }
 
         return NextResponse.json({
             status: 'success',

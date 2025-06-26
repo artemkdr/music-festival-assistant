@@ -1,4 +1,4 @@
-import type { ApiResponse, ArtistDetails } from './types';
+import type { ApiResponse, ArtistDetails, Performance } from './types';
 import { ApiClient, apiClient } from './api-client';
 
 class ArtistsApi {
@@ -25,7 +25,7 @@ class ArtistsApi {
         });
     }
 
-    async getArtistPerformances(id: string): Promise<ApiResponse> {
+    async getArtistPerformances(id: string): Promise<ApiResponse<Performance[]>> {
         return this.client.request(`/admin/artists/${id}/performances`);
     }
 

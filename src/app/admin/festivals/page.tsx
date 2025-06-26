@@ -40,14 +40,6 @@ export default function FestivalsPage() {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
     return (
         <ProtectedRoute requireAdmin>
             <AdminLayout>
@@ -104,12 +96,8 @@ export default function FestivalsPage() {
                                                 {festival.location}
                                             </div>
                                             <div className="flex items-center">
-                                                <span className="mr-2">📅</span>
-                                                {formatDate(festival.startDate)} - {formatDate(festival.endDate)}
-                                            </div>
-                                            <div className="flex items-center">
                                                 <span className="mr-2">🎤</span>
-                                                {festival.performances.length} artists
+                                                {festival.lineup.length} days: {festival.lineup[0].date} - {festival.lineup[festival.lineup.length - 1]!.date}
                                             </div>
                                         </div>
 

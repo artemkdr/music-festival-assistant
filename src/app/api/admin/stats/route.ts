@@ -5,6 +5,7 @@
 import { requireAdmin } from '@/middleware/auth-middleware';
 import { DIContainer } from '@/lib/di-container';
 import { NextResponse } from 'next/server';
+import { getFestivalPerformances } from '@/schemas';
 
 export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
@@ -19,7 +20,7 @@ export const GET = requireAdmin(async (): Promise<Response> => {
         const [festivals, artists] = await Promise.all([festivalService.getAllFestivals(), artistService.getAllArtists()]);
 
         // Calculate total performances across all festivals
-        const totalPerformances = festivals.reduce((total, festival) => total + festival.performances.length, 0);
+        const totalPerformances = festivals.reduce((total, festival) => total + getFestivalPerformances(festival).length, 0);
 
         // For now, we'll use a placeholder for active sessions since we don't have session tracking
         // In a real app, this would come from a session store or analytics
