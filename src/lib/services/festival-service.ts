@@ -2,7 +2,7 @@ import { IFestivalRepository } from '@/lib/repositories/interfaces';
 import { Festival } from '@/lib/schemas';
 import { IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
 import type { ILogger } from '@/lib/types/logger';
-import { generateFestivalId } from '@/lib/utils/id-generator';
+import { generateFestivalActId, generateFestivalId } from '@/lib/utils/id-generator';
 
 interface CreateFestivalData {
     urls: string[];
@@ -56,6 +56,11 @@ export class FestivalService implements IFestivalService {
             this.logger.info(`Overriding festival name with provided name: ${data.name}`);
             newFestival.name = data.name;
         }
+        // ensure that the festival acts have unique IDs
+        newFestival.lineup = newFestival.lineup.map(act => ({
+            ...act,
+            id: act.id || generateFestivalActId(newFestival.name),
+        }));
         return this.festivalRepository.saveFestival(newFestival);
     }
 
@@ -68,6 +73,11 @@ export class FestivalService implements IFestivalService {
                 location: festival.location || 'unknown-location',
             });
         }
+        // ensure that the festival acts have unique IDs
+        festival.lineup = festival.lineup.map(act => ({
+            ...act,
+            id: act.id || generateFestivalActId(festival.name),
+        }));
         await this.festivalRepository.saveFestival(festival);
     }
 

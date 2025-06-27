@@ -48,3 +48,4 @@ export const FestivalDiscoveryRequestSchema = z.object({
  */
 
 export type Festival = z.infer<typeof FestivalSchema>;
+export type ParserFestival = z.infer<typeof ParserFestivalSchema>;

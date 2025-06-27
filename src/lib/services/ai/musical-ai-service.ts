@@ -3,7 +3,8 @@
  */
 import { Artist, ArtistSchema, Festival, ParserFestivalSchema, RecommendationShortSchema, RecommentationsAIResponseSchema, UserPreferences } from '@/lib/schemas';
 import type { AIRequest, IAIService, IMusicalAIService } from '@/lib/services/ai/interfaces';
-import { generateArtistId, generateFestivalActId, generateFestivalId } from '@/lib/utils/id-generator';
+import { mapParserFestivalToFestival } from '@/lib/services/crawler/util';
+import { generateArtistId } from '@/lib/utils/id-generator';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
@@ -68,27 +69,7 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
         }
 
         // result is a partial Festival object, we need to generate a proper Festival object
-        const festival: Festival = {
-            id: generateFestivalId({
-                name: result.festivalName || 'unknown-festival',
-                location: result.festivalLocation || 'unknown-location',
-            }),
-            name: result.festivalName || 'Unknown Festival',
-            location: result.festivalLocation || 'Unknown Location',
-            description: result.festivalDescription,
-            website: result.festivalWebsite,
-            lineup: result.lineup.flatMap(day => {
-                return day.list.map(item => ({
-                    id: generateFestivalActId(result.festivalName || 'unknown-festival'),
-                    festivalName: result.festivalName || 'Unknown Festival',
-                    date: day.date,
-                    artistName: item.artist,
-                    stage: item.stage,
-                    time: item.time,
-                }));
-            }),
-        };
-        return festival;
+        return mapParserFestivalToFestival(result);
     }
 
     /**
@@ -140,6 +121,8 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
             schema: looseArtistSchema,
         });
         // we have to intervent here and generate our own ID
+        // because AI answer can contain any ID according to schema, even a random one
+        // as 'id' is a requited field in the schema
         result.id = generateArtistId();
         return result;
     }
@@ -202,29 +185,12 @@ Generate music recommendations based on the provided user preferences:
      * @param schema Zod schema to generate the parser function for
      * @returns Function that takes HTML content and URL, returns parsed data as a string
      */
-    async generateFestivalParserFunction(html: string, url: string): Promise<string> {
-        // simplified schema for AI
-        const schema = z.object({
-            festivalName: z.string().optional(),
-            festivalLocation: z.string().optional(),
-            lineup: z.array(
-                z.object({
-                    date: z.string(),
-                    list: z.array(
-                        z.object({
-                            artist: z.string().min(1),
-                            time: z.string().optional(),
-                            stage: z.string().optional(),
-                        })
-                    ),
-                })
-            ),
-        });
+    async generateFestivalParserFunction(html: string, url: string): Promise<string> {        
         const aiRequest = {
             systemPrompt: `Provide a scraping function in JavaScript that extracts and returns data according to a schema from the current page. The function must be IIFE. No comments or imports. No console.log. The code you generate will be executed straight away, you shouldn't output anything besides runnable code`,
             prompt: `
                 Website: ${url}
-                Schema: ${JSON.stringify(zodToJsonSchema(schema))}
+                Schema: ${JSON.stringify(zodToJsonSchema(ParserFestivalSchema))}
                 Content: ${html}
             `,
         };

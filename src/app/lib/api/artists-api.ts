@@ -34,7 +34,7 @@ class ArtistsApi {
      * Admin: Crawl artists
      */
     async crawlArtists(data: { festivalId?: string; artistNames?: string[] }): Promise<ApiResponse> {
-        return this.client.request('/admin/crawl-artists', {
+        return this.client.request('/admin/crawl/artists', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -45,7 +45,7 @@ class ArtistsApi {
      * @param data { id, name, spotifyId, context }
      */
     async recrawlArtist(data: { id: string; name?: string | undefined; spotifyId?: string | undefined; context?: string | undefined }): Promise<ApiResponse<Artist>> {
-        return this.client.request<Artist>('/admin/crawl-artist', {
+        return this.client.request<Artist>('/admin/crawl/artist', {
             method: 'POST',
             body: JSON.stringify(data),
         });

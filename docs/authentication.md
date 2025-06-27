@@ -79,8 +79,8 @@ JWT_REFRESH_EXPIRES_IN=7d
 
 - `POST /api/auth/login` - Login with email/password
 - `POST /api/auth/register` - Register new user
-- `POST /api/admin/crawl-festival` - Admin-only festival crawling
-- `POST /api/admin/crawl-artists` - Admin-only artist crawling
+- `POST /api/admin/crawl/festival` - Admin-only festival crawling
+- `POST /api/admin/crawl/artists` - Admin-only artist crawling
 
 ## Production Notes
 

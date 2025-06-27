@@ -1,4 +1,5 @@
-import { Festival } from '@/lib/schemas';
+import { Festival, ParserFestival } from '@/lib/schemas';
+import { generateFestivalActId, generateFestivalId } from '@/lib/utils/id-generator';
 
 /**
  * Extracts artist names from a festival's lineup.

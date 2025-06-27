@@ -27,7 +27,7 @@ const CrawlFestivalRequestSchema = z.object({
 });
 
 /**
- * POST /api/admin/crawl-festival
+ * POST /api/admin/crawl/festival
  * Crawl a festival website and extract lineup data (Admin only)
  */
 export const POST = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {

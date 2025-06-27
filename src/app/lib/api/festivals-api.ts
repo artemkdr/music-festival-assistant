@@ -27,7 +27,7 @@ class FestivalsApi {
         // Support backward compatibility with single URL string
         const requestBody = typeof data === 'string' ? { urls: [data] } : data;
 
-        return this.client.request('/admin/crawl-festival', {
+        return this.client.request('/admin/crawl/festival', {
             method: 'POST',
             body: JSON.stringify(requestBody),
         });

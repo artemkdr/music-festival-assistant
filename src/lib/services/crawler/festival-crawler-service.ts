@@ -1,18 +1,20 @@
 /**
  * Festival web crawler service implementation
  */
+import { type Festival } from '@/lib/schemas';
+import { IMusicalAIService } from '@/lib/services/ai/interfaces';
+import { FestivalHtmlParser, IFestivalHtmlParser } from '@/lib/services/crawler/festival-html-parser';
 import type { ILogger } from '@/lib/types/logger';
 import { IErrorHandler, IRetryHandler, toError } from '@/lib/utils/error-handler';
-import { IMusicalAIService } from '@/lib/services/ai/interfaces';
-import { type Festival } from '@/lib/schemas';
 import type { IFestivalCrawlerService } from './interfaces';
-import { FestivalScraper, IFestivalScraper } from '@/lib/services/scraper/festival-scraper';
+import { mapParserFestivalToFestival } from '@/lib/services/crawler/util';
+
 
 /**
  * Festival crawler service implementation
  */
 export class FestivalCrawlerService implements IFestivalCrawlerService {
-    private readonly scraper: IFestivalScraper;
+    private readonly scraper: IFestivalHtmlParser;
 
     constructor(
         private readonly logger: ILogger,
@@ -20,7 +22,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
         retryHandler: IRetryHandler,
         private readonly aiService: IMusicalAIService
     ) {
-        this.scraper = new FestivalScraper(aiService, logger, errorHandler, retryHandler);
+        this.scraper = new FestivalHtmlParser(aiService, logger, errorHandler, retryHandler);
     }
 
     /**
@@ -34,7 +36,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
 
         try {
             // Step 1: Try structured scraping first for supported websites
-            const scrapedResult = await this.tryStructuredScraping(urls[0]!);
+            const scrapedResult = await this.tryStructuredParsing(urls[0]!);
 
             if (scrapedResult) {
                 this.logger.info(`Successfully scraped festival data from: ${urls[0]}`);
@@ -60,11 +62,11 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
      * @param urls URLs to scrape
      * @returns Array of successfully scraped festival data
      */
-    private async tryStructuredScraping(url: string): Promise<Festival | null> {
+    private async tryStructuredParsing(url: string): Promise<Festival | null> {
         try {
             // Scrape using appropriate scraper
-            const scrapedData = await this.scraper.scrape(url);
-            return scrapedData;
+            const scrapedData = await this.scraper.parse(url);
+            return mapParserFestivalToFestival(scrapedData);
         } catch (error) {
             this.logger.error(`Structured scraping failed for URL ${url}, will try AI fallback:`, toError(error));
             // Continue to next URL or fall back to AI

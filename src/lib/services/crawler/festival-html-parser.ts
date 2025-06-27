@@ -1,16 +1,20 @@
 /**
- * @fileoverview Base scraper class for website data extraction.
+ * @fileoverview Festival html parser class for website data extraction.
+ * 
+ * It uses Playwright for browser automation and AI service for parsing.
+ * It uses AI for generating a parser function based on the HTML content.
+ * Then this function is evaluated in the browser context (Playwright) to extract structured data.
+ * 
  * @author github/artemkdr
  */
-import { Festival } from '@/lib/schemas';
+import { Festival, ParserFestival, ParserFestivalSchema } from '@/lib/schemas';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
 import type { ILogger } from '@/lib/types/logger';
-import { APIError, IErrorHandler, IRetryHandler, toError } from '@/lib/utils/error-handler';
+import { IErrorHandler, IRetryHandler, toError } from '@/lib/utils/error-handler';
 import { Browser, BrowserContext, Page, chromium } from 'playwright';
-import { z } from 'zod';
 
-export interface IFestivalScraper {
-    scrape(url: string): Promise<Festival>;
+export interface IFestivalHtmlParser {
+    parse(url: string): Promise<ParserFestival>;
 }
 
 export interface ScraperOptions {
@@ -20,10 +24,9 @@ export interface ScraperOptions {
 }
 
 /**
- * Base scraper class that can be extended for specific website scrapers.
  * Provides robust HTML downloading and parsing with error handling and retry logic.
  */
-export class FestivalScraper implements IFestivalScraper {
+export class FestivalHtmlParser implements IFestivalHtmlParser {
     private readonly defaultOptions: ScraperOptions = {
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         timeout: 30000,
@@ -45,10 +48,11 @@ export class FestivalScraper implements IFestivalScraper {
      * @param url - The URL to scrape
      * @returns Parsed data according to the schema
      */
-    async scrape(url: string): Promise<Festival> {
+    async parse(url: string): Promise<ParserFestival> {
         this.logger.info(`Starting scrape operation for URL: ${url}`);
         try {
-            const result = await this.scrapeWithBrowser(url);
+            const page = await this.scrapeWithBrowser(url);
+            const result = await this.parsePage(page, url);
             this.logger.info(`Successfully scraped data from: ${url}`);
             return result;
         } catch (error) {
@@ -62,7 +66,7 @@ export class FestivalScraper implements IFestivalScraper {
      * @param url - The URL to scrape
      * @returns Parsed data according to the schema
      */
-    async scrapeWithBrowser(url: string): Promise<Festival> {
+    async scrapeWithBrowser(url: string): Promise<Page> {
         let browser: Browser | null = null;
         let context: BrowserContext | null = null;
         let page: Page | null = null;
@@ -82,10 +86,9 @@ export class FestivalScraper implements IFestivalScraper {
             this.logger.debug(`Navigating to URL: ${url}`);
             await page.goto(url);
             // cleanup
-            this.cleanHtml(page);
-            // Parse the page
-            const result = await this.parseHtml(page, url);
-            return result;
+            await this.cleanHtml(page);
+            this.logger.debug(`Page loaded, rendered and cleaned up successfully: ${url}`);
+            return page;
         } finally {
             // Clean up resources
             if (page) await page.close();
@@ -100,39 +103,45 @@ export class FestivalScraper implements IFestivalScraper {
      * @param url - Original URL (for context in error messages)
      * @returns Parsed and validated data
      */
-    async parseHtml(page: Page, url: string): Promise<Festival> {
+    async parsePage(page: Page, url: string): Promise<ParserFestival> {
+        
+        this.logger.debug(`Parsing HTML for URL: ${url}`);
+
+        let parsedData: unknown = {};
+        let parserFunctionCode: string;
+
         try {
-            this.logger.debug(`Parsing HTML for URL: ${url}`);
-
-            let parsedData: unknown = {};
-
-            try {
-                this.logger.debug(`Using AI service to parse HTML for URL: ${url}`);
-                let htmlContent = await page.content();
-                // final cleanup
-                htmlContent = htmlContent
-                    .replace(/\s+/g, ' ') // remove spaces
-                    .replace(/<!--[\s\S]*?-->/g, '') // remove HTML comments
-                    .trim();
-                const parserFunction = await this.aiService.generateFestivalParserFunction(htmlContent, url);
-                parsedData = await this.evaluateScript(page, parserFunction);
-            } catch (error) {
-                throw new Error('AI parsing failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
-            }
-
-            this.logger.debug(`Successfully parsed and validated data for: ${url}`);
-
-            // convert validatedDat to Festival type
-            return parsedData as Festival;
+            this.logger.debug(`Using AI service to parse HTML for URL: ${url}`);
+            let htmlContent = await page.content();
+            // find/replace cleanup
+            htmlContent = htmlContent
+                .replace(/\s+/g, ' ') // remove spaces
+                .replace(/<!--[\s\S]*?-->/g, '') // remove HTML comments
+                .trim();
+            parserFunctionCode = await this.aiService.generateFestivalParserFunction(htmlContent, url);            
         } catch (error) {
-            if (error instanceof z.ZodError) {
-                this.logger.error(`Schema validation failed for ${url}: ${error.message}`);
-                throw new APIError(`Data validation failed: ${error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')}`, 400, 'BaseScraper');
-            }
-
-            this.logger.error(`HTML parsing failed for ${url}:`, error as Error);
-            throw new APIError(`Failed to parse HTML: ${error instanceof Error ? error.message : 'Unknown parsing error'}`, 500, 'BaseScraper', error instanceof Error ? error : undefined);
+            throw new Error(`AI parser function generation failed for URL: ${url}`, toError(error));
         }
+
+        try {
+            parsedData = await this.evaluateScript<Festival>(page, parserFunctionCode);
+        } catch (error) {
+            this.logger.error(`Failed to evaluate parser function for URL: ${url}`, toError(error));
+            throw new Error('Failed to evaluate parser function', toError(error));
+        }
+
+        // validate parsed data against Festival schema
+        try {
+            ParserFestivalSchema.parse(parsedData);
+        } catch (error) {
+            this.logger.error(`Parsed data validation failed for URL: ${url}`, toError(error));
+            throw new Error(`Parsed data validation failed for URL: ${url}`, toError(error));
+        }
+
+        this.logger.debug(`Successfully parsed and validated data for: ${url}`);
+
+        // convert validatedDat to Festival type
+        return parsedData as ParserFestival;
     }
 
     /**

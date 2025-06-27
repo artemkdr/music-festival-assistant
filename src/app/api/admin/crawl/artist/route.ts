@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 /**
  * Route for (re) crawling an existing artist by ID.
- * If you need to crawl a new artist, use the POST /api/admin/crawl-artists endpoint instead.
+ * If you need to crawl a new artist, use the POST /api/admin/crawl/artists endpoint instead.
  */
 
 const CrawlArtistRequestSchema = z.object({

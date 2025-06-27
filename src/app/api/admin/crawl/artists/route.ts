@@ -5,7 +5,6 @@
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { Festival } from '@/lib/schemas';
-import { generateArtistId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -58,11 +57,9 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         const results: { name: string; status: 'crawled' | 'exists' | 'error'; error?: string }[] = [];
         for (const name of artistNames) {
             try {
-                let artistId = generateArtistId();
-
                 const existing = await artistService.searchArtistByName(name);
                 if (existing) {
-                    artistId = existing.id; // Use the first existing artist's ID
+                    const artistId = existing.id; // Use the first existing artist's ID
                     results.push({ name, status: 'exists' });
                     if (validated.force === false) {
                         continue;
