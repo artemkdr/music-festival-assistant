@@ -22,12 +22,12 @@ export interface IRecommendationService {
  */
 export interface ICalendarService {
     /**
-     * Generate calendar events for selected performances
-     * @param performanceIds Array of performance identifiers
+     * Generate calendar events for selected acts
+     * @param actIds Array of act identifiers
      * @param festivalId Festival identifier
      * @returns Promise resolving to array of calendar events
      */
-    generateCalendarEvents(performanceIds: string[], festivalId: string): Promise<CalendarEvent[]>;
+    generateCalendarEvents(actIds: string[], festivalId: string): Promise<CalendarEvent[]>;
 
     /**
      * Create iCal format string for calendar import

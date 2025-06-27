@@ -108,19 +108,20 @@ export const mockFestival: Festival = {
     imageUrl: 'https://example.com/summer-sound-festival.jpg',
     lineup: [
         {
+            id: 'act-1',
+            festivalName: 'Summer Sound Festival 2024',
             date: '2024-07-20',
-            list: [
-                {
-                    artistName: 'Arctic Monkeys',
-                    time: '20:00 - 21:30',
-                    stage: 'Main Stage',
-                },
-                {
-                    artistName: 'Disclosure',
-                    time: '22:00 - 23:30',
-                    stage: 'Electronic Stage',
-                },
-            ],
+            artistName: 'Arctic Monkeys',
+            time: '20:00 - 21:30',
+            stage: 'Main Stage',
+        },
+        {
+            id: 'act-1',
+            festivalName: 'Summer Sound Festival 2024',
+            date: '2024-07-20',
+            artistName: 'Disclosure',
+            time: '22:00 - 23:30',
+            stage: 'Electronic Stage',
         },
     ],
 };

@@ -1,8 +1,8 @@
 /**
  * Festival web crawler service implementation
  */
-import type { ILogger } from '@/lib/logger';
-import { IErrorHandler, IRetryHandler } from '@/lib/utils/error-handler';
+import type { ILogger } from '@/lib/types/logger';
+import { IErrorHandler, IRetryHandler, toError } from '@/lib/utils/error-handler';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
 import { type Festival } from '@/lib/schemas';
 import type { IFestivalCrawlerService } from './interfaces';
@@ -50,8 +50,8 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
 
             return await this.aiService.generateFestival(urls);
         } catch (error) {
-            this.logger.error('Festival crawl failed', error instanceof Error ? error : new Error(String(error)));
-            throw new Error(`Festival crawl failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            this.logger.error('Festival crawl failed', toError(error));
+            throw new Error(`Festival crawl failed: ${toError(error).message}`);
         }
     }
 
@@ -66,7 +66,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
             const scrapedData = await this.scraper.scrape(url);
             return scrapedData;
         } catch (error) {
-            this.logger.warn(`Structured scraping failed for URL ${url}, will try AI fallback:`, error as Error);
+            this.logger.error(`Structured scraping failed for URL ${url}, will try AI fallback:`, toError(error));
             // Continue to next URL or fall back to AI
         }
         return null;

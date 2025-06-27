@@ -1,7 +1,7 @@
 /**
  * Artist crawler service: fetches artist data from Spotify and enriches with AI if needed.
  */
-import type { ILogger } from '@/lib/logger';
+import type { ILogger } from '@/lib/types/logger';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
 import { IArtistCrawlerService } from '@/lib/services/crawler/interfaces';
 import { SpotifyService, SpotifyArtist } from '@/lib/services/spotify/spotify-service';

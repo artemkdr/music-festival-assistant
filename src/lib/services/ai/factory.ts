@@ -1,8 +1,8 @@
 /**
  * AI service factory for creating AI providers
  */
-import type { ILogger } from '@/lib/logger';
 import { AIService } from '@/lib/services/ai/ai-service';
+import type { ILogger } from '@/lib/types/logger';
 import type { AIProvider, AIProviderConfig, IAIService, IAIServiceFactory } from './interfaces';
 
 /**

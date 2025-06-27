@@ -4,9 +4,10 @@
  */
 'use client';
 
+import { festivalsApi } from '@/app/lib/api';
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { Festival, festivalsApi } from '@/app/lib/api';
+import { Festival } from '@/lib/schemas';
 import Link from 'next/link';
 import { ChangeEvent, useState } from 'react';
 
@@ -16,7 +17,7 @@ interface CrawlResult {
     festival?: {
         name: string;
         location: string;
-        performances: Array<{ artist: { name: string } }>;
+        acts: Array<{ artist: { name: string } }>;
     };
     error?: string;
 }
@@ -107,13 +108,14 @@ export default function FestivalCrawlPage() {
                     message: response.message,
                     festival: {
                         name: response.data.festival.name,
-                        location: response.data.festival.location,
-                        performances:
-                            response.data.festival.lineup?.flatMap(days =>
-                                days.list.map(item => ({
-                                    artist: { name: item.artistName },
-                                }))
-                            ) || [],
+                        location: response.data.festival.location || '',
+                        acts: response.data.festival.lineup.map(act => {
+                            return {
+                                artist: {
+                                    name: act.artistName,
+                                },
+                            };
+                        }),
                     },
                 });
             } else {
@@ -297,16 +299,16 @@ export default function FestivalCrawlPage() {
                                                     <strong>Location:</strong> {result.festival.location}
                                                 </p>
                                                 <p>
-                                                    <strong>Artists Found:</strong> {result.festival.performances?.length || 0}
+                                                    <strong>Artists Found:</strong> {result.festival.acts?.length ?? 0}
                                                 </p>
-                                                {result.festival.performances && result.festival.performances.length > 0 && (
+                                                {result.festival.acts && result.festival.acts.length > 0 && (
                                                     <div>
                                                         <strong>Sample Artists:</strong>
                                                         <ul className="mt-1 ml-4 list-disc">
-                                                            {result.festival.performances.slice(0, 5).map((perf, index) => (
-                                                                <li key={index}>{perf.artist.name}</li>
+                                                            {result.festival.acts.slice(0, 5).map((act, index) => (
+                                                                <li key={index}>{act.artist.name}</li>
                                                             ))}
-                                                            {result.festival.performances.length > 5 && <li>... and {result.festival.performances.length - 5} more</li>}
+                                                            {result.festival.acts.length > 5 && <li>... and {result.festival.acts.length - 5} more</li>}
                                                         </ul>
                                                     </div>
                                                 )}

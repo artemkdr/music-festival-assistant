@@ -1,11 +1,10 @@
-
 import { z } from 'zod';
 
-// Performance schema
-export const FestivalActSchema = z.object({    
+// Festival Act schema
+export const FestivalActSchema = z.object({
     id: z.string().min(1),
     artistName: z.string(),
-    artistId: z.string().optional(),    
+    artistId: z.string().optional(),
     festivalName: z.string(),
     festivalId: z.string().optional(),
     date: z.string().optional(),

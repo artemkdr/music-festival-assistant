@@ -1,10 +1,10 @@
 /**
- * Artist performances API endpoint
- * GET /api/admin/artists/[id]/performances - Get festivals where this artist performs
+ * Artist acts API endpoint
+ * GET /api/admin/artists/[id]/acts - Get festivals where this artist performs
  */
 import { DIContainer } from '@/lib/di-container';
 import { FestivalAct } from '@/lib/schemas';
-import { getPerformanceByArtistName, isFestivalFinished } from '@/lib/utils/festival-util';
+import { getActsByArtistName, isFestivalFinished } from '@/lib/utils/festival-util';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     const { id } = await params;
 
     try {
-        logger.info('Artist performances request received', { artistId: id });
+        logger.info('Artist acts request received', { artistId: id });
 
         const artist = await artistService.getArtistById(id);
         if (!artist) {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
         for (const festival of allFestivals) {
             if (!isFestivalFinished(festival)) {
                 // Check if the artist is performing in this festival
-                const act = getPerformanceByArtistName(festival, artist.name);
+                const act = getActsByArtistName(festival, artist.name);
                 if (act) {
                     acts.push(act);
                 }
@@ -48,15 +48,15 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
 
         return NextResponse.json({
             status: 'success',
-            message: 'Artist performances retrieved successfully',
+            message: 'Artist acts retrieved successfully',
             data: acts,
         });
     } catch (error) {
-        logger.error('Failed to get artist performances', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to get artist acts', error instanceof Error ? error : new Error(String(error)));
         return NextResponse.json(
             {
                 status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve artist performances',
+                message: error instanceof Error ? error.message : 'Failed to retrieve artist acts',
             },
             { status: 500 }
         );

@@ -1,4 +1,4 @@
-import { Festival } from "@/lib/schemas";
+import { Festival } from '@/lib/schemas';
 
 /**
  * Extracts artist names from a festival's lineup.
@@ -10,9 +10,9 @@ export const getFestivalArtists = (
     id: string | undefined;
 }[] => {
     const artists = [] as { name: string; id: string | undefined }[];
-    festival.lineup.forEach(performance => {        
-        const artistId = performance.artistId;
-        const artistName = performance.artistName;
+    festival.lineup.forEach(act => {
+        const artistId = act.artistId;
+        const artistName = act.artistName;
         // check if the artist with defined id is already in the list,
         // if id is not defined, check by name
         if (artists.some(a => (artistId !== undefined ? a.id === artistId : a.name === artistName))) {
@@ -22,7 +22,7 @@ export const getFestivalArtists = (
                 name: artistName,
                 id: artistId,
             });
-        }        
+        }
     });
     return artists;
 };
@@ -32,9 +32,9 @@ export const getFestivalArtists = (
  */
 export const getFestivalStages = (festival: Festival): string[] => {
     const stagesSet = new Set<string>();
-    festival.lineup.forEach(performance => {        
-        if (!!performance.stage) {
-            stagesSet.add(performance.stage);
+    festival.lineup.forEach(act => {
+        if (!!act.stage) {
+            stagesSet.add(act.stage);
         }
     });
     return Array.from(stagesSet);
@@ -47,19 +47,18 @@ export const getFestivalDates = (festival: Festival): { startDate: string | unde
     if (!festival.lineup || festival.lineup.length === 0) {
         return { startDate: undefined, endDate: undefined };
     }
-    const firstDayPerformance = festival.lineup[0];
-    const lastDayPerformance = festival.lineup[festival.lineup.length - 1];
-    const startDate = !!firstDayPerformance ? firstDayPerformance.date : undefined;
-    const endDate = !!lastDayPerformance ? lastDayPerformance.date : undefined;
+    const firstDayAct = festival.lineup[0];
+    const lastDayAct = festival.lineup[festival.lineup.length - 1];
+    const startDate = !!firstDayAct ? firstDayAct.date : undefined;
+    const endDate = !!lastDayAct ? lastDayAct.date : undefined;
     return { startDate, endDate };
 };
 
-
 /**
- * Get performance by artist name in a festival's lineup.
+ * Get acts by artist name in a festival's lineup.
  */
-export const getPerformanceByArtistName = (festival: Festival, artistName: string) => {
-    return festival.lineup.find(performance => performance.artistName.toLowerCase() === artistName.toLowerCase());
+export const getActsByArtistName = (festival: Festival, artistName: string) => {
+    return festival.lineup.find(act => act.artistName.toLowerCase() === artistName.toLowerCase());
 };
 
 /**
@@ -72,4 +71,62 @@ export const isFestivalFinished = (festival: Festival): boolean => {
         return false; // If end date is invalid, we cannot determine if festival is finished
     }
     return endDate < today;
+};
+
+export const DATE_TBA = 'TBA';
+
+/**
+ * Groups festival acts by date for display purposes.
+ * This maintains backwards compatibility with the old lineup structure.
+ */
+export const groupFestivalActsByDate = (
+    festival: Festival
+): Array<{
+    date: string;
+    list: Array<{
+        artistName: string;
+        artistId?: string;
+        time?: string;
+        stage?: string;
+    }>;
+}> => {
+    if (!festival.lineup || festival.lineup.length === 0) {
+        return [];
+    }
+
+    // Group acts by date
+    const groupedByDate = festival.lineup.reduce(
+        (acc, act) => {
+            const date = act.date || DATE_TBA;
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push({
+                artistName: act.artistName,
+                ...(act.artistId && { artistId: act.artistId }),
+                ...(act.time && { time: act.time }),
+                ...(act.stage && { stage: act.stage }),
+            });
+            return acc;
+        },
+        {} as Record<
+            string,
+            Array<{
+                artistName: string;
+                artistId?: string;
+                time?: string;
+                stage?: string;
+            }>
+        >
+    );
+
+    // Convert to array and sort by date
+    return Object.entries(groupedByDate)
+        .map(([date, list]) => ({ date, list }))
+        .sort((a, b) => {
+            // Handle 'TBA' dates by putting them last
+            if (a.date === DATE_TBA) return 1;
+            if (b.date === DATE_TBA) return -1;
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
 };

@@ -4,7 +4,7 @@
  *
  * NOTE: You must provide a valid Spotify access token. For production, implement token refresh logic.
  */
-import type { ILogger } from '@/lib/logger';
+import type { ILogger } from '@/lib/types/logger';
 
 export interface SpotifyArtist {
     id: string;

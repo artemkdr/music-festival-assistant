@@ -1,15 +1,16 @@
-import type { ApiResponse, ArtistDetails, Performance } from './types';
+import { Artist, FestivalAct } from '@/lib/schemas';
 import { ApiClient, apiClient } from './api-client';
+import type { ApiResponse } from './types';
 
 class ArtistsApi {
     constructor(private client: ApiClient) {}
 
-    async getArtists(): Promise<ApiResponse<ArtistDetails[]>> {
-        return this.client.request<ArtistDetails[]>('/admin/artists');
+    async getArtists(): Promise<ApiResponse<Artist[]>> {
+        return this.client.request<Artist[]>('/admin/artists');
     }
 
-    async getArtist(id: string): Promise<ApiResponse<ArtistDetails>> {
-        return this.client.request<ArtistDetails>(`/admin/artists/${id}`);
+    async getArtist(id: string): Promise<ApiResponse<Artist>> {
+        return this.client.request<Artist>(`/admin/artists/${id}`);
     }
 
     async deleteArtist(id: string): Promise<ApiResponse> {
@@ -18,15 +19,15 @@ class ArtistsApi {
         });
     }
 
-    async updateArtist(id: string, artistData: Partial<ArtistDetails>): Promise<ApiResponse<ArtistDetails>> {
-        return this.client.request<ArtistDetails>(`/admin/artists/${id}`, {
+    async updateArtist(id: string, artistData: Partial<Artist>): Promise<ApiResponse<Artist>> {
+        return this.client.request<Artist>(`/admin/artists/${id}`, {
             method: 'PUT',
             body: JSON.stringify(artistData),
         });
     }
 
-    async getArtistPerformances(id: string): Promise<ApiResponse<Performance[]>> {
-        return this.client.request(`/admin/artists/${id}/performances`);
+    async getArtistActs(id: string): Promise<ApiResponse<FestivalAct[]>> {
+        return this.client.request(`/admin/artists/${id}/acts`);
     }
 
     /**
@@ -43,8 +44,8 @@ class ArtistsApi {
      * Admin: Recrawl a single artist with custom context
      * @param data { id, name, spotifyId, context }
      */
-    async recrawlArtist(data: { id: string; name?: string | undefined; spotifyId?: string | undefined; context?: string | undefined }): Promise<ApiResponse<ArtistDetails>> {
-        return this.client.request<ArtistDetails>('/admin/crawl-artist', {
+    async recrawlArtist(data: { id: string; name?: string | undefined; spotifyId?: string | undefined; context?: string | undefined }): Promise<ApiResponse<Artist>> {
+        return this.client.request<Artist>('/admin/crawl-artist', {
             method: 'POST',
             body: JSON.stringify(data),
         });

@@ -1,8 +1,9 @@
 /**
  * Main authentication service
  */
-import type { ILogger } from '@/lib/logger';
-import type { IAuthService, IAuthProvider, User } from './interfaces';
+
+import { ILogger } from '@/lib/types/logger';
+import type { IAuthProvider, IAuthService, User } from './interfaces';
 import { extractTokenFromHeader } from './jwt-utils';
 
 /**

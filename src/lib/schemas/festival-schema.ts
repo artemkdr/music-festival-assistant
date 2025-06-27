@@ -1,4 +1,4 @@
-import { FestivalAct, FestivalActSchema } from '@/lib/schemas';
+import { FestivalActSchema } from '@/lib/schemas';
 import { UserPreferencesSchema } from '@/lib/schemas/user-preferences-schema';
 import { z } from 'zod';
 
@@ -30,7 +30,7 @@ export const FestivalSchema = z.object({
     location: z.string().min(1).max(200).optional(),
     website: z.string().url().optional(),
     imageUrl: z.string().url().optional(),
-    lineup: z.array(FestivalActSchema)
+    lineup: z.array(FestivalActSchema),
 });
 
 // Festival update schema (for PUT requests)

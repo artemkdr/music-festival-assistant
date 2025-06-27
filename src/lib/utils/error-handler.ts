@@ -2,7 +2,7 @@
  * @fileoverview Error handling utilities and middleware.
  * @author github/artemkdr
  */
-import { ILogger } from '@/lib/logger';
+import type { ILogger } from '@/lib/types/logger';
 export interface IErrorHandler {
     handleAPIError(error: unknown, service: string, operation: string): never;
     safeExecute<T>(operation: () => Promise<T>, operationName: string, defaultValue?: T): Promise<T | undefined>;
@@ -19,6 +19,19 @@ export interface ICircuitBreaker {
     getFailureCount(): number;
 }
 
+export const toError = (error: unknown): Error => {
+    if (error instanceof Error) {
+        return error as Error;
+    }
+    if (typeof error === 'string') {
+        return new Error(error);
+    }
+    if (error && typeof error === 'object' && 'message' in error) {
+        return new Error((error as { message: string }).message);
+    }
+    return new Error('Unknown error');
+};
+
 /**
  * Custom error classes for specific error types.
  */
@@ -33,7 +46,6 @@ export class APIError extends Error {
         this.name = 'APIError';
     }
 }
-
 export class ConfigurationError extends Error {
     constructor(
         message: string,
@@ -61,7 +73,7 @@ export class RetryHandler implements IRetryHandler {
             try {
                 return await operation();
             } catch (error) {
-                lastError = error instanceof Error ? error : new Error(String(error));
+                lastError = toError(error);
 
                 if (attempt === this.maxAttempts || !shouldRetry(lastError)) {
                     this.logger.error(`${operationName} failed after ${attempt} attempts:`, lastError);
@@ -69,7 +81,7 @@ export class RetryHandler implements IRetryHandler {
                 }
 
                 const delayMs = this.baseDelayMs * Math.pow(2, attempt - 1);
-                this.logger.warn(`${operationName} failed (attempt ${attempt}/${this.maxAttempts}), retrying in ${delayMs}ms:`, lastError.message);
+                this.logger.warn(`${operationName} failed (attempt ${attempt}/${this.maxAttempts}), retrying in ${delayMs}ms:`, { cause: lastError.message });
 
                 await this.delay(delayMs);
             }

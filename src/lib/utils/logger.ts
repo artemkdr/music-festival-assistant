@@ -1,6 +1,6 @@
 import { Logger } from 'tslog';
 import { appendFileSync } from 'fs';
-import { ILogger } from '@/lib/logger';
+import type { ILogger } from '@/lib/types/logger';
 
 /**
  * Map string log level to tslog numeric level.

@@ -1,4 +1,4 @@
-import { normalizeName } from "@/lib/utils/normalize-name";
+import { normalizeName } from '@/lib/utils/normalize-name';
 
 /**
  * Generates a unique festival ID based on the festival's name and location.
@@ -12,15 +12,14 @@ export const generateFestivalId = (festival: { name: string; location: string })
     return `festival-${normalizeName(festival.name)}-${normalizeName(festival.location)}-${randomString}`;
 };
 
-/** 
- * Generates a unique performance ID based on the festival name and a random string.
+/**
+ * Generates a unique act ID based on the festival name and a random string.
  * @param festivalName - The name of the festival.
- * @returns 
+ * @returns
  */
-export const generatePerformanceId = (festivalName: string) => {
-    return `performance-${normalizeName(festivalName)}-${Math.random().toString(36).substring(2, 15)}`;
+export const generateFestivalActId = (festivalName: string) => {
+    return `act-${normalizeName(festivalName)}-${Math.random().toString(36).substring(2, 15)}`;
 };
-
 
 /**
  * This ID is generated using a random string to ensure uniqueness.

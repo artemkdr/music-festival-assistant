@@ -4,10 +4,11 @@
  */
 'use client';
 
+import { festivalsApi } from '@/app/lib/api';
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { festivalsApi } from '@/app/lib/api';
-import type { Festival } from '@/app/lib/api/types';
+import { Festival } from '@/lib/schemas';
+import { getFestivalDates } from '@/lib/utils/festival-util';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -82,36 +83,39 @@ export default function FestivalsPage() {
                     {/* Festivals Grid */}
                     {!isLoading && !error && (
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {festivals.map(festival => (
-                                <div key={festival.id} className="bg-white overflow-hidden shadow rounded-lg">
-                                    <div className="px-4 py-5 sm:p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-medium text-gray-900 truncate">{festival.name}</h3>
-                                            <span className="text-2xl">🎪</span>
-                                        </div>
-
-                                        <div className="space-y-2 text-sm text-gray-600 mb-4">
-                                            <div className="flex items-center">
-                                                <span className="mr-2">📍</span>
-                                                {festival.location}
+                            {festivals.map(festival => {
+                                const { startDate, endDate } = getFestivalDates(festival);
+                                return (
+                                    <div key={festival.id} className="bg-white overflow-hidden shadow rounded-lg">
+                                        <div className="px-4 py-5 sm:p-6">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-lg font-medium text-gray-900 truncate">{festival.name}</h3>
+                                                <span className="text-2xl">🎪</span>
                                             </div>
-                                            <div className="flex items-center">
-                                                <span className="mr-2">🎤</span>
-                                                {festival.lineup.length} days: {festival.lineup[0].date} - {festival.lineup[festival.lineup.length - 1]!.date}
-                                            </div>
-                                        </div>
 
-                                        <div className="flex space-x-2">
-                                            <Link href={`/admin/festivals/${festival.id}`} className="flex-1 btn-primary-light border-1 border-primary/50 bg-primary/10 text-center">
-                                                View Details
-                                            </Link>
-                                            <Link href={`/admin/festivals/${festival.id}/edit`} className="flex-1 btn-secondary-light border-1 border-secondary/50 bg-secondary/10 text-center">
-                                                Edit
-                                            </Link>
+                                            <div className="space-y-2 text-sm text-gray-600 mb-4">
+                                                <div className="flex items-center">
+                                                    <span className="mr-2">📍</span>
+                                                    {festival.location}
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <span className="mr-2">🎤</span>
+                                                    {festival.lineup.length} days: {startDate} - {endDate}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex space-x-2">
+                                                <Link href={`/admin/festivals/${festival.id}`} className="flex-1 btn-primary-light border-1 border-primary/50 bg-primary/10 text-center">
+                                                    View Details
+                                                </Link>
+                                                <Link href={`/admin/festivals/${festival.id}/edit`} className="flex-1 btn-secondary-light border-1 border-secondary/50 bg-secondary/10 text-center">
+                                                    Edit
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
 

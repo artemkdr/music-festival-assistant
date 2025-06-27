@@ -1,6 +1,6 @@
-import { ILogger } from '@/lib/logger';
 import { IFestivalRepository } from '@/lib/repositories/interfaces';
 import { Festival } from '@/lib/schemas';
+import type { ILogger } from '@/lib/types/logger';
 import { mockFestival } from '@/tests/mock-data';
 
 /**

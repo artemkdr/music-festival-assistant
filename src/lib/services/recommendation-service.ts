@@ -2,10 +2,11 @@
  * Recommendation service implementation
  * Core business logic for generating music recommendations
  */
-import type { ILogger } from '@/lib/logger';
 import { IArtistRepository } from '@/lib/repositories/interfaces';
-import { Artist, getPerformanceByArtistName, getFestivalArtists, type Festival, type Recommendation, type UserPreferences } from '@/lib/schemas';
+import { Artist, type Festival, type Recommendation, type UserPreferences } from '@/lib/schemas';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
+import type { ILogger } from '@/lib/types/logger';
+import { getActsByArtistName, getFestivalArtists } from '@/lib/utils/festival-util';
 import type { IRecommendationService } from './interfaces';
 
 /**
@@ -71,11 +72,11 @@ export class RecommendationService implements IRecommendationService {
             for (const rec of aiRecommendations) {
                 const artist = artistsMap[rec.artistName];
                 const artistName = artist?.name ?? rec.artistName;
-                const performance = getPerformanceByArtistName(festival, artistName);
-                if (artist && performance) {
+                const act = getActsByArtistName(festival, artistName);
+                if (artist && act) {
                     recommendations.push({
                         artist: artist,
-                        performance,
+                        act: act,
                         score: rec.score,
                         reasons: rec.reasons,
                         aiEnhanced: true,

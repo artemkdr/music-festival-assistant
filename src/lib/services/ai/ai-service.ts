@@ -1,4 +1,4 @@
-import { ILogger } from '@/lib/logger';
+import type { ILogger } from '@/lib/types/logger';
 import { AIProviderConfig, AIRequest, AIResponse, IAIService, SchemaAIRequest } from '@/lib/services/ai/interfaces';
 import { createVertex } from '@ai-sdk/google-vertex';
 import { openai } from '@ai-sdk/openai';

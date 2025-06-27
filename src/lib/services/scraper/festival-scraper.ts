@@ -2,10 +2,10 @@
  * @fileoverview Base scraper class for website data extraction.
  * @author github/artemkdr
  */
-import { ILogger } from '@/lib/logger';
 import { Festival } from '@/lib/schemas';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
-import { APIError, IErrorHandler, IRetryHandler } from '@/lib/utils/error-handler';
+import type { ILogger } from '@/lib/types/logger';
+import { APIError, IErrorHandler, IRetryHandler, toError } from '@/lib/utils/error-handler';
 import { Browser, BrowserContext, Page, chromium } from 'playwright';
 import { z } from 'zod';
 
@@ -212,7 +212,7 @@ export class FestivalScraper implements IFestivalScraper {
         try {
             return (await page.evaluate(script)) as TResult;
         } catch (error) {
-            this.logger.warn(`Failed to evaluate script:`, error as Error);
+            this.logger.error(`Failed to evaluate script:`, toError(error));
             return defaultValue;
         }
     }

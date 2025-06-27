@@ -1,8 +1,9 @@
 /**
  * A wrapper for AI services related to music festivals, artists and recommendations.
  */
-import { Artist, ArtistSchema, Festival, generateArtistId, generateFestivalId, ParserFestivalSchema, RecommendationShortSchema, RecommentationsAIResponseSchema, UserPreferences } from '@/lib/schemas';
+import { Artist, ArtistSchema, Festival, ParserFestivalSchema, RecommendationShortSchema, RecommentationsAIResponseSchema, UserPreferences } from '@/lib/schemas';
 import type { AIRequest, IAIService, IMusicalAIService } from '@/lib/services/ai/interfaces';
+import { generateArtistId, generateFestivalActId, generateFestivalId } from '@/lib/utils/id-generator';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
@@ -27,8 +28,8 @@ Your task is to generate detailed music festival information based on the provid
 - First of all, identify the language of the festival website or documents. It will help you to parse the content correctly using the right keywords.
 - Festival lineup is normally a list/table of performances or the list/table of artists:
     - If you parse the website, then look for the HTML elements like <table>, <ul>, <ol> or repeating elements like <div>, <p> or similar that contain artist names and related information.
-    - Look for the patterns like "lineup", "program", "performances", "artists", "stages", "timetable" or similar in English or in the language detected earlier.
-    - If you find the lineup, then extract it as a list of performances with stage, artists names and their performance times (if available).
+    - Look for the patterns like "lineup", "program", "performances", "shows", "acts", "artists", "stages", "timetable" or similar in English or in the language detected earlier.
+    - If you find the lineup, then extract it as a list of acts with stage, artists names and their act time (if available).
 - Festival description must be max 500 characters and focused on the festival's atmosphere, history, and unique features.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
 
@@ -76,15 +77,16 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
             location: result.festivalLocation || 'Unknown Location',
             description: result.festivalDescription,
             website: result.festivalWebsite,
-            lineup: result.lineup?.map(day => ({
-                date: day.date,
-                list: day.list.map(item => ({
+            lineup: result.lineup.flatMap(day => {
+                return day.list.map(item => ({
+                    id: generateFestivalActId(result.festivalName || 'unknown-festival'),
+                    festivalName: result.festivalName || 'Unknown Festival',
+                    date: day.date,
                     artistName: item.artist,
-                    artistId: generateArtistId(),
-                    time: item.time,
                     stage: item.stage,
-                })),
-            })),
+                    time: item.time,
+                }));
+            }),
         };
         return festival;
     }

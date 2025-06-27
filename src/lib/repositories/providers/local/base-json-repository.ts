@@ -1,4 +1,4 @@
-import { ILogger } from '@/lib/logger';
+import type { ILogger } from '@/lib/types/logger';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

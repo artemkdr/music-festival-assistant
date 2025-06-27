@@ -1,5 +1,6 @@
-import type { ApiResponse, Festival } from './types';
+import { Festival } from '@/lib/schemas';
 import { apiClient, ApiClient } from './api-client';
+import type { ApiResponse } from './types';
 
 class FestivalsApi {
     constructor(private client: ApiClient) {}

@@ -4,11 +4,13 @@
  */
 'use client';
 
+import { festivalsApi } from '@/app/lib/api';
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { Festival, festivalsApi } from '@/app/lib/api';
+import { Festival } from '@/lib/schemas';
+import { DATE_TBA, getFestivalArtists, groupFestivalActsByDate } from '@/lib/utils/festival-util';
 import Link from 'next/link';
-import React, { useState, useEffect, Usable } from 'react';
+import React, { Usable, useEffect, useState } from 'react';
 
 interface FestivalDetailPageProps {
     params: Usable<{ id: string }>;
@@ -45,7 +47,10 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
     }, [id]);
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
+        if (dateString === DATE_TBA) {
+            return 'Date To Be Announced';
+        }
+        return new Date(dateString).toLocaleDateString(undefined, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -136,14 +141,14 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                     <span className="mr-3 text-lg">🎤</span>
                                                     <div>
                                                         <div className="text-sm font-medium text-muted-foreground">Total Artists</div>
-                                                        <div className="text-sm text-foreground">{festival.lineup.reduce((total, day) => total + day.list.length, 0)}</div>
+                                                        <div className="text-sm text-foreground">{getFestivalArtists(festival).length}</div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center">
                                                     <span className="mr-3 text-lg">🎭</span>
                                                     <div>
                                                         <div className="text-sm font-medium text-muted-foreground">Festival Days</div>
-                                                        <div className="text-sm text-foreground">{festival.lineup.length}</div>
+                                                        <div className="text-sm text-foreground">{groupFestivalActsByDate(festival).length}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -163,7 +168,7 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                 <div className="px-4 py-5 sm:p-6">
                                     <h2 className="text-lg font-medium text-foreground mb-4">Festival Schedule</h2>
                                     <div className="space-y-6">
-                                        {festival.lineup.map((dayLineup, dayIndex) => (
+                                        {groupFestivalActsByDate(festival).map((dayLineup, dayIndex) => (
                                             <div key={dayIndex}>
                                                 <h3 className="text-md font-medium text-foreground mb-3">{formatDate(dayLineup.date)}</h3>
                                                 <div className="space-y-2">

@@ -1,7 +1,8 @@
-import { ILogger } from '@/lib/logger';
 import { IFestivalRepository } from '@/lib/repositories/interfaces';
-import { Festival, generateFestivalId } from '@/lib/schemas';
+import { Festival } from '@/lib/schemas';
 import { IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
+import type { ILogger } from '@/lib/types/logger';
+import { generateFestivalId } from '@/lib/utils/id-generator';
 
 interface CreateFestivalData {
     urls: string[];

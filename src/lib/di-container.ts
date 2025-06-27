@@ -20,7 +20,7 @@ import { FestivalService, IFestivalService } from '@/lib/services/festival-servi
 import type { IRecommendationService } from '@/lib/services/interfaces';
 import { RecommendationService } from '@/lib/services/recommendation-service';
 import { SpotifyService } from '@/lib/services/spotify/spotify-service';
-import { ILogger } from '@/lib/types/logger';
+import type { ILogger } from '@/lib/types/logger';
 import { ErrorHandler, IErrorHandler, IRetryHandler, RetryHandler } from '@/lib/utils/error-handler';
 import { createAppLogger } from '@/lib/utils/logger';
 
@@ -69,7 +69,7 @@ export class DIContainer {
                     error: console.error,
                     debug: console.debug,
                     trace: console.trace,
-                }
+                };
             }
             this._logger.info('Logger initialized');
         }

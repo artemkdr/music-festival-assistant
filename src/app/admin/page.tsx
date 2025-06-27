@@ -15,7 +15,7 @@ export default function AdminDashboardPage() {
     const [stats, setStats] = useState({
         festivals: 0,
         artists: 0,
-        performances: 0,
+        acts: 0,
         activeSessions: 0,
     });
     const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +78,7 @@ export default function AdminDashboardPage() {
     const statsDisplay = [
         { name: 'Festivals', value: stats.festivals.toString(), icon: '🎪', color: 'text-blue-600' },
         { name: 'Artists', value: stats.artists.toString(), icon: '🎤', color: 'text-green-600' },
-        { name: 'Performances', value: stats.performances.toString(), icon: '🎭', color: 'text-purple-600' },
+        { name: 'Live acts', value: stats.acts.toString(), icon: '🎭', color: 'text-purple-600' },
         { name: 'Active Sessions', value: stats.activeSessions.toString(), icon: '👥', color: 'text-indigo-600' },
     ];
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { Festival, Recommendation } from '@/app/lib/api';
+import { Festival, Recommendation } from '@/lib/schemas';
+import { getFestivalDates } from '@/lib/utils/festival-util';
 import type { ReactElement } from 'react';
 
 interface RecommendationsListProps {
@@ -27,6 +28,8 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
         return 'Might Interest You';
     };
 
+    const { startDate: festivalStartDate, endDate: festivalEndDate } = getFestivalDates(festival);
+
     return (
         <div className="space-y-6">
             {/* Festival Header */}
@@ -37,9 +40,9 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                         <p className="text-gray-600 mb-4">{festival.description}</p>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                             <span>📍 {festival.location}</span>
-                            {festival.lineup.length > 0 && (
+                            {festival.lineup && festival.lineup.length > 0 && (
                                 <span>
-                                    📅 {festival.lineup[0].date} - {festival.lineup[festival.lineup.length - 1]!.date}
+                                    📅 {festivalStartDate} - {festivalEndDate}
                                 </span>
                             )}
                             <span>🎵 {recommendations.length} recommendations</span>
@@ -51,7 +54,7 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
             {/* Recommendations */}
             <div className="grid gap-6">
                 {recommendations.map(recommendation => (
-                    <div key={`${recommendation.performance.id}-${recommendation.artist.id}`} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div key={`${recommendation.act.id}-${recommendation.artist.id}`} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                         <div className="p-6">
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">
@@ -81,21 +84,21 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                 </div>
                             </div>
 
-                            {/* Performance Info */}
+                            {/* Act Info */}
                             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                                <h4 className="font-medium text-gray-900 mb-2">Performance Details</h4>
+                                <h4 className="font-medium text-gray-900 mb-2">Act Details</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div>
                                         <span className="text-gray-500">Stage:</span>
-                                        <span className="ml-2 font-medium">{recommendation.performance.stage}</span>
+                                        <span className="ml-2 font-medium">{recommendation.act.stage}</span>
                                     </div>
                                     <div>
                                         <span className="text-gray-500">Day:</span>
-                                        <span className="ml-2 font-medium">{recommendation.performance.date}</span>
+                                        <span className="ml-2 font-medium">{recommendation.act.date}</span>
                                     </div>
                                     <div>
                                         <span className="text-gray-500">Time:</span>
-                                        <span className="ml-2 font-medium">{recommendation.performance.date}</span>
+                                        <span className="ml-2 font-medium">{recommendation.act.date}</span>
                                     </div>
                                 </div>
                             </div>
@@ -114,28 +117,28 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                             <div className="flex items-center justify-between">
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => onFeedback(recommendation.performance.id, recommendation.artist.id, 'love')}
+                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'love')}
                                         className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
                                         title="Love this recommendation"
                                     >
                                         ❤️ Love
                                     </button>
                                     <button
-                                        onClick={() => onFeedback(recommendation.performance.id, recommendation.artist.id, 'like')}
+                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'like')}
                                         className="px-3 py-2 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
                                         title="Like this recommendation"
                                     >
                                         👍 Like
                                     </button>
                                     <button
-                                        onClick={() => onFeedback(recommendation.performance.id, recommendation.artist.id, 'dislike')}
+                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'dislike')}
                                         className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
                                         title="Not interested"
                                     >
                                         👎 Pass
                                     </button>
                                     <button
-                                        onClick={() => onFeedback(recommendation.performance.id, recommendation.artist.id, 'skip')}
+                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'skip')}
                                         className="px-3 py-2 text-sm bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors"
                                         title="Skip for now"
                                     >

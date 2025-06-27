@@ -35,16 +35,16 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                     throw new Error(artistResponse.message || 'Failed to fetch artist details');
                 }
 
-                // Fetch artist performances from API
-                const performancesResponse = await artistsApi.getArtistPerformances(id);
+                // Fetch artist acts from API
+                const actsResponse = await artistsApi.getArtistActs(id);
 
-                if (performancesResponse.status !== 'success') {
-                    console.warn('Failed to fetch performances:', performancesResponse.message);
-                    // Continue without performances data instead of failing completely
+                if (actsResponse.status !== 'success') {
+                    console.warn('Failed to fetch acts:', actsResponse.message);
+                    // Continue without acts data instead of failing completely
                 }
 
                 setArtist(artistResponse.data as Artist);
-                setActs((performancesResponse.data as FestivalAct[]) || []);
+                setActs((actsResponse.data as FestivalAct[]) || []);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load artist');
                 console.error('Error loading artist:', err);
@@ -69,15 +69,6 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
             minute: '2-digit',
             hour12: true,
         });
-    };
-
-    const formatNumber = (num: number) => {
-        if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + 'M';
-        } else if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'K';
-        }
-        return num.toString();
     };
 
     return (
@@ -149,7 +140,7 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                                     </div>
                                                 </div>
 
-                                                {!!(artist.genre?.length) && (
+                                                {!!artist.genre?.length && (
                                                     <div className="flex items-start">
                                                         <span className="mr-3 text-lg mt-1">🎵</span>
                                                         <div>
@@ -189,28 +180,28 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                 </div>
                             </div>
 
-                            {/* Festival Performances */}
+                            {/* Festival acts */}
                             <div className="bg-white shadow rounded-lg">
                                 <div className="px-4 py-5 sm:p-6">
-                                    <h2 className="text-lg font-medium text-gray-900 mb-4">Festival Performances</h2>
+                                    <h2 className="text-lg font-medium text-gray-900 mb-4">Festival Live Acts</h2>
                                     {acts.length > 0 ? (
                                         <div className="space-y-3">
-                                            {acts.map((performance, index) => (
+                                            {acts.map((act, index) => (
                                                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                                     <div className="flex items-center space-x-4">
                                                         <span className="text-2xl">🎪</span>
                                                         <div>
-                                                            <a href={`/admin/festivals/${performance.festivalId}`} className="text-blue-600 hover:text-blue-800 font-medium">
-                                                                {performance.festivalName}
+                                                            <a href={`/admin/festivals/${act.festivalId}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                                                                {act.festivalName}
                                                             </a>
                                                             <div className="text-sm text-gray-600 space-x-2">
-                                                                {performance.date && <span>{formatDate(performance.date)}</span>}
-                                                                {performance.time && <span>• {formatTime(performance.time)}</span>}
-                                                                {performance.stage && <span>• {performance.stage}</span>}
+                                                                {act.date && <span>{formatDate(act.date)}</span>}
+                                                                {act.time && <span>• {formatTime(act.time)}</span>}
+                                                                {act.stage && <span>• {act.stage}</span>}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <Link href={`/admin/festivals/${performance.festivalId}`} className="btn-primary-light border-1 border-primary">
+                                                    <Link href={`/admin/festivals/${act.festivalId}`} className="btn-primary-light border-1 border-primary">
                                                         View Festival
                                                     </Link>
                                                 </div>
@@ -219,7 +210,7 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                     ) : (
                                         <div className="text-center py-8">
                                             <span className="text-4xl mb-4 block">🎪</span>
-                                            <h3 className="text-lg font-medium text-gray-900 mb-2">No festival performances</h3>
+                                            <h3 className="text-lg font-medium text-gray-900 mb-2">No festival live acts</h3>
                                             <p className="text-gray-600">This artist is not currently associated with any festivals.</p>
                                         </div>
                                     )}

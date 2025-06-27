@@ -417,12 +417,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
                                                 <label>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={actFormData.isNewArtist}
-                                                        onChange={e => handleActInputChange('isNewArtist', e.target.checked)}
-                                                        className="mr-2"
-                                                    />
+                                                    <input type="checkbox" checked={actFormData.isNewArtist} onChange={e => handleActInputChange('isNewArtist', e.target.checked)} className="mr-2" />
                                                     Create new artist
                                                 </label>
                                             </div>
@@ -432,12 +427,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                             <div className="mt-4">
                                                 <label htmlFor="newArtistName">New Artist Name *</label>
                                                 <div className="flex space-x-2">
-                                                    <input
-                                                        type="text"
-                                                        id="newArtistName"
-                                                        value={actFormData.artistName}
-                                                        onChange={e => handleActInputChange('artistName', e.target.value)}
-                                                    />
+                                                    <input type="text" id="newArtistName" value={actFormData.artistName} onChange={e => handleActInputChange('artistName', e.target.value)} />
                                                     <button
                                                         type="button"
                                                         className="btn-secondary"

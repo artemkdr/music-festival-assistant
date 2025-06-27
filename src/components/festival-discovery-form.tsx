@@ -1,6 +1,7 @@
 'use client';
 
-import { Festival, festivalsApi, UserPreferences } from '@/app/lib/api';
+import { festivalsApi } from '@/app/lib/api';
+import { Festival, UserPreferences } from '@/lib/schemas';
 import { availableGenres } from '@/tests/mock-data';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
@@ -45,7 +46,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
     // Filter festivals based on search term
     const filteredFestivals = festivals.filter(
-        festival => festival.name.toLowerCase().includes(festivalSearchTerm.toLowerCase()) || festival.location.toLowerCase().includes(festivalSearchTerm.toLowerCase())
+        festival => festival.name.toLowerCase().includes(festivalSearchTerm.toLowerCase()) || festival.location?.toLowerCase().includes(festivalSearchTerm.toLowerCase())
     );
 
     // Get selected festival details

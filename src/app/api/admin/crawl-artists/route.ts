@@ -4,7 +4,8 @@
  */
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/middleware/auth-middleware';
-import { Festival, generateArtistId } from '@/lib/schemas';
+import { Festival } from '@/lib/schemas';
+import { generateArtistId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -38,7 +39,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     { status: 404 }
                 );
             }
-            artistNames = festival.lineup.map(item => item.list.map(item => item.artistName)).flat();
+            artistNames = Array.from(new Set(festival.lineup.map(act => act.artistName)));
         } else if (validated.artistNames) {
             artistNames = validated.artistNames;
         } else {

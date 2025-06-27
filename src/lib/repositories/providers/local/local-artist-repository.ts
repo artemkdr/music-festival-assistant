@@ -1,7 +1,7 @@
-import { ILogger } from '@/lib/logger';
 import { IArtistRepository } from '@/lib/repositories/interfaces';
 import { BaseJsonRepository } from '@/lib/repositories/providers/local/base-json-repository';
 import { Artist } from '@/lib/schemas';
+import type { ILogger } from '@/lib/types/logger';
 
 /**
  * Local JSON artist repository implementation

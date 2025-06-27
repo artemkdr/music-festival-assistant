@@ -3,10 +3,11 @@ import { z } from 'zod';
 
 export const RecommendationSchema = z.object({
     artist: ArtistSchema,
-    performance: z.object({
+    act: z.object({
+        id: z.string().min(1), // Unique identifier for the act
         artistName: z.string().min(1).max(200), // Name of the artist
-        date: z.string().optional(), // Optional performance date
-        time: z.string().optional(), // Optional performance time
+        date: z.string().optional(), // Optional act date
+        time: z.string().optional(), // Optional act time
         stage: z.string().optional(), // Optional stage/venue
     }),
     score: z.number().min(0).max(1), // Confidence score

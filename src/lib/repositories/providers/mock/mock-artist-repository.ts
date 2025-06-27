@@ -1,6 +1,6 @@
-import { ILogger } from '@/lib/logger';
 import { IArtistRepository } from '@/lib/repositories/interfaces';
 import { Artist } from '@/lib/schemas';
+import type { ILogger } from '@/lib/types/logger';
 import { mockArtists } from '@/tests/mock-data';
 
 /**

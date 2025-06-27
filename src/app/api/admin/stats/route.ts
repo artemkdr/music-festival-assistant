@@ -2,10 +2,9 @@
  * Admin statistics API endpoint
  * GET /api/admin/stats - Get dashboard statistics
  */
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { DIContainer } from '@/lib/di-container';
+import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { NextResponse } from 'next/server';
-import { getFestivalPerformances } from '@/lib/schemas';
 
 export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
@@ -19,8 +18,8 @@ export const GET = requireAdmin(async (): Promise<Response> => {
         // Get all data to calculate statistics
         const [festivals, artists] = await Promise.all([festivalService.getAllFestivals(), artistService.getAllArtists()]);
 
-        // Calculate total performances across all festivals
-        const totalPerformances = festivals.reduce((total, festival) => total + getFestivalPerformances(festival).length, 0);
+        // Calculate total acts across all festivals
+        const totalActs = festivals.reduce((total, festival) => total + festival.lineup.length, 0);
 
         // For now, we'll use a placeholder for active sessions since we don't have session tracking
         // In a real app, this would come from a session store or analytics
@@ -29,7 +28,7 @@ export const GET = requireAdmin(async (): Promise<Response> => {
         const stats = {
             festivals: festivals.length,
             artists: artists.length,
-            performances: totalPerformances,
+            acts: totalActs,
             activeSessions,
         };
 

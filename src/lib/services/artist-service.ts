@@ -1,7 +1,8 @@
-import { ILogger } from '@/lib/logger';
 import { IArtistRepository } from '@/lib/repositories/interfaces';
-import { Artist, generateArtistId } from '@/lib/schemas';
+import { Artist } from '@/lib/schemas';
 import { IArtistCrawlerService } from '@/lib/services/crawler/interfaces';
+import type { ILogger } from '@/lib/types/logger';
+import { generateArtistId } from '@/lib/utils/id-generator';
 
 interface CreateArtistData {
     name: string;

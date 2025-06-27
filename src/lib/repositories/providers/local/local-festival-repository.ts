@@ -1,7 +1,7 @@
-import { ILogger } from '@/lib/logger';
 import { IFestivalRepository } from '@/lib/repositories/interfaces';
 import { BaseJsonRepository } from '@/lib/repositories/providers/local/base-json-repository';
 import { Festival } from '@/lib/schemas';
+import type { ILogger } from '@/lib/types/logger';
 
 /**
  * Local JSON festival repository implementation

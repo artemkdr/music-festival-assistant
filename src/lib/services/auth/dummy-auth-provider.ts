@@ -2,7 +2,7 @@
  * Dummy authentication provider for development/testing
  * Generates valid JWT tokens for any email/password combination
  */
-import type { ILogger } from '@/lib/logger';
+import type { ILogger } from '@/lib/types/logger';
 import type { IAuthProvider, AuthResult, LoginRequest, RegisterRequest, User } from './interfaces';
 import { generateAccessToken, generateRefreshToken, verifyToken } from './jwt-utils';
 

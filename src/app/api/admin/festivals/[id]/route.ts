@@ -4,7 +4,7 @@
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { Festival, getFestivalPerformances, UpdateFestivalSchema } from '@/lib/schemas';
+import { Festival, UpdateFestivalSchema } from '@/lib/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -34,35 +34,35 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
             );
         }
 
-        const performances = getFestivalPerformances(festival);
+        const acts = festival.lineup;
 
-        // Resolve artist references in performances
-        logger.debug('Resolving artist references for festival performances', {
+        // Resolve artist references in acts
+        logger.debug('Resolving artist references for festival acts', {
             festivalId: id,
-            performanceCount: performances.length,
+            actsCount: acts.length,
         });
 
-        const enrichedPerformances = await Promise.all(
-            performances.map(async performance => {
+        const actsWithArtistDetails = await Promise.all(
+            acts.map(async act => {
                 // Try to find the artist by name
-                const artistMatches = await artistService.searchArtistsByName(performance.artistName);
+                const artistMatches = await artistService.searchArtistsByName(act.artistName);
 
                 if (artistMatches.length > 0) {
                     // Use the first exact match or best match
-                    const exactMatch = artistMatches.find(artist => artist.name.toLowerCase() === performance.artistName.toLowerCase());
+                    const exactMatch = artistMatches.find(artist => artist.name.toLowerCase() === act.artistName.toLowerCase());
                     const bestMatch = exactMatch || artistMatches[0];
 
                     if (bestMatch) {
-                        logger.debug('Found artist match for performance', {
-                            performanceArtistName: performance.artistName,
+                        logger.debug('Found artist match for act', {
+                            actArtistName: act.artistName,
                             matchedArtistId: bestMatch.id,
                             matchedArtistName: bestMatch.name,
                             isExactMatch: !!exactMatch,
                         });
 
-                        // Return performance with resolved artist data
+                        // Return act with resolved artist data
                         return {
-                            ...performance,
+                            ...act,
                             artistId: bestMatch.id,
                             artist: bestMatch,
                         };
@@ -70,18 +70,18 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
                 }
 
                 // No artist found, keep original data but log the issue
-                logger.warn('No artist found for performance', {
-                    performanceArtistName: performance.artistName,
+                logger.warn('No artist found for act', {
+                    actArtistName: act.artistName,
                     festivalId: id,
                 });
 
-                return performance;
+                return act;
             })
         );
 
         const enrichedFestival = {
             ...festival,
-            performances: enrichedPerformances,
+            acts: actsWithArtistDetails,
         };
 
         return NextResponse.json({
