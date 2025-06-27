@@ -7,20 +7,7 @@
 import { festivalsApi } from '@/app/lib/api';
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { Festival } from '@/lib/schemas';
-import Link from 'next/link';
 import { ChangeEvent, useState } from 'react';
-
-interface CrawlResult {
-    success: boolean;
-    message: string;
-    festival?: {
-        name: string;
-        location: string;
-        acts: Array<{ artist: { name: string } }>;
-    };
-    error?: string;
-}
 
 // Add a type for the crawl request payload
 interface CrawlFestivalRequest {
@@ -32,7 +19,6 @@ interface CrawlFestivalRequest {
 export default function FestivalCrawlPage() {
     const [urls, setUrls] = useState<string[]>(['']);
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<CrawlResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     // New state for forced festival name
     const [forcedName, setForcedName] = useState<string>('');
@@ -92,7 +78,6 @@ export default function FestivalCrawlPage() {
 
         setIsLoading(true);
         setError(null);
-        setResult(null);
 
         try {
             // Use the new type for clarity
@@ -101,25 +86,12 @@ export default function FestivalCrawlPage() {
                 forcedName: forcedName.trim(),
                 files,
             };
-            const response = await festivalsApi.crawlFestival<{ festival: Festival }>(payload);
-            if (response.status === 'success' && response.data) {
-                setResult({
-                    success: true,
-                    message: response.message,
-                    festival: {
-                        name: response.data.festival.name,
-                        location: response.data.festival.location || '',
-                        acts: response.data.festival.lineup.map(act => {
-                            return {
-                                artist: {
-                                    name: act.artistName,
-                                },
-                            };
-                        }),
-                    },
-                });
+            const response = await festivalsApi.crawlFestival(payload);
+            if (response) {
+                // Redirect to the cache page with the new cache ID
+                console.log(response);
             } else {
-                setError(response.message || 'Crawl failed');
+                setError('Crawl failed');
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unexpected error occurred');
@@ -130,7 +102,6 @@ export default function FestivalCrawlPage() {
 
     const handleReset = () => {
         setUrls(['']);
-        setResult(null);
         setError(null);
         setForcedName('');
         setFiles([]);
@@ -272,58 +243,6 @@ export default function FestivalCrawlPage() {
                                 <div className="ml-3">
                                     <h3 className="text-sm font-medium text-red-800">Crawl Failed</h3>
                                     <p className="mt-1 text-sm text-red-700">{error}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Success Result */}
-                    {result && result.success && (
-                        <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <span className="text-green-400">✅</span>
-                                </div>
-                                <div className="ml-3">
-                                    <h3 className="text-sm font-medium text-green-800">Festival Crawled Successfully!</h3>
-                                    <p className="mt-1 text-sm text-green-700">{result.message}</p>
-
-                                    {result.festival && (
-                                        <div className="mt-4 p-4 bg-white rounded border border-green-200">
-                                            <h4 className="font-medium text-gray-900 mb-3">Festival Details:</h4>
-                                            <div className="space-y-2 text-sm">
-                                                <p>
-                                                    <strong>Name:</strong> {result.festival.name}
-                                                </p>
-                                                <p>
-                                                    <strong>Location:</strong> {result.festival.location}
-                                                </p>
-                                                <p>
-                                                    <strong>Artists Found:</strong> {result.festival.acts?.length ?? 0}
-                                                </p>
-                                                {result.festival.acts && result.festival.acts.length > 0 && (
-                                                    <div>
-                                                        <strong>Sample Artists:</strong>
-                                                        <ul className="mt-1 ml-4 list-disc">
-                                                            {result.festival.acts.slice(0, 5).map((act, index) => (
-                                                                <li key={index}>{act.artist.name}</li>
-                                                            ))}
-                                                            {result.festival.acts.length > 5 && <li>... and {result.festival.acts.length - 5} more</li>}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="mt-4 flex space-x-3">
-                                                <Link href="/admin/festivals" className="btn-primary-light">
-                                                    View All Festivals
-                                                </Link>
-                                                <button onClick={handleReset} className="btn-primary">
-                                                    Crawl Another
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </div>

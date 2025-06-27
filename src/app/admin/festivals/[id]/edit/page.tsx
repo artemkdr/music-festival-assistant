@@ -74,24 +74,18 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                 setId(resolvedParams.id);
 
                 // Load festival and artists in parallel
-                const [festivalResponse, artistsResponse] = await Promise.all([festivalsApi.getFestival(resolvedParams.id), artistsApi.getArtists()]);
+                const festivalResponse = await festivalsApi.getFestival(resolvedParams.id);
 
                 if (festivalResponse.status !== 'success' || !festivalResponse.data) {
                     throw new Error(festivalResponse.message || 'Failed to fetch festival details');
                 }
 
-                if (artistsResponse.status !== 'success' || !artistsResponse.data) {
-                    throw new Error(artistsResponse.message || 'Failed to fetch artists');
-                }
-
                 const festivalData = festivalResponse.data as Festival;
-                const artistsData = artistsResponse.data as Artist[];
 
-                const actsFromData: FestivalAct[] = [];
+                const actsFromData: FestivalAct[] = festivalData.lineup;
 
                 setFestival(festivalData);
                 setActs(actsFromData || []);
-                setAvailableArtists(artistsData);
 
                 setFormData({
                     name: festivalData.name || '',
@@ -108,7 +102,17 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             }
         };
 
+        const loadAvailableArtists = async () => {
+            try {
+                const reponse = await artistsApi.getArtists();
+                setAvailableArtists(reponse.data || []);
+            } catch (err) {
+                console.warn('Error loading available artists:', err);
+            }
+        };
+
         loadFestival();
+        loadAvailableArtists();
     }, [params]);
     const handleInputChange = (field: keyof FestivalFormData, value: string) => {
         setFormData(prev => ({
@@ -391,7 +395,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                         <div>
                                                             <p className="font-semibold">{p.artistName}</p>
                                                             <p className="text-sm text-muted-foreground">
-                                                                at {p.time} on {p.stage}
+                                                                {p.date} at {p.time} on {p.stage}
                                                             </p>
                                                         </div>
                                                         <div className="space-x-2">

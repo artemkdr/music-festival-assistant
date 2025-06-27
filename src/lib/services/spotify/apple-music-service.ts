@@ -2,7 +2,7 @@
  * Apple Music API service for artist data lookup
  * Uses Apple Music API to search and fetch artist data by name or ID.
  *
- * NOTE: You must provide a valid Apple Music developer token (JWT). 
+ * NOTE: You must provide a valid Apple Music developer token (JWT).
  * For production, implement proper JWT token generation with your private key.
  */
 import type { ILogger } from '@/lib/types/logger';
@@ -69,7 +69,7 @@ export class AppleMusicService {
      */
     private getAuthHeaders(): Record<string, string> {
         return {
-            'Authorization': `Bearer ${this.developerToken}`,
+            Authorization: `Bearer ${this.developerToken}`,
             'Content-Type': 'application/json',
         };
     }
@@ -102,7 +102,7 @@ export class AppleMusicService {
      */
     async searchArtistByName(name: string): Promise<AppleMusicArtist | null> {
         const url = `${this.baseUrl}/catalog/${this.storefront}/search?term=${encodeURIComponent(name)}&types=artists&limit=10`;
-        
+
         const response = await fetch(url, {
             headers: this.getAuthHeaders(),
         });
@@ -114,19 +114,19 @@ export class AppleMusicService {
 
         const data: AppleMusicSearchResponse = await response.json();
         const normalizedName = this.normalize(name);
-        
+
         const artists = data.results.artists?.data || [];
-        
+
         // Sort by match score, then by exact match
         artists.sort((a: AppleMusicArtistResponse, b: AppleMusicArtistResponse) => {
             const scoreA = this.getArtistMatchScore(normalizedName, this.normalize(a.attributes.name));
             const scoreB = this.getArtistMatchScore(normalizedName, this.normalize(b.attributes.name));
             if (scoreA !== scoreB) return scoreB - scoreA; // higher score first
-            
+
             // If scores are equal, prefer exact match
             if (this.normalize(a.attributes.name) === normalizedName) return -1;
             if (this.normalize(b.attributes.name) === normalizedName) return 1;
-            
+
             return 0; // Apple Music doesn't provide popularity scores directly
         });
 
@@ -162,7 +162,7 @@ export class AppleMusicService {
      */
     async getArtistById(id: string): Promise<AppleMusicArtist | null> {
         const url = `${this.baseUrl}/catalog/${this.storefront}/artists/${id}`;
-        
+
         const response = await fetch(url, {
             headers: this.getAuthHeaders(),
         });
@@ -174,9 +174,9 @@ export class AppleMusicService {
 
         const data: AppleMusicArtistDetailResponse = await response.json();
         const artist = data.data[0];
-        
+
         if (!artist) return null;
-        
+
         return this.mapAppleMusicArtist(artist);
     }
 
@@ -188,9 +188,7 @@ export class AppleMusicService {
         let imageUrl: string | undefined;
         if (artist.attributes.artwork?.url) {
             // Replace template placeholders with actual dimensions
-            imageUrl = artist.attributes.artwork.url
-                .replace('{w}', '400')
-                .replace('{h}', '400');
+            imageUrl = artist.attributes.artwork.url.replace('{w}', '400').replace('{h}', '400');
         }
 
         return {

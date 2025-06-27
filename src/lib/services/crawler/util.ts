@@ -1,5 +1,5 @@
-import { ParserFestival, Festival } from "@/lib/schemas";
-import { generateFestivalId, generateFestivalActId } from "@/lib/utils/id-generator";
+import { ParserFestival, Festival } from '@/lib/schemas';
+import { generateFestivalId, generateFestivalActId } from '@/lib/utils/id-generator';
 
 /**
  * Map ParserFestival to Festival
@@ -27,4 +27,4 @@ export const mapParserFestivalToFestival = (data: ParserFestival): Festival => {
         }),
     };
     return festival;
-}
+};

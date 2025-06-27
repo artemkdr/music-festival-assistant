@@ -1,5 +1,5 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { AuthProvider } from '@/lib/contexts/auth-context';
@@ -11,7 +11,11 @@ export const metadata: Metadata = {
     description: 'Discover artists at music festivals based on your preferences',
     keywords: ['music', 'festival', 'discovery', 'recommendations', 'artists'],
     authors: [{ name: 'Music Festival Assistant Team' }],
-    viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport: Viewport = {
+    width: 'device-width',
+    initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }): React.JSX.Element {

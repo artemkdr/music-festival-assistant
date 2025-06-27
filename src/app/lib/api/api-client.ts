@@ -42,8 +42,21 @@ export class ApiClient {
             ...options,
             headers,
         });
-        const data = await response.json();
-        return data as ApiResponse<T>;
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+        // Check response content type, parse as JSON if it's application/json
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            return data as ApiResponse<T>;
+        } else {
+            // For non-JSON responses, return text as data
+            const text = await response.text();
+            return { status: 'success' as const, data: text as unknown as T } as ApiResponse<T>;
+        }
     }
 }
 

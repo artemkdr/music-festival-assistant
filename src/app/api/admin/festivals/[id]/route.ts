@@ -22,7 +22,8 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
     try {
         logger.info('Admin festival detail request received', { festivalId: id });
 
-        const festival = await festivalService.getFestivalById(id);
+        // search festival in the database or use cached data (parsed but not saved)
+        const festival = (await festivalService.getFestivalById(id)) ?? (await festivalService.getCachedData(id));
 
         if (!festival) {
             return NextResponse.json(
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
 
         const enrichedFestival = {
             ...festival,
-            acts: actsWithArtistDetails,
+            lineup: actsWithArtistDetails,
         };
 
         return NextResponse.json({

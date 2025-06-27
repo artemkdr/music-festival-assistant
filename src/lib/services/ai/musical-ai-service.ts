@@ -185,7 +185,7 @@ Generate music recommendations based on the provided user preferences:
      * @param schema Zod schema to generate the parser function for
      * @returns Function that takes HTML content and URL, returns parsed data as a string
      */
-    async generateFestivalParserFunction(html: string, url: string): Promise<string> {        
+    async generateFestivalParserFunction(html: string, url: string): Promise<string> {
         const aiRequest = {
             systemPrompt: `Provide a scraping function in JavaScript that extracts and returns data according to a schema from the current page. The function must be IIFE. No comments or imports. No console.log. The code you generate will be executed straight away, you shouldn't output anything besides runnable code`,
             prompt: `

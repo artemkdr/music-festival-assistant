@@ -23,11 +23,22 @@ class FestivalsApi {
     /**
      * Admin: Crawl festival
      */
-    async crawlFestival<T>(data: { urls: string[]; forcedName?: string | undefined; files?: { name: string; type: string; base64: string }[] | undefined }): Promise<ApiResponse<T>> {
+    async crawlFestival(data: {
+        urls: string[];
+        forcedName?: string | undefined;
+        files?:
+            | {
+                  name: string;
+                  type: string;
+                  base64: string;
+              }[]
+            | undefined;
+    }): Promise<ApiResponse<string>> {
         // Support backward compatibility with single URL string
         const requestBody = typeof data === 'string' ? { urls: [data] } : data;
 
-        return this.client.request('/admin/crawl/festival', {
+        // this request returns a 303 redirect to the edit page of the parsed festival
+        return this.client.request<string>('/admin/crawl/festival', {
             method: 'POST',
             body: JSON.stringify(requestBody),
         });

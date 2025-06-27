@@ -5,7 +5,6 @@
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import type { User } from '@/lib/services/auth/interfaces';
-import { getFestivalArtists, getFestivalStages } from '@/lib/utils/festival-util';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -47,43 +46,36 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
             requestedBy: user.id,
         });
 
-        // Save to database if requested and crawl was successful
-        try {
-            const festival = await festivalService.createFestival({
-                urls: validatedRequest.urls,
-                name: validatedRequest.forcedName,
-                files: validatedRequest.files,
-            });
-            logger.info('Festival created', {
-                festivalId: festival.id,
-                festivalName: festival.name,
-                savedBy: user.id,
-            });
+        // Parse festival data without saving - for review/approval
+        const { cacheId, festival } = await festivalService.grabFestivalData({
+            urls: validatedRequest.urls,
+            name: validatedRequest.forcedName,
+            files: validatedRequest.files,
+        });
 
-            return NextResponse.json({
-                status: 'success',
-                message: 'Festival crawled and saved successfully',
-                data: {
-                    festival: festival,
-                    crawlResult: {
-                        success: true,
-                        artistCount: getFestivalArtists(festival).length,
-                        stageCount: getFestivalStages(festival).length,
-                        scheduleItemCount: festival.lineup.length,
-                    },
-                },
-            });
-        } catch (saveError) {
-            logger.error('Failed to create festival', saveError instanceof Error ? saveError : new Error(String(saveError)));
+        logger.info('Festival parsed successfully', {
+            festivalName: festival.name,
+            cacheId: cacheId,
+            parsedBy: user.id,
+        });
 
-            return NextResponse.json({
-                status: 'partial_success',
-                message: 'Festival creation failed',
-                data: {
-                    saveError: saveError instanceof Error ? saveError.message : 'Unknown save error',
+        return NextResponse.redirect(new URL(`/admin/festivals/${cacheId}/edit`, request.url), {
+            status: 303, // Use 303 to indicate redirect after POST
+        });
+
+        /*return NextResponse.json({
+            status: 'success',
+            message: 'Festival parsed successfully - ready for review and approval',
+            data: {
+                cacheId: cacheId,
+                crawlResult: {
+                    success: true,
+                    artistCount: getFestivalArtists(festival).length,
+                    stageCount: getFestivalStages(festival).length,
+                    scheduleItemCount: festival.lineup.length,
                 },
-            });
-        }
+            },
+        });*/
     } catch (error) {
         logger.error('Admin festival crawl failed', error instanceof Error ? error : new Error(String(error)));
 

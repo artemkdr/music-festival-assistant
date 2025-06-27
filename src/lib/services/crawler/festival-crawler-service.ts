@@ -1,14 +1,13 @@
 /**
  * Festival web crawler service implementation
  */
-import { type Festival } from '@/lib/schemas';
+import { ParserFestivalSchema, type Festival } from '@/lib/schemas';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
 import { FestivalHtmlParser, IFestivalHtmlParser } from '@/lib/services/crawler/festival-html-parser';
 import type { ILogger } from '@/lib/types/logger';
 import { IErrorHandler, IRetryHandler, toError } from '@/lib/utils/error-handler';
 import type { IFestivalCrawlerService } from './interfaces';
 import { mapParserFestivalToFestival } from '@/lib/services/crawler/util';
-
 
 /**
  * Festival crawler service implementation
@@ -22,7 +21,7 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
         retryHandler: IRetryHandler,
         private readonly aiService: IMusicalAIService
     ) {
-        this.scraper = new FestivalHtmlParser(aiService, logger, errorHandler, retryHandler);
+        this.scraper = new FestivalHtmlParser(ParserFestivalSchema, aiService, logger, errorHandler, retryHandler);
     }
 
     /**
@@ -66,6 +65,9 @@ export class FestivalCrawlerService implements IFestivalCrawlerService {
         try {
             // Scrape using appropriate scraper
             const scrapedData = await this.scraper.parse(url);
+            if (!scrapedData) {
+                throw new Error(`Null data returned from scraper.parse for URL: ${url}`);
+            }
             return mapParserFestivalToFestival(scrapedData);
         } catch (error) {
             this.logger.error(`Structured scraping failed for URL ${url}, will try AI fallback:`, toError(error));
