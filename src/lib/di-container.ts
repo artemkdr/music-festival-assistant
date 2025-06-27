@@ -3,26 +3,26 @@
  * Central place to configure and wire up all services following SOLID principles
  */
 import { getAIConfig, validateAIConfig } from '@/config/ai-config';
-import { type ILogger } from '@/lib/logger';
-import type { IArtistRepository, IFestivalRepository } from '@/repositories/interfaces';
-import { LocalJsonArtistRepository, LocalJsonFestivalRepository } from '@/repositories/providers/local';
-import type { IAIService } from '@/services/ai';
-import { AIServiceFactory } from '@/services/ai';
-import { IMusicalAIService } from '@/services/ai/interfaces';
-import { MusicalAIService } from '@/services/ai/musical-ai-service';
-import { ArtistService, IArtistService } from '@/services/artist-service';
-import { AuthService } from '@/services/auth/auth-service';
-import { DummyAuthProvider } from '@/services/auth/dummy-auth-provider';
-import type { IAuthService } from '@/services/auth/interfaces';
-import { ArtistCrawlerService } from '@/services/crawler/artist-crawler-service';
-import { FestivalCrawlerService } from '@/services/crawler/festival-crawler-service';
-import type { IArtistCrawlerService, IFestivalCrawlerService } from '@/services/crawler/interfaces';
-import { FestivalService, IFestivalService } from '@/services/festival-service';
-import type { IRecommendationService } from '@/services/interfaces';
-import { RecommendationService } from '@/services/recommendation-service';
-import { SpotifyService } from '@/services/spotify/spotify-service';
-import { ErrorHandler, IErrorHandler, IRetryHandler, RetryHandler } from '@/utils/error-handler';
-import { createAppLogger } from '@/utils/logger';
+import type { IArtistRepository, IFestivalRepository } from '@/lib/repositories/interfaces';
+import { LocalJsonArtistRepository, LocalJsonFestivalRepository } from '@/lib/repositories/providers/local';
+import type { IAIService } from '@/lib/services/ai';
+import { AIServiceFactory } from '@/lib/services/ai';
+import { IMusicalAIService } from '@/lib/services/ai/interfaces';
+import { MusicalAIService } from '@/lib/services/ai/musical-ai-service';
+import { ArtistService, IArtistService } from '@/lib/services/artist-service';
+import { AuthService } from '@/lib/services/auth/auth-service';
+import { DummyAuthProvider } from '@/lib/services/auth/dummy-auth-provider';
+import type { IAuthService } from '@/lib/services/auth/interfaces';
+import { ArtistCrawlerService } from '@/lib/services/crawler/artist-crawler-service';
+import { FestivalCrawlerService } from '@/lib/services/crawler/festival-crawler-service';
+import type { IArtistCrawlerService, IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
+import { FestivalService, IFestivalService } from '@/lib/services/festival-service';
+import type { IRecommendationService } from '@/lib/services/interfaces';
+import { RecommendationService } from '@/lib/services/recommendation-service';
+import { SpotifyService } from '@/lib/services/spotify/spotify-service';
+import { ILogger } from '@/lib/types/logger';
+import { ErrorHandler, IErrorHandler, IRetryHandler, RetryHandler } from '@/lib/utils/error-handler';
+import { createAppLogger } from '@/lib/utils/logger';
 
 /**
  * Dependency injection container class
@@ -62,6 +62,15 @@ export class DIContainer {
                 name: 'Music-Festival-Assistant',
                 level: 'info' as const,
             });
+            if (!this._logger) {
+                this._logger = {
+                    info: console.log,
+                    warn: console.warn,
+                    error: console.error,
+                    debug: console.debug,
+                    trace: console.trace,
+                }
+            }
             this._logger.info('Logger initialized');
         }
         return this._logger;

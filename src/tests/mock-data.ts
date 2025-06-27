@@ -2,7 +2,7 @@
  * Mock data for festivals and artists
  * This will be replaced with real data sources in production
  */
-import type { Artist, Festival } from '@/schemas';
+import type { Artist, Festival } from '@/lib/schemas';
 
 /**
  * Mock artists data

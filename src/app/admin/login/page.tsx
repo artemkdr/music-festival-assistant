@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/lib/contexts/auth-context';
 import { useEffect, useState } from 'react';
 
 export default function AdminLoginPage() {

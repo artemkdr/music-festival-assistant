@@ -2,10 +2,10 @@
  * Admin statistics API endpoint
  * GET /api/admin/stats - Get dashboard statistics
  */
-import { requireAdmin } from '@/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { DIContainer } from '@/lib/di-container';
 import { NextResponse } from 'next/server';
-import { getFestivalPerformances } from '@/schemas';
+import { getFestivalPerformances } from '@/lib/schemas';
 
 export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();

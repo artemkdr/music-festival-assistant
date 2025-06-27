@@ -4,12 +4,13 @@
  */
 'use client';
 
-import { AdminLayout } from '@/app/components/admin/admin-layout';
-import { ProtectedRoute } from '@/app/components/protected-route';
-import { ArtistDetails, artistsApi } from '@/app/lib/api';
+import { AdminLayout } from '@/components/admin/admin-layout';
+import { ProtectedRoute } from '@/components/protected-route';
+import { artistsApi } from '@/app/lib/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, Usable } from 'react';
+import { Artist } from '@/lib/schemas';
 
 interface ArtistEditPageProps {
     params: Usable<{ id: string }>;
@@ -17,11 +18,11 @@ interface ArtistEditPageProps {
 
 export default function ArtistEditPage({ params }: ArtistEditPageProps) {
     const artistId = React.use(params).id;
-    const [artist, setArtist] = useState<ArtistDetails | null>(null);
+    const [artist, setArtist] = useState<Artist | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [formData, setFormData] = useState<Partial<ArtistDetails>>({});
+    const [formData, setFormData] = useState<Partial<Artist>>({});
     const [showRecrawl, setShowRecrawl] = useState(false);
     const [recrawlLoading, setRecrawlLoading] = useState(false);
     const [recrawlError, setRecrawlError] = useState<string | null>(null);
@@ -45,7 +46,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                     throw new Error(response.message || 'Failed to fetch artist details');
                 }
 
-                const artistData = response.data as ArtistDetails;
+                const artistData = response.data as Artist;
                 setArtist(artistData);
                 setFormData(artistData);
             } catch (err) {
@@ -77,7 +78,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
         }));
     };
 
-    const handleNestedInputChange = (parentField: keyof ArtistDetails, childField: string, value: string) => {
+    const handleNestedInputChange = (parentField: keyof Artist, childField: string, value: string) => {
         setFormData(prev => ({
             ...prev,
             [parentField]: {
@@ -122,7 +123,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
             if (response.status !== 'success' || !response.data) {
                 throw new Error(response.message || 'Failed to recrawl artist');
             }
-            setFormData(response.data as ArtistDetails);
+            setFormData(response.data as Artist);
             setShowRecrawl(false);
         } catch (err) {
             setRecrawlError(err instanceof Error ? err.message : 'Failed to recrawl artist');
@@ -340,28 +341,6 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                                             id="instagram"
                                             value={formData.socialLinks?.instagram || ''}
                                             onChange={e => handleNestedInputChange('socialLinks', 'instagram', e.target.value)}
-                                            className="mt-1 block w-full"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="twitter">Twitter</label>
-                                        <input
-                                            type="url"
-                                            id="twitter"
-                                            value={formData.socialLinks?.twitter || ''}
-                                            onChange={e => handleNestedInputChange('socialLinks', 'twitter', e.target.value)}
-                                            className="mt-1 block w-full"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label htmlFor="facebook">Facebook</label>
-                                        <input
-                                            type="url"
-                                            id="facebook"
-                                            value={formData.socialLinks?.facebook || ''}
-                                            onChange={e => handleNestedInputChange('socialLinks', 'facebook', e.target.value)}
                                             className="mt-1 block w-full"
                                         />
                                     </div>

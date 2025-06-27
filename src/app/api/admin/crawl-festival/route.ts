@@ -3,9 +3,9 @@
  * This endpoint is for admin use only to add new festivals to the system
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/middleware/auth-middleware';
-import { getFestivalArtists, getFestivalPerformances, getFestivalStages } from '@/schemas';
-import type { User } from '@/services/auth/interfaces';
+import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { getFestivalArtists, getFestivalPerformances, getFestivalStages } from '@/lib/schemas';
+import type { User } from '@/lib/services/auth/interfaces';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

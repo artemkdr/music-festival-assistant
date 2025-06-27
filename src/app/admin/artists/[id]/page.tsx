@@ -4,20 +4,20 @@
  */
 'use client';
 
-import { AdminLayout } from '@/app/components/admin/admin-layout';
-import { ProtectedRoute } from '@/app/components/protected-route';
 import { artistsApi } from '@/app/lib/api';
+import { AdminLayout } from '@/components/admin/admin-layout';
+import { ProtectedRoute } from '@/components/protected-route';
+import { Artist, FestivalAct } from '@/lib/schemas';
 import Link from 'next/link';
-import React, { useState, useEffect, Usable } from 'react';
-import { ArtistDetails, ArtistPerformance } from '@/app/lib/api/types';
+import React, { Usable, useEffect, useState } from 'react';
 
 interface ArtistDetailPageProps {
     params: Usable<{ id: string }>;
 }
 
 export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
-    const [artist, setArtist] = useState<ArtistDetails | null>(null);
-    const [performances, setPerformances] = useState<ArtistPerformance[]>([]);
+    const [artist, setArtist] = useState<Artist | null>(null);
+    const [acts, setActs] = useState<FestivalAct[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { id } = React.use(params);
@@ -43,8 +43,8 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                     // Continue without performances data instead of failing completely
                 }
 
-                setArtist(artistResponse.data as ArtistDetails);
-                setPerformances((performancesResponse.data as ArtistPerformance[]) || []);
+                setArtist(artistResponse.data as Artist);
+                setActs((performancesResponse.data as FestivalAct[]) || []);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load artist');
                 console.error('Error loading artist:', err);
@@ -149,7 +149,7 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                                     </div>
                                                 </div>
 
-                                                {artist.genre?.length > 0 && (
+                                                {!!(artist.genre?.length) && (
                                                     <div className="flex items-start">
                                                         <span className="mr-3 text-lg mt-1">🎵</span>
                                                         <div>
@@ -178,23 +178,6 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                         </div>
 
                                         <div className="space-y-4">
-                                            {/* Stats */}
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {/*artist.popularity?.spotify && (
-                                                    <div className="bg-purple-50 p-4 rounded-lg">
-                                                        <div className="text-2xl font-bold text-purple-600">{artist.popularity.spotify}/100</div>
-                                                        <div className="text-sm text-purple-600">Popularity</div>
-                                                    </div>
-                                                )*/}
-
-                                                {artist.followers && (
-                                                    <div className="bg-green-50 p-4 rounded-lg">
-                                                        <div className="text-2xl font-bold text-green-600">{formatNumber(artist.followers)}</div>
-                                                        <div className="text-sm text-green-600">Followers</div>
-                                                    </div>
-                                                )}
-                                            </div>
-
                                             {artist.description && (
                                                 <div>
                                                     <div className="text-sm font-medium text-gray-500 mb-2">Description</div>
@@ -210,9 +193,9 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                             <div className="bg-white shadow rounded-lg">
                                 <div className="px-4 py-5 sm:p-6">
                                     <h2 className="text-lg font-medium text-gray-900 mb-4">Festival Performances</h2>
-                                    {performances.length > 0 ? (
+                                    {acts.length > 0 ? (
                                         <div className="space-y-3">
-                                            {performances.map((performance, index) => (
+                                            {acts.map((performance, index) => (
                                                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                                     <div className="flex items-center space-x-4">
                                                         <span className="text-2xl">🎪</span>

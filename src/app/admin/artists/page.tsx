@@ -4,14 +4,15 @@
  */
 'use client';
 
-import { AdminLayout } from '@/app/components/admin/admin-layout';
-import { ProtectedRoute } from '@/app/components/protected-route';
-import { ArtistDetails, artistsApi } from '@/app/lib/api';
+import { artistsApi } from '@/app/lib/api';
+import { AdminLayout } from '@/components/admin/admin-layout';
+import { ProtectedRoute } from '@/components/protected-route';
+import { Artist } from '@/lib/schemas';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function ArtistsPage() {
-    const [artists, setArtists] = useState<ArtistDetails[]>([]);
+    const [artists, setArtists] = useState<Artist[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -182,7 +183,7 @@ export default function ArtistsPage() {
                                                             {genre}
                                                         </span>
                                                     ))}
-                                                    {artist.genre?.length > 3 && <span className="text-xs text-gray-500">+{artist.genre.length - 3} more</span>}
+                                                    {Array.isArray(artist.genre) && artist.genre?.length > 3 && <span className="text-xs text-gray-500">+{artist.genre.length - 3} more</span>}
                                                 </div>
                                             </div>
                                             {/*artist.popularity && (

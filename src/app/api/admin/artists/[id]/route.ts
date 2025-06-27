@@ -4,8 +4,8 @@
  * PUT /api/admin/artists/[id] - Update artist by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { UpdateArtistSchema } from '@/schemas';
-import { Artist } from '@/schemas';
+import { UpdateArtistSchema } from '@/lib/schemas';
+import { Artist } from '@/lib/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 

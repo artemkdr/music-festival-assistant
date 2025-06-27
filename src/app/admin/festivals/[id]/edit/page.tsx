@@ -4,14 +4,14 @@
  */
 'use client';
 
-import { AdminLayout } from '@/app/components/admin/admin-layout';
-import { ProtectedRoute } from '@/app/components/protected-route';
+import { AdminLayout } from '@/components/admin/admin-layout';
+import { ProtectedRoute } from '@/components/protected-route';
 import { artistsApi, festivalsApi, spotifyApi, SpotifySearchResult } from '@/app/lib/api';
-import type { Artist, Festival, Performance } from '@/app/lib/api/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { Artist, Festival, FestivalAct } from '@/lib/schemas';
 
 interface FestivalFormData {
     name?: string;
@@ -21,7 +21,7 @@ interface FestivalFormData {
     imageUrl?: string | undefined;
 }
 
-interface PerformanceFormData {
+interface ActFormData {
     id?: string;
     artistId: string;
     artistName: string;
@@ -43,12 +43,12 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
     const [formData, setFormData] = useState<FestivalFormData>({});
     const [id, setId] = useState<string>('');
 
-    // Performance editing state
-    const [performances, setPerformances] = useState<Performance[]>([]);
+    // festival act editing state
+    const [acts, setActs] = useState<FestivalAct[]>([]);
     const [availableArtists, setAvailableArtists] = useState<Artist[]>([]);
-    const [isEditingPerformance, setIsEditingPerformance] = useState(false);
-    const [editingPerformanceId, setEditingPerformanceId] = useState<string | null>(null);
-    const [performanceFormData, setPerformanceFormData] = useState<PerformanceFormData>({
+    const [isEditingAct, setIsEditingAct] = useState(false);
+    const [editingActId, setEditingActId] = useState<string | null>(null);
+    const [actFormData, setActFormData] = useState<ActFormData>({
         artistId: '',
         artistName: '',
         isNewArtist: false,
@@ -87,15 +87,15 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                 const festivalData = festivalResponse.data as Festival;
                 const artistsData = artistsResponse.data as Artist[];
 
-                const performancesFromData: Performance[] = [];
+                const actsFromData: FestivalAct[] = [];
 
                 setFestival(festivalData);
-                setPerformances(performancesFromData || []);
+                setActs(actsFromData || []);
                 setAvailableArtists(artistsData);
 
                 setFormData({
-                    name: festivalData.name,
-                    location: festivalData.location,
+                    name: festivalData.name || '',
+                    location: festivalData.location || '',
                     website: festivalData.website,
                     description: festivalData.description,
                     imageUrl: festivalData.imageUrl,
@@ -117,55 +117,55 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         }));
     };
 
-    const handlePerformanceInputChange = (field: keyof PerformanceFormData, value: string | boolean | number) => {
-        setPerformanceFormData(prev => ({
+    const handleActInputChange = (field: keyof ActFormData, value: string | boolean | number) => {
+        setActFormData(prev => ({
             ...prev,
             [field]: value,
         }));
     };
 
-    const handleAddNewPerformance = () => {
-        setEditingPerformanceId(null);
-        setPerformanceFormData({
+    const handleAddNewAct = () => {
+        setEditingActId(null);
+        setActFormData({
             artistId: '',
             artistName: '',
             isNewArtist: false,
-            date: performanceFormData.date || '',
+            date: actFormData.date || '',
             time: '20:00',
             stage: '',
         });
-        setIsEditingPerformance(true);
+        setIsEditingAct(true);
     };
 
-    const handleEditPerformance = (performance: Performance) => {
-        setEditingPerformanceId(performance.id);
+    const handleEditAct = (act: FestivalAct) => {
+        setEditingActId(act.id);
 
-        setPerformanceFormData({
-            id: performance.id,
-            artistId: performance.artistId || '',
-            artistName: performance.artistName,
+        setActFormData({
+            id: act.id,
+            artistId: act.artistId || '',
+            artistName: act.artistName,
             isNewArtist: false,
-            date: performance.date || '',
-            time: performance.time || '',
-            stage: performance.stage || '',
+            date: act.date || '',
+            time: act.time || '',
+            stage: act.stage || '',
         });
-        setIsEditingPerformance(true);
+        setIsEditingAct(true);
     };
 
-    const handleDeletePerformance = (performanceId: string) => {
-        setPerformances(prev => prev.filter(p => p.id !== performanceId));
+    const handleDeleteAct = (actId: string) => {
+        setActs(prev => prev.filter(p => p.id !== actId));
     };
 
-    const handleCancelEditPerformance = () => {
-        setIsEditingPerformance(false);
-        setEditingPerformanceId(null);
+    const handleCancelEditAct = () => {
+        setIsEditingAct(false);
+        setEditingActId(null);
     };
 
-    const handleSavePerformance = () => {
-        const { date, time, artistId, artistName, stage, isNewArtist, id } = performanceFormData;
+    const handleSaveAct = () => {
+        const { date, time, artistId, artistName, stage, isNewArtist, id } = actFormData;
 
         if ((!artistId && !isNewArtist) || (isNewArtist && !artistName) || !date || !time || !stage) {
-            setError('Please fill all required performance fields.');
+            setError('Please fill all required act fields.');
             return;
         }
 
@@ -184,10 +184,10 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             }
         }
 
-        const newPerformance: Performance = {
+        const newAct: FestivalAct = {
             festivalId: festival!.id,
             festivalName: festival!.name,
-            id: id || `perf-${Date.now()}`,
+            id: id || `act-${Date.now()}`,
             artistId: finalArtistId,
             artistName: finalArtistName,
             date,
@@ -195,15 +195,15 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             stage,
         };
 
-        if (editingPerformanceId) {
-            // Update existing performance
-            setPerformances(prev => prev.map(p => (p.id === editingPerformanceId ? newPerformance : p)));
+        if (editingActId) {
+            // Update existing act
+            setActs(prev => prev.map(p => (p.id === editingActId ? newAct : p)));
         } else {
-            // Add new performance
-            setPerformances(prev => [...prev, newPerformance]);
+            // Add new act
+            setActs(prev => [...prev, newAct]);
         }
 
-        handleCancelEditPerformance();
+        handleCancelEditAct();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -220,7 +220,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                 description: formData.description?.trim() || '',
                 website: formData.website?.trim() || undefined,
                 imageUrl: formData.imageUrl?.trim() || undefined,
-                performances,
+                acts,
             };
 
             const response = await festivalsApi.updateFestival(id, cleanedFormData);
@@ -256,7 +256,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
     };
 
     const handleSelectSpotifyArtist = (artist: SpotifySearchResult) => {
-        setPerformanceFormData(prev => ({
+        setActFormData(prev => ({
             ...prev,
             artistName: artist.name,
             // Optionally set genre/imageUrl if you want to use them
@@ -378,14 +378,14 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                 </div>
                             </div>
 
-                            {/* Performances */}
+                            {/* Acts */}
                             <div>
-                                <h2 className="text-lg font-medium text-foreground mb-4">Performances</h2>
+                                <h2 className="text-lg font-medium text-foreground mb-4">Festival acts</h2>
 
-                                {!isEditingPerformance ? (
+                                {!isEditingAct ? (
                                     <div>
                                         <ul className="space-y-3">
-                                            {performances.map(p => {
+                                            {acts.map(p => {
                                                 return (
                                                     <li key={p.id} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
                                                         <div>
@@ -395,10 +395,10 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                             </p>
                                                         </div>
                                                         <div className="space-x-2">
-                                                            <button type="button" onClick={() => handleEditPerformance(p)} className="btn-primary-light">
+                                                            <button type="button" onClick={() => handleEditAct(p)} className="btn-primary-light">
                                                                 Edit
                                                             </button>
-                                                            <button type="button" onClick={() => handleDeletePerformance(p.id)} className="btn-destructive-light">
+                                                            <button type="button" onClick={() => handleDeleteAct(p.id)} className="btn-destructive-light">
                                                                 Delete
                                                             </button>
                                                         </div>
@@ -406,21 +406,21 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                                 );
                                             })}
                                         </ul>
-                                        <button type="button" onClick={handleAddNewPerformance} className="mt-4 btn-primary-light">
-                                            + Add Performance
+                                        <button type="button" onClick={handleAddNewAct} className="mt-4 btn-primary-light">
+                                            + Add Act
                                         </button>
                                     </div>
                                 ) : (
                                     <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-md font-medium text-foreground mb-4">{editingPerformanceId ? 'Edit Performance' : 'Add New Performance'}</h3>
+                                        <h3 className="text-md font-medium text-foreground mb-4">{editingActId ? 'Edit Act' : 'Add New Act'}</h3>
 
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                             <div>
                                                 <label>
                                                     <input
                                                         type="checkbox"
-                                                        checked={performanceFormData.isNewArtist}
-                                                        onChange={e => handlePerformanceInputChange('isNewArtist', e.target.checked)}
+                                                        checked={actFormData.isNewArtist}
+                                                        onChange={e => handleActInputChange('isNewArtist', e.target.checked)}
                                                         className="mr-2"
                                                     />
                                                     Create new artist
@@ -428,21 +428,21 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                             </div>
                                         </div>
 
-                                        {performanceFormData.isNewArtist ? (
+                                        {actFormData.isNewArtist ? (
                                             <div className="mt-4">
                                                 <label htmlFor="newArtistName">New Artist Name *</label>
                                                 <div className="flex space-x-2">
                                                     <input
                                                         type="text"
                                                         id="newArtistName"
-                                                        value={performanceFormData.artistName}
-                                                        onChange={e => handlePerformanceInputChange('artistName', e.target.value)}
+                                                        value={actFormData.artistName}
+                                                        onChange={e => handleActInputChange('artistName', e.target.value)}
                                                     />
                                                     <button
                                                         type="button"
                                                         className="btn-secondary"
-                                                        disabled={isSpotifySearching || !performanceFormData.artistName}
-                                                        onClick={() => searchSpotifyArtist(performanceFormData.artistName)}
+                                                        disabled={isSpotifySearching || !actFormData.artistName}
+                                                        onClick={() => searchSpotifyArtist(actFormData.artistName)}
                                                     >
                                                         {isSpotifySearching ? 'Searching...' : 'Spotify Lookup'}
                                                     </button>
@@ -470,7 +470,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                         ) : (
                                             <div className="mt-4">
                                                 <label htmlFor="artistId">Artist *</label>
-                                                <select id="artistId" value={performanceFormData.artistId} onChange={e => handlePerformanceInputChange('artistId', e.target.value)}>
+                                                <select id="artistId" value={actFormData.artistId} onChange={e => handleActInputChange('artistId', e.target.value)}>
                                                     <option value="">Select an artist</option>
                                                     {availableArtists.map(artist => (
                                                         <option key={artist.id} value={artist.id}>
@@ -483,20 +483,20 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
 
                                         <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-3">
                                             <div>
-                                                <label htmlFor="perfStartDate">Date *</label>
-                                                <input type="date" id="perfStartDate" value={performanceFormData.date} onChange={e => handlePerformanceInputChange('date', e.target.value)} />
+                                                <label htmlFor="actStartDate">Date *</label>
+                                                <input type="date" id="actStartDate" value={actFormData.date} onChange={e => handleActInputChange('date', e.target.value)} />
                                             </div>
                                             <div>
-                                                <label htmlFor="perfStartTime">Time *</label>
-                                                <input type="time" id="perfStartTime" value={performanceFormData.time} onChange={e => handlePerformanceInputChange('time', e.target.value)} />
+                                                <label htmlFor="actStartTime">Time *</label>
+                                                <input type="time" id="actStartTime" value={actFormData.time} onChange={e => handleActInputChange('time', e.target.value)} />
                                             </div>
                                         </div>
                                         <div className="mt-4">
                                             <label htmlFor="stage">Stage *</label>
-                                            <input type="text" id="stage" value={performanceFormData.stage} onChange={e => handlePerformanceInputChange('stage', e.target.value)} />
+                                            <input type="text" id="stage" value={actFormData.stage} onChange={e => handleActInputChange('stage', e.target.value)} />
                                         </div>
                                         {/* Spotify Artist Search */}
-                                        {!performanceFormData.isNewArtist && (
+                                        {!actFormData.isNewArtist && (
                                             <div className="mt-6">
                                                 <label className="mb-2">Search for Artist on Spotify</label>
                                                 <div className="flex space-x-2">
@@ -550,11 +550,11 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                         )}
 
                                         <div className="mt-6 flex justify-end space-x-3">
-                                            <button type="button" onClick={handleCancelEditPerformance} className="btn-neutral">
+                                            <button type="button" onClick={handleCancelEditAct} className="btn-neutral">
                                                 Cancel
                                             </button>
-                                            <button type="button" onClick={handleSavePerformance} className="btn-primary">
-                                                Save Performance
+                                            <button type="button" onClick={handleSaveAct} className="btn-primary">
+                                                Save Act
                                             </button>
                                         </div>
                                     </div>

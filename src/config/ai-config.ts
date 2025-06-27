@@ -1,7 +1,7 @@
 /**
  * Configuration management for AI services
  */
-import type { AIProvider, AIProviderConfig } from '@/services/ai';
+import type { AIProvider, AIProviderConfig } from '@/lib/services/ai';
 
 /**
  * AI service configuration

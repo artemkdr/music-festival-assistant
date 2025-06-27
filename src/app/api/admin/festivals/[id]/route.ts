@@ -4,7 +4,7 @@
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { Festival, getFestivalPerformances, UpdateFestivalSchema } from '@/schemas';
+import { Festival, getFestivalPerformances, UpdateFestivalSchema } from '@/lib/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 

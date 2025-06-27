@@ -3,7 +3,7 @@
  * Accepts a festivalId or a list of artist names, crawls missing artists, and saves them to the repository.
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

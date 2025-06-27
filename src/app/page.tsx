@@ -1,8 +1,8 @@
 'use client';
 
-import { FestivalDiscoveryForm } from '@/app/components/festival-discovery-form';
-import { LoadingSpinner } from '@/app/components/loading-spinner';
-import { RecommendationsList } from '@/app/components/recommendations-list';
+import { FestivalDiscoveryForm } from '@/components/festival-discovery-form';
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { RecommendationsList } from '@/components/recommendations-list';
 import { Festival, Recommendation, UserPreferences } from '@/app/lib/api';
 import type { ReactElement } from 'react';
 import { useState } from 'react';

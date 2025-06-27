@@ -4,9 +4,9 @@
  */
 'use client';
 
-import { AdminLayout } from '@/app/components/admin/admin-layout';
-import { ProtectedRoute } from '@/app/components/protected-route';
-import { useAuth } from '@/contexts/auth-context';
+import { AdminLayout } from '@/components/admin/admin-layout';
+import { ProtectedRoute } from '@/components/protected-route';
+import { useAuth } from '@/lib/contexts/auth-context';
 import { statsApi } from '@/app/lib/api/stats-api';
 import { useEffect, useState } from 'react';
 
