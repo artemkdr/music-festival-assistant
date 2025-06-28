@@ -31,6 +31,7 @@ export interface IFestivalService {
     saveFestival(festival: Festival): Promise<void>;
     deleteFestival(id: string): Promise<void>;
     getAllFestivals(): Promise<Festival[]>;
+    updateFestivalAct(festivalId: string, actId: string, updates: { artistId?: string }): Promise<void>;
 }
 
 export class FestivalService implements IFestivalService {
@@ -164,6 +165,38 @@ export class FestivalService implements IFestivalService {
         this.logger.info(`Deleting festival with ID: ${id}`);
         throw new Error('Festival deletion is not implemented yet');
         //await this.festivalRepository.deleteFestival(id);
+    }
+
+    async updateFestivalAct(festivalId: string, actId: string, updates: { artistId?: string }): Promise<void> {
+        this.logger.info(`Updating festival act: ${actId} for festival: ${festivalId}`, updates);
+        const festival = await this.getFestivalById(festivalId);
+        if (!festival) {
+            throw new Error(`Festival with ID ${festivalId} not found`);
+        }
+
+        const actIndex = festival.lineup.findIndex(act => act.id === actId);
+        if (actIndex === -1) {
+            throw new Error(`Act with ID ${actId} not found in festival ${festivalId}`);
+        }
+
+        const currentAct = festival.lineup[actIndex]!; // Safe because we checked actIndex !== -1
+
+        // Update the act details
+        const updatedAct = {
+            id: currentAct.id,
+            artistName: currentAct.artistName,
+            festivalName: currentAct.festivalName,
+            artistId: updates.artistId ?? currentAct.artistId,
+            festivalId: currentAct.festivalId,
+            date: currentAct.date,
+            time: currentAct.time,
+            stage: currentAct.stage,
+        };
+
+        // Replace the old act with the updated act in the lineup
+        festival.lineup[actIndex] = updatedAct;
+
+        await this.saveFestival(festival);
     }
 
     private generateCacheId(): string {

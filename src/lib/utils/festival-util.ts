@@ -84,6 +84,7 @@ export const groupFestivalActsByDate = (
 ): Array<{
     date: string;
     list: Array<{
+        id: string;
         artistName: string;
         artistId?: string;
         time?: string;
@@ -102,6 +103,7 @@ export const groupFestivalActsByDate = (
                 acc[date] = [];
             }
             acc[date].push({
+                id: act.id,
                 artistName: act.artistName,
                 ...(act.artistId && { artistId: act.artistId }),
                 ...(act.time && { time: act.time }),
@@ -112,6 +114,7 @@ export const groupFestivalActsByDate = (
         {} as Record<
             string,
             Array<{
+                id: string;
                 artistName: string;
                 artistId?: string;
                 time?: string;

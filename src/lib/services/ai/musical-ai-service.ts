@@ -116,15 +116,17 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
         // add the most important instructions to the end of the prompt
         aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
 
-        const result = await this.aiService.generateObject<Artist>({
+        const result = await this.aiService.generateObject<z.infer<typeof looseArtistSchema>>({
             ...aiRequest,
             schema: looseArtistSchema,
         });
         // we have to intervent here and generate our own ID
         // because AI answer can contain any ID according to schema, even a random one
         // as 'id' is a requited field in the schema
-        result.id = generateArtistId();
-        return result;
+        return {
+            ...result,
+            id: generateArtistId(), // Generate a new ID for the artist
+        };
     }
 
     /**

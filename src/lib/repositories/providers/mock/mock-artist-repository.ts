@@ -30,19 +30,37 @@ export class MockArtistRepository implements IArtistRepository {
         return matchingArtists;
     }
 
-    async searchArtistsByName(name: string): Promise<Artist[]> {
-        this.logger.debug('Searching artists by name', { name });
+    async searchArtistsByName(name: string, exact: boolean = true): Promise<Artist[]> {
+        this.logger.debug('Searching artists by name in local storage', { name });
         const searchTerm = name.toLowerCase();
-        const matchingArtists = this.artists.filter(artist => artist.name.toLowerCase().includes(searchTerm));
-        this.logger.info('Name-based artist search result', {
+        const matchingArtists = this.artists.filter(artist => (exact ? artist.name.toLowerCase() === searchTerm : artist.name.toLowerCase().includes(searchTerm)));
+        this.logger.info('Local name-based artist search result', {
             name,
             foundCount: matchingArtists.length,
+        });
+        // sort matching artists by macthing score
+        // score is the index of the search term in the artist name
+        // and the length diff between the search term and the artist name - minimal difference is better
+        matchingArtists.sort((a, b) => {
+            let aScore = a.name.toLowerCase().indexOf(searchTerm);
+            let bScore = b.name.toLowerCase().indexOf(searchTerm);
+            if (a.name.length > searchTerm.length) {
+                aScore += a.name.length - searchTerm.length;
+            }
+            if (b.name.length > searchTerm.length) {
+                bScore += b.name.length - searchTerm.length;
+            }
+            // If scores are equal, prefer exact match
+            if (aScore === 0 && bScore > 0) return -1;
+            if (bScore === 0 && aScore > 0) return 1;
+            // Otherwise, sort by score
+            return aScore - bScore;
         });
         return matchingArtists;
     }
 
     async searchArtistByName(name: string): Promise<Artist | null> {
-        const artist = await this.searchArtistsByName(name);
+        const artist = await this.searchArtistsByName(name, true);
         if (artist.length > 0 && artist[0]) {
             return artist[0];
         }

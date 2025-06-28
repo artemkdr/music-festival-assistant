@@ -6,11 +6,11 @@ import { generateArtistId } from '@/lib/utils/id-generator';
 
 interface CreateArtistData {
     name: string;
-    genre?: string[];
-    description?: string;
-    imageUrl?: string;
-    mappingIds?: Record<string, string>;
-    festivalName?: string;
+    genre?: string[] | undefined;
+    description?: string | undefined;
+    imageUrl?: string | undefined;
+    mappingIds?: Record<string, string> | undefined;
+    festivalName?: string | undefined;
 }
 
 export interface IArtistService {
@@ -90,6 +90,7 @@ export class ArtistService implements IArtistService {
     async createArtist(data: CreateArtistData): Promise<Artist> {
         this.logger.info(`Creating new artist: ${data.name}`);
         const newArtist = await this.crawler.crawlArtistByName(data.name, {
+            spotifyId: data.mappingIds?.spotify,
             context: data.festivalName,
         });
         newArtist.id = generateArtistId();

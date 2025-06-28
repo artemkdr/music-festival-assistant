@@ -5,6 +5,7 @@
  */
 import { DIContainer } from '@/lib/di-container';
 import { Festival, UpdateFestivalSchema } from '@/lib/schemas';
+import { generateFestivalId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
@@ -16,7 +17,6 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
     const { id } = await context.params;
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
-    const artistService = container.getArtistService();
     const festivalService = container.getFestivalService();
 
     try {
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
             actsCount: acts.length,
         });
 
-        const actsWithArtistDetails = await Promise.all(
+        /*const actsWithArtistDetails = await Promise.all(
             acts.map(async act => {
                 // Try to find the artist by name
                 const artistMatches = await artistService.searchArtistsByName(act.artistName);
@@ -78,17 +78,12 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
 
                 return act;
             })
-        );
-
-        const enrichedFestival = {
-            ...festival,
-            lineup: actsWithArtistDetails,
-        };
+        );*/
 
         return NextResponse.json({
             status: 'success',
             message: 'Festival retrieved successfully',
-            data: enrichedFestival,
+            data: festival,
         });
     } catch (error) {
         logger.error('Failed to get festival', error instanceof Error ? error : new Error(String(error)));
@@ -117,32 +112,30 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
 
         // Check if festival exists
         const existingFestival = await festivalService.getFestivalById(id);
-        if (!existingFestival) {
-            return NextResponse.json(
-                {
-                    status: 'error',
-                    message: `Festival not found: ${id}`,
-                },
-                { status: 404 }
-            );
-        }
 
         const updatedFestival: Festival = {
-            id: existingFestival.id,
-            name: validatedData.name || existingFestival.name,
-            location: validatedData.location || existingFestival.location,
-            description: validatedData.description || existingFestival.description,
-            website: validatedData.website || existingFestival.website,
-            imageUrl: validatedData.imageUrl || existingFestival.imageUrl,
+            id:
+                existingFestival?.id ||
+                generateFestivalId({
+                    name: validatedData.name || 'unknown-festival',
+                    location: validatedData.location || 'unknown-location',
+                }),
+            name: validatedData.name,
+            location: validatedData.location,
+            description: validatedData.description,
+            website: validatedData.website,
+            imageUrl: validatedData.imageUrl,
             lineup: validatedData.lineup,
         };
 
-        const savedFestival = await festivalService.saveFestival(updatedFestival);
+        await festivalService.saveFestival(updatedFestival);
 
         return NextResponse.json({
             status: 'success',
             message: 'Festival updated successfully',
-            data: savedFestival,
+            data: {
+                id: updatedFestival.id,
+            },
         });
     } catch (error) {
         if (error instanceof ZodError) {

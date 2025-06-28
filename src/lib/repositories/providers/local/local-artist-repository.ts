@@ -43,6 +43,24 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
             name,
             foundCount: matchingArtists.length,
         });
+        // sort matching artists by macthing score
+        // score is the index of the search term in the artist name
+        // and the length diff between the search term and the artist name - minimal difference is better
+        matchingArtists.sort((a, b) => {
+            let aScore = a.name.toLowerCase().indexOf(searchTerm);
+            let bScore = b.name.toLowerCase().indexOf(searchTerm);
+            if (a.name.length > searchTerm.length) {
+                aScore += a.name.length - searchTerm.length;
+            }
+            if (b.name.length > searchTerm.length) {
+                bScore += b.name.length - searchTerm.length;
+            }
+            // If scores are equal, prefer exact match
+            if (aScore === 0 && bScore > 0) return -1;
+            if (bScore === 0 && aScore > 0) return 1;
+            // Otherwise, sort by score
+            return aScore - bScore;
+        });
         return matchingArtists;
     }
 

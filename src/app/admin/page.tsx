@@ -79,7 +79,6 @@ export default function AdminDashboardPage() {
         { name: 'Festivals', value: stats.festivals.toString(), icon: '🎪', color: 'text-blue-600' },
         { name: 'Artists', value: stats.artists.toString(), icon: '🎤', color: 'text-green-600' },
         { name: 'Live acts', value: stats.acts.toString(), icon: '🎭', color: 'text-purple-600' },
-        { name: 'Active Sessions', value: stats.activeSessions.toString(), icon: '👥', color: 'text-indigo-600' },
     ];
 
     return (

@@ -224,7 +224,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                 description: formData.description?.trim() || '',
                 website: formData.website?.trim() || undefined,
                 imageUrl: formData.imageUrl?.trim() || undefined,
-                acts,
+                lineup: acts,
             };
 
             const response = await festivalsApi.updateFestival(id, cleanedFormData);
@@ -235,7 +235,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             }
 
             // Redirect back to festival detail page
-            router.push(`/admin/festivals/${id}`);
+            router.push(`/admin/festivals/${response.data?.id || id}`);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save festival');
             console.error('Error saving festival:', err);
@@ -251,7 +251,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         setSpotifySearchResults([]);
         try {
             const response = await spotifyApi.searchArtists(query);
-            setSpotifySearchResults(response.data || []);
+            setSpotifySearchResults(response.data?.artists || []);
         } catch {
             setSpotifySearchError('Spotify search failed');
         } finally {
@@ -311,21 +311,6 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                             <h1 className="text-3xl font-bold text-foreground">Edit Festival</h1>
                         </div>
                     </div>
-
-                    {/* Error State */}
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <span className="text-red-400">⚠️</span>
-                                </div>
-                                <div className="ml-3">
-                                    <h3 className="text-sm font-medium text-red-800">Error</h3>
-                                    <p className="mt-1 text-sm text-red-700">{error}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Edit Form */}
                     <div className="bg-white shadow rounded-lg">
@@ -554,6 +539,21 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Error State */}
+                            {error && (
+                                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                                    <div className="flex">
+                                        <div className="flex-shrink-0">
+                                            <span className="text-red-400">⚠️</span>
+                                        </div>
+                                        <div className="ml-3">
+                                            <h3 className="text-sm font-medium text-red-800">Error</h3>
+                                            <p className="mt-1 text-sm text-red-700">{error}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Submit Buttons */}
                             <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">

@@ -1,11 +1,15 @@
-import type { ApiResponse, SpotifySearchResult } from './types';
+import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
 import { apiClient, ApiClient } from './api-client';
+import type { ApiResponse } from './types';
 
 export class SpotifyApi {
     constructor(private client: ApiClient) {}
 
-    async searchArtists(query: string): Promise<ApiResponse<SpotifySearchResult[]>> {
-        return this.client.request<SpotifySearchResult[]>(`/spotify/search?q=${encodeURIComponent(query)}`);
+    /**
+     * Admin: Search artists on Spotify
+     */
+    async searchArtists(query: string): Promise<ApiResponse<{ artists: SpotifyArtist[] }>> {
+        return this.client.request(`/admin/spotify/search?q=${encodeURIComponent(query)}`);
     }
 }
 

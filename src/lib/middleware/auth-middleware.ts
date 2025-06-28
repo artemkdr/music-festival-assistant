@@ -19,8 +19,21 @@ export async function getCurrentUser(request: NextRequest): Promise<User | null>
 /**
  * Require authentication for a route handler
  */
-export function requireAuth(handler: (request: NextRequest, user: User) => Promise<Response>) {
-    return async (request: NextRequest): Promise<Response> => {
+export function requireAuth(
+    handler: (
+        request: NextRequest,
+        user: User,
+        context: {
+            params?: Promise<{ [key: string]: string }>;
+        }
+    ) => Promise<Response>
+) {
+    return async (
+        request: NextRequest,
+        context: {
+            params?: Promise<{ [key: string]: string }>;
+        }
+    ): Promise<Response> => {
         const user = await getCurrentUser(request);
 
         if (!user) {
@@ -36,28 +49,44 @@ export function requireAuth(handler: (request: NextRequest, user: User) => Promi
             );
         }
 
-        return handler(request, user);
+        return handler(request, user, context);
     };
 }
 
 /**
  * Require admin role for a route handler
  */
-export function requireAdmin(handler: (request: NextRequest, user: User) => Promise<Response>) {
-    return requireAuth(async (request: NextRequest, user: User): Promise<Response> => {
-        if (user.role !== 'admin') {
-            return new Response(
-                JSON.stringify({
-                    status: 'error',
-                    message: 'Admin access required',
-                }),
-                {
-                    status: 403,
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
+export function requireAdmin(
+    handler: (
+        request: NextRequest,
+        user: User,
+        context: {
+            params?: Promise<{ [key: string]: string }>;
         }
+    ) => Promise<Response>
+) {
+    return requireAuth(
+        async (
+            request: NextRequest,
+            user: User,
+            context: {
+                params?: Promise<{ [key: string]: string }>;
+            }
+        ): Promise<Response> => {
+            if (user.role !== 'admin') {
+                return new Response(
+                    JSON.stringify({
+                        status: 'error',
+                        message: 'Admin access required',
+                    }),
+                    {
+                        status: 403,
+                        headers: { 'Content-Type': 'application/json' },
+                    }
+                );
+            }
 
-        return handler(request, user);
-    });
+            return handler(request, user, context);
+        }
+    );
 }

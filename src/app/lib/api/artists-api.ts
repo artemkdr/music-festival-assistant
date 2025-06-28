@@ -31,6 +31,13 @@ class ArtistsApi {
     }
 
     /**
+     * Admin: Search artists in database
+     */
+    async searchArtists(query: string): Promise<ApiResponse<{ artists: Artist[] }>> {
+        return this.client.request(`/admin/artists/search?q=${encodeURIComponent(query)}`);
+    }
+
+    /**
      * Admin: Crawl artists
      */
     async crawlArtists(data: { festivalId?: string; artistNames?: string[] }): Promise<ApiResponse> {

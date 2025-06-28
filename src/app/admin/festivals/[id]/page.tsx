@@ -6,6 +6,7 @@
 
 import { festivalsApi } from '@/app/lib/api';
 import { AdminLayout } from '@/components/admin/admin-layout';
+import { ArtistLinking } from '@/components/admin/artist-linking';
 import { ProtectedRoute } from '@/components/protected-route';
 import { Festival } from '@/lib/schemas';
 import { DATE_TBA, getFestivalArtists, groupFestivalActsByDate } from '@/lib/utils/festival-util';
@@ -20,6 +21,7 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
     const [festival, setFestival] = useState<Festival | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [linkingActId, setLinkingActId] = useState<string | null>(null);
     const { id } = React.use(params);
 
     useEffect(() => {
@@ -45,6 +47,23 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
         };
         loadFestival();
     }, [id]);
+
+    const handleLinkingSuccess = async () => {
+        setLinkingActId(null);
+        // Reload festival data to show the updated artist link
+        try {
+            const festivalResponse = await festivalsApi.getFestival(id);
+            if (festivalResponse.status === 'success' && festivalResponse.data) {
+                setFestival(festivalResponse.data as Festival);
+            }
+        } catch (err) {
+            console.error('Error reloading festival:', err);
+        }
+    };
+
+    const handleLinkingCancel = () => {
+        setLinkingActId(null);
+    };
 
     const formatDate = (dateString: string) => {
         if (dateString === DATE_TBA) {
@@ -75,9 +94,6 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                             <div className="flex space-x-3">
                                 <Link href={`/admin/festivals/${festival.id}/edit`} className="btn-primary">
                                     Edit Festival
-                                </Link>
-                                <Link href={`/admin/artists/crawl?festivalId=${festival.id}`} className="btn-secondary">
-                                    Crawl Artists
                                 </Link>
                             </div>
                         )}
@@ -172,33 +188,55 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                             <div key={dayIndex}>
                                                 <h3 className="text-md font-medium text-foreground mb-3">{formatDate(dayLineup.date)}</h3>
                                                 <div className="space-y-2">
+                                                    {' '}
                                                     {dayLineup.list
                                                         .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
                                                         .map((artist, index) => (
-                                                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                                <div className="flex items-center space-x-4">
-                                                                    <div className="text-sm font-medium text-foreground">{artist.time ?? 'TBA'}</div>
-                                                                    <div>
+                                                            <React.Fragment key={index}>
+                                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                                    <div className="flex items-center space-x-4">
+                                                                        <div className="text-sm font-medium text-foreground">{artist.time ?? 'TBA'}</div>
+                                                                        <div>
+                                                                            {artist.artistId ? (
+                                                                                <Link href={`/admin/artists/${artist.artistId}`} className="link-primary font-medium">
+                                                                                    {artist.artistName}
+                                                                                </Link>
+                                                                            ) : (
+                                                                                <span className="font-medium text-foreground">{artist.artistName}</span>
+                                                                            )}
+                                                                        </div>
+                                                                        {artist.stage && <div className="text-sm text-muted-foreground">@ {artist.stage}</div>}
+                                                                    </div>
+                                                                    <div className="flex space-x-2">
                                                                         {artist.artistId ? (
-                                                                            <Link href={`/admin/artists/${artist.artistId}`} className="link-primary font-medium">
-                                                                                {artist.artistName}
+                                                                            <Link href={`/admin/artists/${artist.artistId}`} className="btn-primary-light bg-primary/10 px-3 py-2 rounded-3xl text-sm">
+                                                                                View Artist
                                                                             </Link>
                                                                         ) : (
-                                                                            <span className="font-medium text-foreground">{artist.artistName}</span>
+                                                                            <>
+                                                                                <span className="text-sm text-destructive px-3 py-2">No Artist Profile</span>
+                                                                                <button
+                                                                                    onClick={() => setLinkingActId(artist.id)}
+                                                                                    disabled={linkingActId !== null}
+                                                                                    className="btn-primary-light bg-primary/10 px-3 py-2 text-sm disabled:opacity-50"
+                                                                                >
+                                                                                    Link Artist Profile
+                                                                                </button>
+                                                                            </>
                                                                         )}
                                                                     </div>
-                                                                    {artist.stage && <div className="text-sm text-muted-foreground">@ {artist.stage}</div>}
                                                                 </div>
-                                                                <div className="flex space-x-2">
-                                                                    {artist.artistId ? (
-                                                                        <Link href={`/admin/artists/${artist.artistId}`} className="btn-primary-light bg-primary/10 px-3 py-2 rounded-3xl text-sm">
-                                                                            View Artist
-                                                                        </Link>
-                                                                    ) : (
-                                                                        <span className="text-sm text-muted-foreground bg-gray-100 px-3 py-2 rounded-3xl">No Artist Profile</span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
+                                                                {/* Artist Linking Component */}
+                                                                {linkingActId === artist.id && festival && (
+                                                                    <ArtistLinking
+                                                                        festivalId={festival.id}
+                                                                        actId={artist.id}
+                                                                        actName={artist.artistName}
+                                                                        onSuccess={handleLinkingSuccess}
+                                                                        onCancel={handleLinkingCancel}
+                                                                    />
+                                                                )}
+                                                            </React.Fragment>
                                                         ))}
                                                 </div>
                                             </div>

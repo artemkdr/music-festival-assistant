@@ -100,7 +100,7 @@ export default function FestivalsPage() {
                                                 </div>
                                                 <div className="flex items-center">
                                                     <span className="mr-2">🎤</span>
-                                                    {festival.lineup.length} days: {startDate} - {endDate}
+                                                    {festival.lineup.length} live acts, {startDate} - {endDate}
                                                 </div>
                                             </div>
 

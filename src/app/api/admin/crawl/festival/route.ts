@@ -59,23 +59,15 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
             parsedBy: user.id,
         });
 
-        return NextResponse.redirect(new URL(`/admin/festivals/${cacheId}/edit`, request.url), {
-            status: 303, // Use 303 to indicate redirect after POST
-        });
-
-        /*return NextResponse.json({
+        return NextResponse.json({
             status: 'success',
             message: 'Festival parsed successfully - ready for review and approval',
             data: {
                 cacheId: cacheId,
-                crawlResult: {
-                    success: true,
-                    artistCount: getFestivalArtists(festival).length,
-                    stageCount: getFestivalStages(festival).length,
-                    scheduleItemCount: festival.lineup.length,
-                },
+                // Redirect to edit page with cache ID
+                redirect: new URL(`/admin/festivals/${cacheId}/edit`, request.url),
             },
-        });*/
+        });
     } catch (error) {
         logger.error('Admin festival crawl failed', error instanceof Error ? error : new Error(String(error)));
 

@@ -34,7 +34,9 @@ export const FestivalSchema = z.object({
 });
 
 // Festival update schema (for PUT requests)
-export const UpdateFestivalSchema = FestivalSchema;
+export const UpdateFestivalSchema = FestivalSchema.extend({
+    id: z.string().min(1).optional(),
+});
 
 // Festival discovery request schema
 export const FestivalDiscoveryRequestSchema = z.object({

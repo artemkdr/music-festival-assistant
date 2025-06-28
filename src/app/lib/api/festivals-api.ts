@@ -1,6 +1,7 @@
 import { Festival } from '@/lib/schemas';
 import { apiClient, ApiClient } from './api-client';
 import type { ApiResponse } from './types';
+import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
 
 class FestivalsApi {
     constructor(private client: ApiClient) {}
@@ -33,12 +34,20 @@ class FestivalsApi {
                   base64: string;
               }[]
             | undefined;
-    }): Promise<ApiResponse<string>> {
+    }): Promise<
+        ApiResponse<{
+            cacheId: string;
+            redirect?: string; // URL to redirect to after successful crawl
+        }>
+    > {
         // Support backward compatibility with single URL string
         const requestBody = typeof data === 'string' ? { urls: [data] } : data;
 
         // this request returns a 303 redirect to the edit page of the parsed festival
-        return this.client.request<string>('/admin/crawl/festival', {
+        return this.client.request<{
+            cacheId: string;
+            redirect?: string; // URL to redirect to after successful crawl
+        }>('/admin/crawl/festival', {
             method: 'POST',
             body: JSON.stringify(requestBody),
         });
@@ -51,6 +60,24 @@ class FestivalsApi {
         return this.client.request('/festivals/discover', {
             method: 'POST',
             body: JSON.stringify(preferences),
+        });
+    }
+
+    /**
+     * Admin: Link festival act with artist
+     */
+    async linkArtistToAct(
+        festivalId: string,
+        data: {
+            actId: string;
+            artistName: string; // Use artistName for clarity
+            artistId?: string;
+            spotifyData?: SpotifyArtist;
+        }
+    ): Promise<ApiResponse<{ actId: string; artistId: string; linkType: string }>> {
+        return this.client.request(`/admin/festivals/${festivalId}/link-artist-to-act`, {
+            method: 'POST',
+            body: JSON.stringify(data),
         });
     }
 }

@@ -7,6 +7,7 @@
 import { festivalsApi } from '@/app/lib/api';
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
+import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
 
 // Add a type for the crawl request payload
@@ -24,6 +25,7 @@ export default function FestivalCrawlPage() {
     const [forcedName, setForcedName] = useState<string>('');
     // New state for files (base64 encoded)
     const [files, setFiles] = useState<{ name: string; type: string; base64: string }[]>([]);
+    const router = useRouter();
 
     const handleAddUrl = () => {
         if (urls.length < 10) {
@@ -89,7 +91,9 @@ export default function FestivalCrawlPage() {
             const response = await festivalsApi.crawlFestival(payload);
             if (response) {
                 // Redirect to the cache page with the new cache ID
-                console.log(response);
+                if (response.data?.cacheId) {
+                    router.push(`/admin/festivals/${response.data.cacheId}/edit`);
+                }
             } else {
                 setError('Crawl failed');
             }

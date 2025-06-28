@@ -110,47 +110,10 @@ export class SpotifyService {
     }
 
     /**
-     * Search for an artist by name using Spotify API
+     * Normalize artist name by removing diacritics, special characters,
+     * @param name - artist name to normalize
+     * @returns normalized name
      */
-    async searchArtistByName(name: string): Promise<SpotifyArtist | null> {
-        const url = `${this.baseUrl}/search?q=${encodeURIComponent(name)}&type=artist&limit=10`;
-        const token = await this.getAccessToken();
-        const res = await fetch(url, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`Spotify API error: ${res.status} ${res.statusText} - ${errorText}`);
-        }
-        const data = await res.json();
-        const normalizedName = this.normalize(name);
-        // Sort by match score, then by exact match, then by popularity
-        data.artists.items.sort((a: SpotifyArtistResponse, b: SpotifyArtistResponse) => {
-            const scoreA = this.getArtistMatchScore(normalizedName, this.normalize(a.name));
-            const scoreB = this.getArtistMatchScore(normalizedName, this.normalize(b.name));
-            if (scoreA !== scoreB) return scoreB - scoreA; // higher score first
-            // If scores are equal, prefer exact match
-            if (this.normalize(a.name) === normalizedName) return -1;
-            if (this.normalize(b.name) === normalizedName) return 1;
-            // Otherwise, sort by popularity
-            return b.popularity - a.popularity;
-        });
-        // return the first artist that matches
-        const artist = data.artists?.items?.[0];
-        if (!artist) return null;
-        // if found artist has a matching score less than 50%, return null
-        const matchScore = this.getArtistMatchScore(normalizedName, this.normalize(artist.name));
-        if (matchScore <= 0.5) {
-            this.logger.warn('No good match found for artist', {
-                searchedName: normalizedName,
-                foundName: this.normalize(artist.name),
-                matchScore,
-            });
-            return null;
-        }
-        return this.mapSpotifyArtist(artist);
-    }
-
     private normalize(name: string): string {
         return name
             .normalize('NFD') // Normalize to decompose diacritics
@@ -175,6 +138,62 @@ export class SpotifyService {
         }
         const artist = await res.json();
         return this.mapSpotifyArtist(artist);
+    }
+
+    /**
+     * Search for multiple artists by name using Spotify API
+     * Returns up to 10 artists with match scores above 0.3
+     */
+    async searchArtistsByName(name: string): Promise<SpotifyArtist[]> {
+        const url = `${this.baseUrl}/search?q=${encodeURIComponent(name)}&type=artist&limit=20`;
+        const token = await this.getAccessToken();
+        const res = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Spotify API error: ${res.status} ${res.statusText} - ${errorText}`);
+        }
+        const data = await res.json();
+        const normalizedName = this.normalize(name);
+
+        // Sort by match score, then by exact match, then by popularity
+        interface ArtistWithScore {
+            artist: SpotifyArtistResponse;
+            matchScore: number;
+        }
+
+        const sortedArtists = data.artists.items
+            .map(
+                (artist: SpotifyArtistResponse): ArtistWithScore => ({
+                    artist,
+                    matchScore: this.getArtistMatchScore(normalizedName, this.normalize(artist.name)),
+                })
+            )
+            .filter(({ matchScore }: ArtistWithScore) => matchScore > 0.3) // Filter out poor matches
+            .sort((a: ArtistWithScore, b: ArtistWithScore) => {
+                if (a.matchScore !== b.matchScore) return b.matchScore - a.matchScore;
+                // If scores are equal, prefer exact match
+                if (this.normalize(a.artist.name) === normalizedName) return -1;
+                if (this.normalize(b.artist.name) === normalizedName) return 1;
+                // Otherwise, sort by popularity
+                return b.artist.popularity - a.artist.popularity;
+            })
+            .slice(0, 10) // Limit to 10 results
+            .map(({ artist }: ArtistWithScore) => this.mapSpotifyArtist(artist));
+
+        return sortedArtists;
+    }
+
+    /**
+     * Search for an artist by name using Spotify API
+     */
+    async searchArtistByName(name: string): Promise<SpotifyArtist | null> {
+        const artists = await this.searchArtistsByName(name);
+        if (artists.length > 0 && artists[0]) {
+            return artists[0];
+        }
+        return null;
     }
 
     /**
