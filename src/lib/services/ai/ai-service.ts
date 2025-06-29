@@ -35,8 +35,10 @@ export class AIService implements IAIService {
                 }
                 this.model = createVertex({
                     project: config.projectId,
-                    location: config.location || 'us-central1', // Default to us-central1 if not specified
-                })(config.model); // Initialize Vertex AI model
+                    location: config.location || 'us-central1', // Default to us-central1 if not specified                    
+                })(config.model, {
+                    structuredOutputs: true
+                }); // Initialize Vertex AI model
         }
         this.maxTokens = config.maxTokens || 30000;
         this.temperature = config.temperature || 0.8; // Initialize VertexAI with service account credentials
