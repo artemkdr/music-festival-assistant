@@ -69,7 +69,8 @@ export interface IArtistCrawlerService {
         name: string,
         data?: {
             spotifyId?: string | undefined;
-            context?: string | undefined;
+            context?: string | undefined; // Optional context for the artist (e.g., festival name or country)
+            url?: string | undefined; // Optional URL for additional context (e.g. google search or festival page)
         }
     ): Promise<Artist>;
 }

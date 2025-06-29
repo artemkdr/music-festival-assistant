@@ -114,6 +114,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
                     spotify: validated.spotifyData.id,
                 },
                 festivalName: festival.name,
+                festivalUrl: festival.website,
             });
 
             artistId = newArtist.id;

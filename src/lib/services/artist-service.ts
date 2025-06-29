@@ -11,6 +11,7 @@ interface CreateArtistData {
     imageUrl?: string | undefined;
     mappingIds?: Record<string, string> | undefined;
     festivalName?: string | undefined;
+    festivalUrl?: string | undefined;
 }
 
 export interface IArtistService {
@@ -57,6 +58,7 @@ export class ArtistService implements IArtistService {
         data?: {
             context?: string | undefined;
             spotifyId?: string | undefined;
+            url?: string | undefined;
         }
     ): Promise<Artist> {
         this.logger.info(`Enriching artist with ID: ${id}`);
@@ -67,6 +69,7 @@ export class ArtistService implements IArtistService {
         const enrichedArtist = await this.crawler.crawlArtistByName(artist.name, {
             spotifyId: data?.spotifyId,
             context: data?.context,
+            url: data?.url,
         });
         enrichedArtist.name = artist.name; // Ensure we keep the original name
         enrichedArtist.id = artist.id; // Ensure we keep the original ID
@@ -92,6 +95,11 @@ export class ArtistService implements IArtistService {
         const newArtist = await this.crawler.crawlArtistByName(data.name, {
             spotifyId: data.mappingIds?.spotify,
             context: data.festivalName,
+            url: data.festivalUrl
+                ? `https://www.google.com/search?q=${encodeURIComponent(data.name + ' site:' + data.festivalUrl)}`
+                : data.festivalName
+                  ? `https://www.google.com/search?q=${encodeURIComponent(data.name + ' ' + data.festivalName)}`
+                  : undefined,
         });
         newArtist.id = generateArtistId();
         return this.repository.saveArtist(newArtist);

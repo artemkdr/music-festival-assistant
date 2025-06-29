@@ -24,6 +24,7 @@ export class ArtistCrawlerService implements IArtistCrawlerService {
         data?: {
             spotifyId?: string | undefined;
             context?: string | undefined;
+            url?: string | undefined; // Optional URL for additional context
         }
     ): Promise<Artist> {
         let spotifyArtist: SpotifyArtist | null = null;

@@ -72,7 +72,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     // crawls the artist by name
                     await artistService.createArtist({
                         name,
-                        ...(festival ? { festivalName: festival.name } : {}),
+                        ...(festival ? { festivalName: festival.name, festivalUrl: festival.website } : {}),
                     });
                 }
                 results.push({ name, status: 'crawled' });

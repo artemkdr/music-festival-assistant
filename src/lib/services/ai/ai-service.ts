@@ -18,7 +18,13 @@ export class AIService implements IAIService {
     ) {
         switch (config.provider) {
             case 'openai':
-                this.model = openai(config.model); // Replace with OpenAI model initialization
+                // openai and structured outputs are not well supported yet
+                // read here https://ai-sdk.dev/providers/ai-sdk-providers/openai
+                // and you have to adapt zod schemas (f.e. .optional() is not supported)
+                // you can enabled structured outputs only for reasoning models: gpt-4o, gtp-3o, etc...
+                this.model = openai(config.model, {
+                    structuredOutputs: config.model?.includes('o3') || config.model?.includes('o4') || config.model?.includes('o1'), // Enable structured outputs for reasoning models
+                });
                 break;
             case 'groq':
                 this.model = groq(config.model);
