@@ -24,6 +24,20 @@ export const GET = requireAdmin(async (request: NextRequest): Promise<Response> 
         }
 
         logger.info(`Searching Spotify artists with query: ${query}`);
+        // if query is likely to be a Spotify id or spotify uri then get by spotify id
+        if (/^[a-zA-Z0-9-_]{20,}$/.test(query)) {
+            logger.info(`Query is likely a Spotify ID: ${query}`);
+            const artist = await spotifyService.getArtistById(query);
+            if (!!artist) {
+                return NextResponse.json({
+                    status: 'success',
+                    message: 'Found artist by ID',
+                    data: { artists: [artist] },
+                });
+            }
+        }
+
+        // Otherwise, search for artists by name
         const artists = await spotifyService.searchArtistsByName(query);
 
         return NextResponse.json({

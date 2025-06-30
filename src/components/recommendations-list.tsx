@@ -36,6 +36,11 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
         let formattedStartDate = '';
         let formattedEndDate = '';
         if (isValidDate(actDateTime)) {
+            // if actDateTime hours are less than 5:00, it's likely the next day actually,
+            // because most festivals start in the afternoon or evening and they don't put the next day date in the time field
+            if (actDateTime.getHours() < 5) {
+                actDateTime.setDate(actDateTime.getDate() + 1);
+            }
             // Format as YYYYMMDDTHHMMSSZ
             formattedStartDate = actDateTime.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
             // add 1 hour for end time
