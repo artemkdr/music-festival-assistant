@@ -30,7 +30,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         let artistName = validated.name;
 
         if (validated.id) {
-            const existing = await artistService.getArtistById(validated.id);        
+            const existing = await artistService.getArtistById(validated.id);
             if (!existing) {
                 return NextResponse.json(
                     {
@@ -40,7 +40,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     { status: 404 }
                 );
             }
-            artistName = existing.name;            
+            artistName = existing.name;
         } else if (!artistName) {
             return NextResponse.json(
                 {

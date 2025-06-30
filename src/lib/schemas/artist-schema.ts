@@ -31,6 +31,7 @@ export const ArtistSchema = z.object({
             instagram: z.string().optional(),
         })
         .optional(),
+    sources: z.array(z.string()).optional(), // Sources where the artist was found
     popularity: z
         .object({
             spotify: z

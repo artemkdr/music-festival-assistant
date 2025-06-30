@@ -21,7 +21,7 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
     const [festival, setFestival] = useState<Festival | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [linkingActId, setLinkingActId] = useState<string | null>(null);
+    const [linkingActIds, setLinkingActIds] = useState<Set<string> | null>(null);
     const { id } = React.use(params);
 
     useEffect(() => {
@@ -48,8 +48,14 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
         loadFestival();
     }, [id]);
 
-    const handleLinkingSuccess = async () => {
-        setLinkingActId(null);
+    const handleLinkingSuccess = async (actId: string) => {
+        setLinkingActIds(prev => {
+            if (!prev) return null; // If no linking is in progress, do nothing
+            const updated = new Set(prev);
+            updated.delete(actId); // Remove the successfully linked act ID
+            return updated.size > 0 ? updated : null; // Return null if no more linking
+        });
+
         // Reload festival data to show the updated artist link
         try {
             const festivalResponse = await festivalsApi.getFestival(id);
@@ -61,8 +67,13 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
         }
     };
 
-    const handleLinkingCancel = () => {
-        setLinkingActId(null);
+    const handleLinkingCancel = (id: string) => {
+        setLinkingActIds(prev => {
+            if (!prev) return null; // If no linking is in progress, do nothing
+            const updated = new Set(prev);
+            updated.delete(id); // Remove the cancelled act ID
+            return updated.size > 0 ? updated : null; // Return null if no more linking
+        });
     };
 
     const formatDate = (dateString: string) => {
@@ -216,8 +227,8 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                                             <>
                                                                                 <span className="text-sm text-destructive px-3 py-2">No Artist Profile</span>
                                                                                 <button
-                                                                                    onClick={() => setLinkingActId(artist.id)}
-                                                                                    disabled={linkingActId !== null}
+                                                                                    onClick={() => setLinkingActIds(prev => new Set(prev ? [...prev, artist.id] : [artist.id]))}
+                                                                                    disabled={linkingActIds?.has(artist.id)}
                                                                                     className="btn-primary-light bg-primary/10 px-3 py-2 text-sm disabled:opacity-50"
                                                                                 >
                                                                                     Link Artist Profile
@@ -227,14 +238,14 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                                     </div>
                                                                 </div>
                                                                 {/* Artist Linking Component */}
-                                                                {linkingActId === artist.id && festival && (
+                                                                {linkingActIds?.has(artist.id) && festival && (
                                                                     <ArtistLinking
                                                                         festivalId={festival.id}
                                                                         festivalUrl={festival.website ? new URL(festival.website).hostname : undefined}
                                                                         actId={artist.id}
                                                                         actName={artist.artistName}
-                                                                        onSuccess={handleLinkingSuccess}
-                                                                        onCancel={handleLinkingCancel}
+                                                                        onSuccess={() => handleLinkingSuccess(artist.id)}
+                                                                        onCancel={() => handleLinkingCancel(artist.id)}
                                                                     />
                                                                 )}
                                                             </React.Fragment>

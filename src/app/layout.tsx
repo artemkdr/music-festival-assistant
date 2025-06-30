@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Suspense, type ReactNode } from 'react';
 import { AuthProvider } from '@/lib/contexts/auth-context';
+import Link from 'next/link';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,15 +35,12 @@ export default function RootLayout({ children }: { children: ReactNode }): React
                                         <h1 className="text-xl font-bold text-gray-900">Festival Assistant</h1>
                                     </div>
                                     <nav className="hidden md:flex space-x-6">
-                                        <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+                                        <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
                                             Discover
-                                        </a>
-                                        <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
-                                            About
-                                        </a>
-                                        <a href="/admin/login" className="text-gray-600 hover:text-gray-900 transition-colors">
+                                        </Link>
+                                        <Link href="/admin/login" className="text-gray-600 hover:text-gray-900 transition-colors">
                                             Admin
-                                        </a>
+                                        </Link>
                                     </nav>
                                 </div>
                             </div>
@@ -55,7 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }): React
                         <footer className="bg-white border-t">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                                 <div className="text-center text-gray-600">
-                                    <p>© 2024 Music Festival Assistant. Discover your next favorite artist.</p>
+                                    <p>© 2025 Music Festival Assistant. Discover your next favorite artist.</p>
                                 </div>
                             </div>
                         </footer>

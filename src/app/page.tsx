@@ -1,18 +1,12 @@
 'use client';
 
+import { discoverApi, FestivalDiscoveryResponse } from '@/app/lib/api/discover-api';
 import { FestivalDiscoveryForm } from '@/components/festival-discovery-form';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { RecommendationsList } from '@/components/recommendations-list';
-import { Festival, Recommendation, UserPreferences } from '@/lib/schemas';
+import { UserPreferences } from '@/lib/schemas';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
-
-interface FestivalDiscoveryResponse {
-    festival: Festival;
-    recommendations: Recommendation[];
-    totalArtists: number;
-    totalRecommendations: number;
-}
 
 /**
  * Main page component for the Music Festival Assistant
@@ -31,27 +25,11 @@ export default function HomePage(): ReactElement {
         setError(null);
 
         try {
-            const response = await fetch('/api/festivals/discover-ai', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    festivalId,
-                    userPreferences,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to discover artists');
-            }
-
-            if (data.status === 'success') {
-                setDiscoveryResponse(data.data);
+            const response = await discoverApi.getRecommendations(festivalId, userPreferences);
+            if (response.status === 'success' && response.data) {
+                setDiscoveryResponse(response.data);
             } else {
-                throw new Error(data.message || 'Discovery failed');
+                throw new Error(response.message || 'Discovery failed');
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unexpected error occurred');

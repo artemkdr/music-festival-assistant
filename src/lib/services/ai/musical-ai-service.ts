@@ -146,6 +146,20 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
             description: string | undefined;
         }[];
     }): Promise<z.infer<typeof RecommendationShortSchema>[]> {
+        const mappedUserPreferences = {
+            comment: userPreferences.comment?.trim() || '',
+            preferredGenres: userPreferences.genres?.length ? userPreferences.genres : undefined,
+            preferredArtists: userPreferences.preferredArtists?.length ? userPreferences.preferredArtists : undefined,
+            recommendationStyle:
+                userPreferences.recommendationStyle === 'conservative'
+                    ? 'conservative: focus on well-known artists'
+                    : userPreferences.recommendationStyle === 'balanced'
+                      ? 'balanced: mix of popular and emerging artists'
+                      : userPreferences.recommendationStyle === 'adventurous'
+                        ? 'adventurous: focus on emerging and less known artists'
+                        : '',
+            recommendationsCount: `I would like at least ${userPreferences.recommendationsCount || 5} recommendations`, // Default to 5 if not specified
+        };
         const aiRequest: AIRequest = {
             systemPrompt: `
 You are an expert music recommender. You help users choose an artist from a list of available artists, based on their preferences.
@@ -163,7 +177,7 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
 Generate music recommendations based on the provided user preferences:
 `,
         };
-        this.addFileContentToRequest(aiRequest, [`User preferences: ${JSON.stringify(userPreferences)}`, `Available artists: ${JSON.stringify(availableArtists)}`]);
+        this.addFileContentToRequest(aiRequest, [`User preferences: ${JSON.stringify(mappedUserPreferences)}`, `Available artists: ${JSON.stringify(availableArtists)}`]);
 
         // add the most important instructions to the end of the prompt
         aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;

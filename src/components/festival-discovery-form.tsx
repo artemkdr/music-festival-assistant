@@ -1,8 +1,8 @@
 'use client';
 
-import { festivalsApi } from '@/app/lib/api';
-import { Festival, UserPreferences } from '@/lib/schemas';
-import { availableGenres } from '@/tests/mock-data';
+import { discoverApi, FestivalInfo } from '@/app/lib/api/discover-api';
+import { GenresGrid } from '@/components/genres-grid';
+import { UserPreferences } from '@/lib/schemas';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -15,39 +15,70 @@ interface FestivalDiscoveryFormProps {
  * Form component for festival discovery input
  */
 export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscoveryFormProps): ReactElement {
-    const [festivals, setFestivals] = useState<Festival[]>([]);
+    const [festivals, setFestivals] = useState<FestivalInfo[]>([]);
     const [selectedFestivalId, setSelectedFestivalId] = useState('');
     const [festivalSearchTerm, setFestivalSearchTerm] = useState('');
     const [showFestivalDropdown, setShowFestivalDropdown] = useState(false);
     const [loadingFestivals, setLoadingFestivals] = useState(false);
+    const [availableGenres, setAvailableGenres] = useState<
+        {
+            name: string;
+            count: number;
+        }[]
+    >([]); // now dynamic
     const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+    const [loadingGenres, setLoadingGenres] = useState(false);
     const [discoveryMode, setDiscoveryMode] = useState<'conservative' | 'balanced' | 'adventurous'>('balanced');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [userNotes, setUserNotes] = useState('');
+    const [recommendationsCount, setRecommendationsCount] = useState(5); // Default to 5 recommendations
 
     // Load festivals on component mount
     useEffect(() => {
         const loadFestivals = async () => {
             setLoadingFestivals(true);
             try {
-                const response = await festivalsApi.getFestivals();
+                const response = await discoverApi.getFestivals();
                 if (response.status === 'success' && response.data) {
-                    setFestivals(response.data as Festival[]);
+                    setFestivals(response.data as FestivalInfo[]);
                 }
             } catch (error) {
+                // TODO: use logger
                 console.error('Failed to load festivals:', error);
             } finally {
                 setLoadingFestivals(false);
             }
         };
-
         loadFestivals();
     }, []);
 
-    // Filter festivals based on search term
-    const filteredFestivals = festivals.filter(
-        festival => festival.name.toLowerCase().includes(festivalSearchTerm.toLowerCase()) || festival.location?.toLowerCase().includes(festivalSearchTerm.toLowerCase())
-    );
+    // Load genres when a festival is selected
+    useEffect(() => {
+        if (!selectedFestivalId) {
+            setAvailableGenres([]);
+            setSelectedGenres([]);
+            return;
+        }
+        setLoadingGenres(true);
+        discoverApi
+            .getFestivalGenres(selectedFestivalId)
+            .then(response => {
+                if (response.status === 'success' && response.data) {
+                    setAvailableGenres(
+                        response.data as {
+                            name: string;
+                            count: number;
+                        }[]
+                    );
+                } else {
+                    setAvailableGenres([]);
+                }
+            })
+            .catch(() => {
+                setAvailableGenres([]);
+            })
+            .finally(() => setLoadingGenres(false));
+    }, [selectedFestivalId]);
 
     // Get selected festival details
     const selectedFestival = festivals.find(f => f.id === selectedFestivalId);
@@ -68,8 +99,8 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
             newErrors.festival = 'Please select a festival';
         }
 
-        if (selectedGenres.length === 0) {
-            newErrors.genres = 'Please select at least one genre';
+        if (selectedGenres.length === 0 && !userNotes.trim()) {
+            newErrors.genres = 'Please select at least one genre or provide additional preferences';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -80,8 +111,9 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
         // Create user preferences
         const userPreferences: UserPreferences = {
             genres: selectedGenres,
-            discoveryMode,
+            recommendationStyle: discoveryMode,
             comment: userNotes.trim().substring(0, 500) ?? undefined,
+            recommendationsCount,
         };
 
         await onSubmit(selectedFestivalId, userPreferences);
@@ -95,6 +127,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
         const festival = festivals.find(f => f.id === festivalId);
         setFestivalSearchTerm(festival ? festival.name : '');
         setShowFestivalDropdown(false);
+        setSelectedGenres([]); // reset genres on festival change
     };
 
     /**
@@ -118,12 +151,12 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Festival Selection */}
                 <div>
-                    <label htmlFor="festival-search" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="festival-search" className="block font-bold text-base mb-3">
                         Select Festival
                     </label>
                     <div className="relative">
                         <input
-                            type="text"
+                            type="search"
                             id="festival-search"
                             value={festivalSearchTerm}
                             onChange={e => {
@@ -137,7 +170,10 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                             placeholder="Search for a festival..."
                             className={`input w-full ${errors.festival ? 'border-red-500' : ''}`}
                             disabled={isLoading || loadingFestivals}
+                            autoComplete="off"
                         />
+
+                        <p className="mt-1 text-sm text-gray-500">Search and select from {festivals.length} festivals in our database</p>
 
                         {/* Loading indicator */}
                         {loadingFestivals && (
@@ -149,22 +185,21 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                         {/* Dropdown */}
                         {showFestivalDropdown && !loadingFestivals && (
                             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                                {filteredFestivals.length > 0 ? (
-                                    filteredFestivals.map(festival => (
-                                        <button
-                                            key={festival.id}
-                                            type="button"
-                                            onClick={() => handleFestivalSelect(festival.id)}
-                                            className="w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
-                                        >
-                                            <div className="font-medium text-gray-900">{festival.name}</div>
-                                            <div className="text-sm text-gray-500">{festival.location}</div>
-                                            <div className="text-xs text-gray-400">{festival.lineup.length} days</div>
-                                        </button>
-                                    ))
-                                ) : (
-                                    <div className="px-4 py-3 text-gray-500 text-sm">{festivalSearchTerm ? 'No festivals found matching your search' : 'No festivals available'}</div>
-                                )}
+                                {festivals?.map(festival => (
+                                    <button
+                                        key={festival.id}
+                                        type="button"
+                                        onClick={() => handleFestivalSelect(festival.id)}
+                                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0`}
+                                    >
+                                        <div className="font-medium text-gray-900">{festival.name}</div>
+                                        <div className="text-sm text-gray-500">{festival.location}</div>
+                                        <div className="text-xs text-gray-400">
+                                            {festival.startDate} - {festival.endDate}
+                                        </div>
+                                        <div className="text-xs text-gray-400">{festival.artistsCount}+ artists</div>
+                                    </button>
+                                ))}
                             </div>
                         )}
 
@@ -186,33 +221,22 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                             </div>
                         </div>
                     )}
-
-                    <p className="mt-1 text-sm text-gray-500">Search and select from {festivals.length} festivals in our database</p>
                 </div>
 
                 {/* Genre Selection */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Music Preferences</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                        {availableGenres.map(genre => (
-                            <button
-                                key={genre}
-                                type="button"
-                                onClick={() => handleGenreToggle(genre)}
-                                className={`text-sm transition-colors ${selectedGenres.includes(genre) ? 'btn-primary' : 'btn-primary-light border-1 border-primary/30'}`}
-                                disabled={isLoading}
-                            >
-                                {genre}
-                            </button>
-                        ))}
-                    </div>
+                    <label className="block font-bold text-base mb-3">Music Preferences</label>
+                    {loadingGenres ? (
+                        <div className="text-gray-500 text-sm">Loading genres...</div>
+                    ) : (
+                        <GenresGrid genres={availableGenres} selectedGenres={selectedGenres} onGenreToggle={handleGenreToggle} isLoading={isLoading} />
+                    )}
                     {errors.genres && <p className="mt-2 text-sm text-red-600">{errors.genres}</p>}
-                    <p className="mt-2 text-sm text-gray-500">Select genres you enjoy ({selectedGenres.length} selected)</p>
                 </div>
 
                 {/* Additional Preferences (Free Text) */}
                 <div>
-                    <label htmlFor="user-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="user-notes" className="block font-bold text-base mb-3">
                         Additional Preferences
                     </label>
                     <textarea
@@ -229,7 +253,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
                 {/* Discovery Mode */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">Discovery Mode</label>
+                    <label className="block font-bold text-base mb-3">Discovery Mode</label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {[
                             {
@@ -270,6 +294,23 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                                 <p className="text-sm text-gray-600">{mode.description}</p>
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* Recommendations count */}
+                <div>
+                    <label className="block font-bold text-base mb-3">How many concerts do you want to visit?</label>
+                    <div className="flex items-center space-x-4">
+                        <input
+                            type="range"
+                            min={1}
+                            max={10}
+                            value={recommendationsCount}
+                            className="input w-30 max-w-99/100 text-center"
+                            disabled={isLoading}
+                            onChange={e => setRecommendationsCount(Number(e.target.value))}
+                        />
+                        <span className="text-sm text-gray-500">We will try recommend you {recommendationsCount} concerts</span>
                     </div>
                 </div>
 

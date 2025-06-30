@@ -18,6 +18,17 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const validatedData = FestivalDiscoveryRequestSchema.parse(body);
 
+        if (validatedData.userPreferences.genres?.length === 0 && !validatedData.userPreferences.comment?.trim()) {
+            return NextResponse.json(
+                {
+                    status: 'error' as const,
+                    message: 'At least one genre or additional preferences must be provided',
+                    errors: ['Please select at least one genre or provide additional preferences'],
+                },
+                { status: 400 }
+            );
+        }
+
         logger.info('AI-enhanced festival discovery requested', {
             festivalId: validatedData.festivalId,
             festivalUrl: validatedData.festivalUrl,

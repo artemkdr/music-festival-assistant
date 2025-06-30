@@ -10,7 +10,7 @@ export const RecommendationSchema = z.object({
         time: z.string().optional(), // Optional act time
         stage: z.string().optional(), // Optional stage/venue
     }),
-    score: z.number().min(0).max(1), // Confidence score
+    score: z.number().min(0).max(100), // Confidence score
     reasons: z.array(z.string()), // Why this artist is recommended
     similarArtists: z.array(ArtistSchema).optional(), // Optional similar artists
     aiEnhanced: z.boolean().default(false), // Whether this recommendation was enhanced by AI

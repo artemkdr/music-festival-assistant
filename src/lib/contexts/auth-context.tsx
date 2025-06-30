@@ -99,9 +99,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(null);
     };
 
-    // Check auth on mount
+    // Check auth on mount if it's a protected route
     useEffect(() => {
-        checkAuth();
+        // Only check auth if we have a token
+        authApi.getToken().then(token => {
+            if (token) {
+                checkAuth();
+            }
+        });
     }, []);
 
     const value: AuthContextType = {

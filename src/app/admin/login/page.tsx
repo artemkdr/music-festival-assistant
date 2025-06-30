@@ -53,19 +53,6 @@ export default function AdminLoginPage() {
                         <p className="mt-2 text-gray-600">Sign in to access the admin dashboard</p>
                     </div>
 
-                    {/* Demo Credentials Info */}
-                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h3>
-                        <div className="text-sm text-blue-600 space-y-1">
-                            <p>
-                                <strong>Email:</strong> admin@music-festival.com
-                            </p>
-                            <p>
-                                <strong>Password:</strong> admin123
-                            </p>
-                        </div>
-                    </div>
-
                     {/* Error Display */}
                     {error && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -133,11 +120,6 @@ export default function AdminLoginPage() {
                             </button>
                         </div>
                     </form>
-
-                    {/* Footer */}
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-500">This is a demo admin panel with dummy authentication</p>
-                    </div>
                 </div>
             </div>
         </div>

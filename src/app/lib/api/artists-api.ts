@@ -52,12 +52,7 @@ class ArtistsApi {
      * Either provide an ID of an existing artist or an artist name.
      * @param data { id, name, spotifyId, context }
      */
-    async crawlArtist(data: { 
-        id?: string; 
-        name?: string | undefined; 
-        spotifyId?: string | undefined; 
-        context?: string | undefined 
-    }): Promise<ApiResponse<Artist>> {
+    async crawlArtist(data: { id?: string; name?: string | undefined; spotifyId?: string | undefined; context?: string | undefined }): Promise<ApiResponse<Artist>> {
         return this.client.request<Artist>('/admin/crawl/artist', {
             method: 'POST',
             body: JSON.stringify(data),

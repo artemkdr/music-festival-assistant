@@ -1,7 +1,9 @@
 'use client';
 
-import { Festival, Recommendation } from '@/lib/schemas';
+import { Artist, Festival, Recommendation } from '@/lib/schemas';
+import { isValidDate } from '@/lib/utils/date-util';
 import { getFestivalDates } from '@/lib/utils/festival-util';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 
 interface RecommendationsListProps {
@@ -13,7 +15,7 @@ interface RecommendationsListProps {
 /**
  * Component to display festival recommendations
  */
-export function RecommendationsList({ festival, recommendations, onFeedback }: RecommendationsListProps): ReactElement {
+export function RecommendationsList({ festival, recommendations }: RecommendationsListProps): ReactElement {
     const getScoreColor = (score: number): string => {
         if (score >= 0.8) return 'text-green-600 bg-green-100';
         if (score >= 0.6) return 'text-blue-600 bg-blue-100';
@@ -28,7 +30,30 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
         return 'Might Interest You';
     };
 
+    const addToGoogleCalendar = async (event: { date: string; time: string; festival: string; artist: string }) => {
+        const { date, time, festival, artist } = event;
+        const actDateTime = new Date(`${date}T${time}`);
+        let formattedStartDate = '';
+        let formattedEndDate = '';
+        if (isValidDate(actDateTime)) {
+            // Format as YYYYMMDDTHHMMSSZ
+            formattedStartDate = actDateTime.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+            // add 1 hour for end time
+            const endDate = new Date(actDateTime);
+            endDate.setHours(endDate.getHours() + 1);
+            formattedEndDate = endDate.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+        }
+        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(artist)} at ${encodeURIComponent(festival)}&dates=${formattedStartDate}/${formattedEndDate}`;
+        window.open(calendarUrl, '_blank');
+    };
+
     const { startDate: festivalStartDate, endDate: festivalEndDate } = getFestivalDates(festival);
+
+    const festivalBaseUrl = new URL(festival.website || '').hostname;
+
+    const getGoogleArtistUrl = (artist: Artist): string => {
+        return `https://www.google.com/search?q=${encodeURIComponent(artist.name)}%20${festival.website ? `site:${festivalBaseUrl}` : festival.name}`;
+    };
 
     return (
         <div className="space-y-6">
@@ -60,9 +85,6 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h3 className="text-xl font-bold text-gray-900">{recommendation.artist.name}</h3>
-                                        {recommendation.aiEnhanced && (
-                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">🤖 AI Enhanced</span>
-                                        )}
                                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getScoreColor(recommendation.score)}`}>{getScoreLabel(recommendation.score)}</span>
                                     </div>
 
@@ -85,7 +107,7 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                             </div>
 
                             {/* Act Info */}
-                            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                            <div className="bg-gray-200 rounded-lg p-4 mb-4">
                                 <h4 className="font-medium text-gray-900 mb-2">Act Details</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div>
@@ -98,7 +120,7 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                                     </div>
                                     <div>
                                         <span className="text-gray-500">Time:</span>
-                                        <span className="ml-2 font-medium">{recommendation.act.date}</span>
+                                        <span className="ml-2 font-medium">{recommendation.act.time}</span>
                                     </div>
                                 </div>
                             </div>
@@ -106,7 +128,7 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                             {/* Recommendation Reasons */}
                             <div className="mb-4">
                                 <h4 className="font-medium text-gray-900 mb-2">Why we recommend this artist:</h4>
-                                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                <ul className="list-disc list-inside text-gray-600 space-y-1 px-4">
                                     {recommendation.reasons.map((reason, index) => (
                                         <li key={index}>{reason}</li>
                                     ))}
@@ -114,79 +136,44 @@ export function RecommendationsList({ festival, recommendations, onFeedback }: R
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'love')}
-                                        className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors"
-                                        title="Love this recommendation"
-                                    >
-                                        ❤️ Love
-                                    </button>
-                                    <button
-                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'like')}
-                                        className="px-3 py-2 text-sm bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
-                                        title="Like this recommendation"
-                                    >
-                                        👍 Like
-                                    </button>
-                                    <button
-                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'dislike')}
-                                        className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                                        title="Not interested"
-                                    >
-                                        👎 Pass
-                                    </button>
-                                    <button
-                                        onClick={() => onFeedback(recommendation.act.id, recommendation.artist.id, 'skip')}
-                                        className="px-3 py-2 text-sm bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors"
-                                        title="Skip for now"
-                                    >
-                                        ⏭️ Skip
-                                    </button>
-                                </div>
-
+                            <div className="flex flex-wrap justify-between gap-4">
+                                {/* Show 'Add to calendars button only if the date is valid */}
+                                {isValidDate(new Date(`${recommendation.act.date}T${recommendation.act.time}`)) && (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() =>
+                                                addToGoogleCalendar({
+                                                    date: recommendation.act.date || '',
+                                                    time: recommendation.act.time || '',
+                                                    festival: festival.name,
+                                                    artist: recommendation.artist.name,
+                                                })
+                                            }
+                                            className="link-secondary border-1 border-secondary px-4 py-1 rounded-xl"
+                                        >
+                                            Add to Google calendar
+                                        </button>
+                                    </div>
+                                )}
                                 <div className="flex gap-2">
                                     {recommendation.artist.streamingLinks?.spotify && (
-                                        <a
-                                            href={recommendation.artist.streamingLinks.spotify}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                                        >
+                                        <a href={recommendation.artist.streamingLinks.spotify} target="_blank" rel="noopener noreferrer" className="btn-secondary">
                                             🎵 Spotify
                                         </a>
                                     )}
                                     {recommendation.artist.streamingLinks?.appleMusic && (
-                                        <a
-                                            href={recommendation.artist.streamingLinks.appleMusic}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-3 py-2 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors"
-                                        >
+                                        <a href={recommendation.artist.streamingLinks.appleMusic} target="_blank" rel="noopener noreferrer" className="btn-secondary">
                                             🍎 Apple Music
                                         </a>
                                     )}
                                     {recommendation.artist.streamingLinks?.youtube && (
-                                        <a
-                                            href={recommendation.artist.streamingLinks.youtube}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-3 py-2 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                                        >
+                                        <a href={recommendation.artist.streamingLinks.youtube} target="_blank" rel="noopener noreferrer" className="btn-secondary">
                                             📺 YouTube
                                         </a>
                                     )}
-                                    {recommendation.artist.socialLinks?.website && (
-                                        <a
-                                            href={recommendation.artist.socialLinks.website}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                                        >
-                                            🌐 Website
-                                        </a>
-                                    )}
+                                    <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="btn-primary">
+                                        🌐 Web Search
+                                    </Link>
                                 </div>
                             </div>
                         </div>

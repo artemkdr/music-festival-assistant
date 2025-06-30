@@ -39,7 +39,7 @@ export class RecommendationService implements IRecommendationService {
                 festivalArtists.map(async artist => {
                     const detailedArtist = await this.artistRepository.searchArtistByName(artist.name);
                     if (detailedArtist) {
-                        artistsMap[artist.name] = detailedArtist;
+                        artistsMap[artist.name.toLowerCase()] = detailedArtist;
                     }
                     return {
                         festivalName: festival.name,
@@ -57,7 +57,8 @@ export class RecommendationService implements IRecommendationService {
                     genres: userPreferences.genres,
                     preferredArtists: userPreferences.preferredArtists || [],
                     dislikedArtists: userPreferences.dislikedArtists || [],
-                    discoveryMode: userPreferences.discoveryMode,
+                    recommendationStyle: userPreferences.recommendationStyle,
+                    recommendationsCount: userPreferences.recommendationsCount || 5, // Default to 5 if not specified
                 },
                 availableArtists: artistInfos,
             });
@@ -70,14 +71,14 @@ export class RecommendationService implements IRecommendationService {
 
             const recommendations: Recommendation[] = [];
             for (const rec of aiRecommendations) {
-                const artist = artistsMap[rec.artistName];
+                const artist = artistsMap[rec.artistName.toLowerCase()];
                 const artistName = artist?.name ?? rec.artistName;
                 const act = getActsByArtistName(festival, artistName);
                 if (act) {
                     recommendations.push({
                         artist: artist || {
                             id: '', // Fallback if artist not found
-                            name: artistName                            
+                            name: artistName,
                         },
                         act: act,
                         score: rec.score,
