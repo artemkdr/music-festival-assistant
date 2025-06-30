@@ -1,6 +1,5 @@
 /**
  * Admin endpoint for crawling artist data
- * Accepts a festivalId or a list of artist names, crawls missing artists, and saves them to the repository.
  */
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/middleware/auth-middleware';
@@ -13,7 +12,7 @@ import { z } from 'zod';
  */
 
 const CrawlArtistRequestSchema = z.object({
-    id: z.string(),
+    id: z.string().optional(),
     name: z.string().optional(),
     spotifyId: z.string().optional(),
     context: z.string().optional(),
@@ -28,18 +27,32 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         logger.info('Admin artist crawl request received');
         const body = await request.json();
         const validated = CrawlArtistRequestSchema.parse(body);
-        const existing = await artistService.getArtistById(validated.id);
-        if (!existing) {
+        let artistName = validated.name;
+
+        if (validated.id) {
+            const existing = await artistService.getArtistById(validated.id);        
+            if (!existing) {
+                return NextResponse.json(
+                    {
+                        status: 'error',
+                        message: `Artist not found: ${validated.id}`,
+                    },
+                    { status: 404 }
+                );
+            }
+            artistName = existing.name;            
+        } else if (!artistName) {
             return NextResponse.json(
                 {
                     status: 'error',
-                    message: `Artist not found: ${validated.id}`,
+                    message: 'Missing artist name or ID in request body',
                 },
-                { status: 404 }
+                { status: 400 }
             );
         }
 
         const result = await artistService.crawlArtistDetails(validated.id, {
+            name: artistName,
             context: validated.context,
             spotifyId: validated.spotifyId,
         });

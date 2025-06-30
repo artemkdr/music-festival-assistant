@@ -48,10 +48,16 @@ class ArtistsApi {
     }
 
     /**
-     * Admin: Recrawl a single artist with custom context
+     * Admin: Crawl a single artist with custom context
+     * Either provide an ID of an existing artist or an artist name.
      * @param data { id, name, spotifyId, context }
      */
-    async recrawlArtist(data: { id: string; name?: string | undefined; spotifyId?: string | undefined; context?: string | undefined }): Promise<ApiResponse<Artist>> {
+    async crawlArtist(data: { 
+        id?: string; 
+        name?: string | undefined; 
+        spotifyId?: string | undefined; 
+        context?: string | undefined 
+    }): Promise<ApiResponse<Artist>> {
         return this.client.request<Artist>('/admin/crawl/artist', {
             method: 'POST',
             body: JSON.stringify(data),

@@ -34,10 +34,10 @@ export default function RootLayout({ children }: { children: ReactNode }): React
                                         <h1 className="text-xl font-bold text-gray-900">Festival Assistant</h1>
                                     </div>
                                     <nav className="hidden md:flex space-x-6">
-                                        <a href="#discover" className="text-gray-600 hover:text-gray-900 transition-colors">
+                                        <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
                                             Discover
                                         </a>
-                                        <a href="#about" className="text-gray-600 hover:text-gray-900 transition-colors">
+                                        <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
                                             About
                                         </a>
                                         <a href="/admin/login" className="text-gray-600 hover:text-gray-900 transition-colors">

@@ -73,9 +73,12 @@ export class RecommendationService implements IRecommendationService {
                 const artist = artistsMap[rec.artistName];
                 const artistName = artist?.name ?? rec.artistName;
                 const act = getActsByArtistName(festival, artistName);
-                if (artist && act) {
+                if (act) {
                     recommendations.push({
-                        artist: artist,
+                        artist: artist || {
+                            id: '', // Fallback if artist not found
+                            name: artistName                            
+                        },
                         act: act,
                         score: rec.score,
                         reasons: rec.reasons,

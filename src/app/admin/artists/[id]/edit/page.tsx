@@ -114,7 +114,7 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
         setRecrawlLoading(true);
         setRecrawlError(null);
         try {
-            const response = await artistsApi.recrawlArtist({
+            const response = await artistsApi.crawlArtist({
                 id: recrawlForm.id,
                 name: recrawlForm.name,
                 spotifyId: recrawlForm.spotifyId || undefined,

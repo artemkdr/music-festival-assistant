@@ -44,6 +44,15 @@ export class ApiClient {
         });
 
         if (!response.ok) {
+            // check if the response is 401 Unauthorized
+            // and redirect to login or clear token
+            if (response.status === 401) {
+                this.clearToken();
+                if (typeof window !== 'undefined') {
+                    window.location.href = '/login'; // Redirect to login page
+                }
+                throw new Error('Unauthorized access - please log in again.');
+            }
             const errorText = await response.text();
             throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
         }
