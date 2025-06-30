@@ -230,6 +230,7 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                                                                 {linkingActId === artist.id && festival && (
                                                                     <ArtistLinking
                                                                         festivalId={festival.id}
+                                                                        festivalUrl={festival.website ? new URL(festival.website).hostname : undefined}
                                                                         actId={artist.id}
                                                                         actName={artist.artistName}
                                                                         onSuccess={handleLinkingSuccess}

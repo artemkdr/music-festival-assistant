@@ -64,8 +64,15 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     if (validated.force === false) {
                         continue;
                     }
-                    const populatedArtist = await artistService.populateArtistDetails(artistId, {
-                        context: festival ? `Festival: ${festival.name}` : undefined,
+                    const populatedArtist = await artistService.crawlArtistDetails(artistId, {
+                        context: festival
+                            ? `Festival: ${festival.name}: ${festival.website}` +
+                              (festival.website
+                                  ? `Additinal info:\nhttps://www.google.com/search?q=${encodeURIComponent(existing.name + ' site:' + festival.website)}`
+                                  : festival.name
+                                    ? `Additinal info:\nhttps://www.google.com/search?q=${encodeURIComponent(existing.name + ' ' + festival.name)}`
+                                    : '')
+                            : undefined,
                     });
                     await artistService.saveArtist(populatedArtist);
                 } else {

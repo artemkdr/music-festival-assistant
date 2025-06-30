@@ -20,9 +20,10 @@ export interface IArtistService {
     searchArtistsByName(name: string): Promise<Artist[]>;
     saveArtist(artist: Artist): Promise<void>;
     createArtist(artistData: CreateArtistData): Promise<Artist>;
-    populateArtistDetails(
-        id: string,
+    crawlArtistDetails(
+        id?: string,
         data?: {
+            name?: string;
             context?: string | undefined;
             spotifyId?: string | undefined;
         }
@@ -53,29 +54,6 @@ export class ArtistService implements IArtistService {
         return this.repository.searchArtistsByName(name);
     }
 
-    async populateArtistDetails(
-        id: string,
-        data?: {
-            context?: string | undefined;
-            spotifyId?: string | undefined;
-            url?: string | undefined;
-        }
-    ): Promise<Artist> {
-        this.logger.info(`Enriching artist with ID: ${id}`);
-        const artist = await this.repository.getArtistById(id);
-        if (!artist) {
-            throw new Error(`Artist with ID ${id} not found`);
-        }
-        const enrichedArtist = await this.crawler.crawlArtistByName(artist.name, {
-            spotifyId: data?.spotifyId,
-            context: data?.context,
-            url: data?.url,
-        });
-        enrichedArtist.name = artist.name; // Ensure we keep the original name
-        enrichedArtist.id = artist.id; // Ensure we keep the original ID
-        return enrichedArtist;
-    }
-
     async saveArtist(artist: Artist): Promise<void> {
         this.logger.info(`Saving artist: ${artist.name}`);
         if (!artist.id) {
@@ -94,15 +72,59 @@ export class ArtistService implements IArtistService {
         this.logger.info(`Creating new artist: ${data.name}`);
         const newArtist = await this.crawler.crawlArtistByName(data.name, {
             spotifyId: data.mappingIds?.spotify,
-            context: data.festivalName,
-            url: data.festivalUrl
-                ? `https://www.google.com/search?q=${encodeURIComponent(data.name + ' site:' + data.festivalUrl)}`
-                : data.festivalName
-                  ? `https://www.google.com/search?q=${encodeURIComponent(data.name + ' ' + data.festivalName)}`
-                  : undefined,
+            context:
+                data.festivalName +
+                '\n' +
+                (data.festivalUrl
+                    ? `Additinal info:\nhttps://www.google.com/search?q=${encodeURIComponent(data.name + ' site:' + data.festivalUrl)}`
+                    : data.festivalName
+                      ? `Additinal info:\nhttps://www.google.com/search?q=${encodeURIComponent(data.name + ' ' + data.festivalName)}`
+                      : ''),
         });
         newArtist.id = generateArtistId();
         return this.repository.saveArtist(newArtist);
+    }
+
+    /**
+     * Fetches artist details using crawler service.
+     * It could be an existing artist or an abstract one.
+     * Pass 'id' to fetch existing artist details.
+     * If 'id' is not provided, it will use the 'name' from 'data' to search for the artist.
+     * @param id
+     * @param data
+     * @returns artist with enriched data
+     */
+    async crawlArtistDetails(
+        id?: string,
+        data?: {
+            name?: string;
+            context?: string | undefined;
+            spotifyId?: string | undefined;
+        }
+    ): Promise<Artist> {
+        let artistName = data?.name;
+        // if id is provided, we should fetch the artist to get the artist name
+        if (!!id) {
+            this.logger.info(`Enriching artist with ID: ${id}`);
+            const artist = await this.repository.getArtistById(id);
+            if (!artist) {
+                throw new Error(`Artist with ID ${id} not found`);
+            }
+            artistName = artist.name;
+        }
+        if (!artistName) {
+            throw new Error('Artist name is required to crawl details');
+        }
+        const enrichedArtist = await this.crawler.crawlArtistByName(artistName, {
+            spotifyId: data?.spotifyId,
+            context: data?.context,
+        });
+        enrichedArtist.name = artistName; // Ensure we keep the original name
+        // if id is provided, we should keep it
+        if (id) {
+            enrichedArtist.id = id;
+        }
+        return enrichedArtist;
     }
 
     async deleteArtist(id: string): Promise<void> {

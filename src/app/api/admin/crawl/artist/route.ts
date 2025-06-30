@@ -39,7 +39,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
             );
         }
 
-        const result = await artistService.populateArtistDetails(validated.id, {
+        const result = await artistService.crawlArtistDetails(validated.id, {
             context: validated.context,
             spotifyId: validated.spotifyId,
         });

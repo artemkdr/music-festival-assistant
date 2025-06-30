@@ -69,8 +69,47 @@ export interface IArtistCrawlerService {
         name: string,
         data?: {
             spotifyId?: string | undefined;
-            context?: string | undefined; // Optional context for the artist (e.g., festival name or country)
-            url?: string | undefined; // Optional URL for additional context (e.g. google search or festival page)
+            context?: string | undefined; // Optional context for the artist (e.g., festival name or country or website)
         }
     ): Promise<Artist>;
+}
+
+/**
+ * Search result from web search
+ */
+export interface SearchResult {
+    title: string;
+    url: string;
+    snippet: string;
+    extractedAt: string;
+}
+
+/**
+ * Search service configuration
+ */
+export interface SearchConfig {
+    timeout: number; // Request timeout in ms
+    userAgent: string;
+    headless: boolean; // Whether to run browser in headless mode
+}
+
+/**
+ * Web search service interface
+ */
+export interface ISearchService {
+    /**
+     * Search for a query and return the first result
+     * @param query Search query string
+     * @returns Promise resolving to the first search result
+     * @throws Error if no results found or search fails
+     */
+    searchFirst(query: string): Promise<SearchResult>;
+
+    /**
+     * Search for a query and return multiple results
+     * @param query Search query string
+     * @param limit Maximum number of results to return (default: 10)
+     * @returns Promise resolving to array of search results
+     */
+    search(query: string, limit?: number): Promise<SearchResult[]>;
 }

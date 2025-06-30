@@ -13,13 +13,14 @@ import { useCallback, useEffect, useState } from 'react';
 
 interface ArtistLinkingProps {
     festivalId: string;
+    festivalUrl?: string | undefined; // Optional URL for linking to Google search
     actId: string;
     actName: string;
     onSuccess: () => void;
     onCancel: () => void;
 }
 
-export function ArtistLinking({ festivalId, actId, actName, onSuccess, onCancel }: ArtistLinkingProps) {
+export function ArtistLinking({ festivalId, festivalUrl, actId, actName, onSuccess, onCancel }: ArtistLinkingProps) {
     const [searchQuery, setSearchQuery] = useState(actName);
     const [dbArtists, setDbArtists] = useState<Artist[]>([]);
     const [spotifyArtists, setSpotifyArtists] = useState<SpotifyArtist[]>([]);
@@ -141,6 +142,15 @@ export function ArtistLinking({ festivalId, actId, actName, onSuccess, onCancel 
                         </button>
                     </div>
                 </div>
+
+                {/* link to google search */}
+                {searchPerformed && (
+                    <div className="text-sm text-gray-500 mt-2">
+                        <Link href={`https://www.google.com/search?q=${encodeURIComponent(searchQuery + ' site:' + festivalUrl)}`} target="_blank" className="link-primary">
+                            Search on Google
+                        </Link>
+                    </div>
+                )}
 
                 {/* Search Results */}
                 {searchPerformed && (

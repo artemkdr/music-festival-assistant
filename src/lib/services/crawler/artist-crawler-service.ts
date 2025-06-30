@@ -24,7 +24,6 @@ export class ArtistCrawlerService implements IArtistCrawlerService {
         data?: {
             spotifyId?: string | undefined;
             context?: string | undefined;
-            url?: string | undefined; // Optional URL for additional context
         }
     ): Promise<Artist> {
         let spotifyArtist: SpotifyArtist | null = null;
@@ -39,7 +38,6 @@ export class ArtistCrawlerService implements IArtistCrawlerService {
                 `Name: ${spotifyArtist?.name || name}`,
                 `Spotify id: ${spotifyArtist?.id || ''}`,
                 ...(data?.context ? [`Context: ${data?.context}`] : []),
-                ...(data?.url ? [`Context: ${data?.url}`] : []),
             ]);
             // take in priority the Spotify data if available
             if (spotifyArtist) {

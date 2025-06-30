@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import { AuthProvider } from '@/lib/contexts/auth-context';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -48,7 +48,9 @@ export default function RootLayout({ children }: { children: ReactNode }): React
                             </div>
                         </header>
 
-                        <main className="flex-1">{children}</main>
+                        <main className="flex-1">
+                            <Suspense>{children}</Suspense>
+                        </main>
 
                         <footer className="bg-white border-t">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

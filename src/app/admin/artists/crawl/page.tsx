@@ -4,9 +4,9 @@
  */
 'use client';
 
+import { artistsApi } from '@/app/lib/api';
 import { AdminLayout } from '@/components/admin/admin-layout';
 import { ProtectedRoute } from '@/components/protected-route';
-import { artistsApi } from '@/app/lib/api';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
