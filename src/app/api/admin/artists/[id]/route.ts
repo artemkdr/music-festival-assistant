@@ -4,21 +4,33 @@
  * PUT /api/admin/artists/[id] - Update artist by ID
  */
 import { DIContainer } from '@/lib/di-container';
+import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { UpdateArtistSchema } from '@/lib/schemas';
 import { Artist } from '@/lib/schemas';
+import { User } from '@/lib/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
 interface RouteParams {
-    params: { id: string };
+    params: Promise<{ [key: string]: string }>;
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams): Promise<Response> {
+export const GET = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
     // Apply admin authentication manually since requireAdmin doesn't support route params properly
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const artistService = container.getArtistService();
-    const { id } = await params;
+    const { id } = await context.params;
+
+    if (!id) {
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Missing artist ID in dynamic route parameters',
+            },
+            { status: 400 }
+        );
+    }
 
     try {
         logger.info('Admin artist detail request received', { artistId: id });
@@ -50,13 +62,23 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
             { status: 500 }
         );
     }
-}
+});
 
-export async function PUT(request: NextRequest, { params }: RouteParams): Promise<Response> {
+export const PUT = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const artistService = container.getArtistService();
-    const { id } = await params;
+    const { id } = await context.params;
+
+    if (!id) {
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Missing artist ID in dynamic route parameters',
+            },
+            { status: 400 }
+        );
+    }
 
     try {
         logger.info('Admin artist update request received', { artistId: id });
@@ -116,13 +138,23 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
             { status: 500 }
         );
     }
-}
+});
 
-export async function DELETE(request: NextRequest, { params }: RouteParams): Promise<Response> {
+export const DELETE = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const artistService = container.getArtistService();
-    const { id } = await params;
+    const { id } = await context.params;
+
+    if (!id) {
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Missing artist ID in dynamic route parameters',
+            },
+            { status: 400 }
+        );
+    }
 
     try {
         logger.info('Admin artist delete request received', { artistId: id });
@@ -156,4 +188,4 @@ export async function DELETE(request: NextRequest, { params }: RouteParams): Pro
             { status: 500 }
         );
     }
-}
+});

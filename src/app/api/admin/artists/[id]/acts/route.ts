@@ -3,21 +3,33 @@
  * GET /api/admin/artists/[id]/acts - Get festivals where this artist performs
  */
 import { DIContainer } from '@/lib/di-container';
+import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { FestivalAct } from '@/lib/schemas';
+import { User } from '@/lib/services/auth';
 import { getActsByArtistName, isFestivalFinished } from '@/lib/utils/festival-util';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
-    params: { id: string };
+    params: Promise<{ [key: string]: string }>;
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams): Promise<Response> {
+export const GET = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const artistService = container.getArtistService();
     const festivalService = container.getFestivalService();
 
-    const { id } = await params;
+    const id = (await context.params).id;
+
+    if (!id) {
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Missing artist ID in dynamic route parameters',
+            },
+            { status: 400 }
+        );
+    }
 
     try {
         logger.info('Artist acts request received', { artistId: id });
@@ -61,4 +73,4 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
             { status: 500 }
         );
     }
-}
+});

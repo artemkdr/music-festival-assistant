@@ -26,11 +26,11 @@ const LinkActRequestSchema = z.object({
 });
 
 interface RouteParams {
-    params?: Promise<{ [key: string]: string }>;
+    params: Promise<{ [key: string]: string }>;
 }
 
 export const POST = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
-    const id = (await context.params)?.id;
+    const id = (await context.params).id;
     const container = DIContainer.getInstance();
     const festivalService = container.getFestivalService();
     const artistService = container.getArtistService();
@@ -40,7 +40,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         return NextResponse.json(
             {
                 status: 'error',
-                message: 'Missing festival ID in request parameters',
+                message: 'Missing festival ID in dynamic route parameters',
             },
             { status: 400 }
         );

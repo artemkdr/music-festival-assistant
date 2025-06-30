@@ -4,20 +4,32 @@
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
 import { DIContainer } from '@/lib/di-container';
+import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import { Festival, UpdateFestivalSchema } from '@/lib/schemas';
+import { User } from '@/lib/services/auth';
 import { generateFestivalId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
 interface RouteParams {
-    params: Promise<{ id: string }>;
+    params: Promise<{ [key: string]: string }>;
 }
 
-export async function GET(request: NextRequest, context: RouteParams): Promise<Response> {
+export const GET = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
     const { id } = await context.params;
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const festivalService = container.getFestivalService();
+
+    if (!id) {
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Missing festival ID in dynamic route parameters',
+            },
+            { status: 400 }
+        );
+    }
 
     try {
         logger.info('Admin festival detail request received', { festivalId: id });
@@ -95,13 +107,23 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
             { status: 500 }
         );
     }
-}
+});
 
-export async function PUT(request: NextRequest, context: RouteParams): Promise<Response> {
+export const PUT = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
     const { id } = await context.params;
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const festivalService = container.getFestivalService();
+
+    if (!id) {
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Missing festival ID in dynamic route parameters',
+            },
+            { status: 400 }
+        );
+    }
 
     try {
         logger.info('Admin festival update request received', { festivalId: id });
@@ -158,4 +180,4 @@ export async function PUT(request: NextRequest, context: RouteParams): Promise<R
             { status: 500 }
         );
     }
-}
+});

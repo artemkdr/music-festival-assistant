@@ -24,14 +24,14 @@ export function requireAuth(
         request: NextRequest,
         user: User,
         context: {
-            params?: Promise<{ [key: string]: string }>;
+            params: Promise<{ [key: string]: string }>;
         }
     ) => Promise<Response>
 ) {
     return async (
         request: NextRequest,
         context: {
-            params?: Promise<{ [key: string]: string }>;
+            params: Promise<{ [key: string]: string }>;
         }
     ): Promise<Response> => {
         const user = await getCurrentUser(request);
@@ -61,7 +61,7 @@ export function requireAdmin(
         request: NextRequest,
         user: User,
         context: {
-            params?: Promise<{ [key: string]: string }>;
+            params: Promise<{ [key: string]: string }>;
         }
     ) => Promise<Response>
 ) {
@@ -70,7 +70,7 @@ export function requireAdmin(
             request: NextRequest,
             user: User,
             context: {
-                params?: Promise<{ [key: string]: string }>;
+                params: Promise<{ [key: string]: string }>;
             }
         ): Promise<Response> => {
             if (user.role !== 'admin') {

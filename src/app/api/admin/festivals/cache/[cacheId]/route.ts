@@ -7,31 +7,31 @@ import { requireAdmin } from '@/lib/middleware/auth-middleware';
 import type { User } from '@/lib/services/auth/interfaces';
 import { NextRequest, NextResponse } from 'next/server';
 
+interface RouteParams {
+    params: Promise<{ [key: string]: string }>;
+}
+
 /**
  * GET /api/admin/festivals/cache/[cacheId]
  * Retrieve cached festival data by cache ID (Admin only)
  */
-export const GET = requireAdmin(async (request: NextRequest, user: User): Promise<Response> => {
+export const GET = requireAdmin(async (request: NextRequest, user: User, context: RouteParams): Promise<Response> => {
+    const { cacheId } = await context.params;
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
     const festivalService = container.getFestivalService();
 
+    if (!cacheId) {
+        return NextResponse.json(
+            {
+                status: 'error',
+                message: 'Cache ID is required in dynamic route parameters',
+            },
+            { status: 400 }
+        );
+    }
+
     try {
-        // Extract cacheId from URL pathname
-        const url = new URL(request.url);
-        const pathSegments = url.pathname.split('/');
-        const cacheId = pathSegments[pathSegments.length - 1];
-
-        if (!cacheId || cacheId === 'cache') {
-            return NextResponse.json(
-                {
-                    status: 'error',
-                    message: 'Cache ID is required',
-                },
-                { status: 400 }
-            );
-        }
-
         logger.info('Admin cached festival request received', {
             userId: user.id,
             userEmail: user.email,
