@@ -72,6 +72,7 @@ export abstract class BaseJsonRepository {
         await this.ensureDataDir();
         const filePath = path.join(this.dataDir, filename);
         const jsonData = JSON.stringify(data, null, 2);
+        this.jsonCache.set(filename, data);
         await fs.writeFile(filePath, jsonData, 'utf-8');
     }
 
