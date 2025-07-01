@@ -11,6 +11,7 @@ import { Festival } from '@/lib/schemas';
 import { getFestivalDates } from '@/lib/utils/festival-util';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { MdFestival } from 'react-icons/md';
 
 export default function FestivalsPage() {
     const [festivals, setFestivals] = useState<Festival[]>([]);
@@ -53,7 +54,7 @@ export default function FestivalsPage() {
                         </div>
                         <div className="flex space-x-3">
                             <Link href="/admin/festivals/crawl" className="btn-primary">
-                                🎪 Crawl New Festival
+                                <MdFestival /> Crawl New Festival
                             </Link>
                         </div>
                     </div>
@@ -90,7 +91,7 @@ export default function FestivalsPage() {
                                         <div className="px-4 py-5 sm:p-6">
                                             <div className="flex items-center justify-between mb-4">
                                                 <h3 className="text-lg font-medium text-gray-900 truncate">{festival.name}</h3>
-                                                <span className="text-2xl">🎪</span>
+                                                <span className="text-2xl"><MdFestival /></span>
                                             </div>
 
                                             <div className="space-y-2 text-sm text-gray-600 mb-4">
@@ -122,7 +123,7 @@ export default function FestivalsPage() {
                     {/* Empty State */}
                     {!isLoading && !error && festivals.length === 0 && (
                         <div className="text-center py-12">
-                            <span className="text-6xl mb-4 block">🎪</span>
+                            <span className="text-6xl mb-4 block"><MdFestival /></span>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No festivals found</h3>
                             <p className="text-gray-600 mb-6">Get started by crawling your first festival from a website URL.</p>
                             <Link href="/admin/festivals/crawl" className="btn-primary">

@@ -2,7 +2,8 @@
 
 import { discoverApi, FestivalDiscoveryResponse } from '@/app/lib/api/discover-api';
 import { FestivalDiscoveryForm } from '@/components/festival-discovery-form';
-import { LoadingSpinner } from '@/components/loading-spinner';
+import { RecommendationsLoadingSpinner } from '@/components/recommendations-loading-spinner';
+import { Logo } from '@/components/logo';
 import { RecommendationsList } from '@/components/recommendations-list';
 import { UserPreferences } from '@/lib/schemas';
 import type { ReactElement } from 'react';
@@ -63,9 +64,9 @@ export default function HomePage(): ReactElement {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Hero Section */}
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">Discover Your Next Favorite Artist</h1>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <div className="text-center p-4 flex flex-col gap-2">
+                <h1 className="text-2xl font-bold text-gray-900">Discover Your Next Favorite Artist</h1>
+                <p className="text-base text-gray-600 max-w-3xl mx-auto">
                     Choose from our collection of festivals and get personalized artist recommendations based on your music preferences. Never miss out on discovering amazing music again.
                 </p>
             </div>
@@ -93,7 +94,7 @@ export default function HomePage(): ReactElement {
             {/* Loading State */}
             {isLoading && (
                 <div className="flex justify-center py-12">
-                    <LoadingSpinner />
+                    <RecommendationsLoadingSpinner />
                 </div>
             )}
 
@@ -107,7 +108,9 @@ export default function HomePage(): ReactElement {
             {/* Empty State */}
             {!discoveryResponse && !isLoading && !error && (
                 <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🎵</div>
+                    <div className="text-6xl mb-4">
+                        <Logo className="w-16 h-16 mx-auto" size={40} />
+                    </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to Discover Amazing Music?</h3>
                     <p className="text-gray-600">Select a festival above to get started with personalized recommendations.</p>
                 </div>

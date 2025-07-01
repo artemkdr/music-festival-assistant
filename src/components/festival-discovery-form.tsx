@@ -3,8 +3,11 @@
 import { discoverApi, FestivalInfo } from '@/app/lib/api/discover-api';
 import { GenresGrid } from '@/components/genres-grid';
 import { UserPreferences } from '@/lib/schemas';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
+import { MdFestival } from 'react-icons/md';
+import { TbExternalLink } from 'react-icons/tb';
 
 interface FestivalDiscoveryFormProps {
     onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;
@@ -217,10 +220,24 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                     {selectedFestival && (
                         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
                             <div className="flex items-start">
-                                <span className="text-blue-400 mr-2">🎪</span>
-                                <div>
-                                    <div className="font-medium text-blue-900">{selectedFestival.name}</div>
-                                    <div className="text-sm text-blue-700">{selectedFestival.location}</div>
+                                <span className="text-blue-400 mt-1 mr-2"><MdFestival /></span>
+                                <div className="flex flex-col gap-0.5">
+                                    <div className="font-bold text-primary flex flex-wrap items-center gap-2">
+                                        {selectedFestival.name}
+                                        <Link
+                                            href={`/festival/${selectedFestival.id}`}
+                                            className="link-primary"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            >
+                                            <TbExternalLink />   
+                                        </Link>
+                                    </div>
+                                    <div className="text-sm text-primary">{selectedFestival.location}</div>
+                                    <div className="text-xs text-primary/80">
+                                        {selectedFestival.startDate} - {selectedFestival.endDate},
+                                        {` ${selectedFestival.artistsCount}+ artists`}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -320,7 +337,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
                 {/* Submit Button */}
                 <div className="flex justify-center">
-                    <button type="submit" disabled={isLoading} className="btn-primary w-full md:w-auto px-6 py-4">
+                    <button type="submit" disabled={isLoading} className="btn-primary bg-magic w-full md:w-auto px-6 py-4">
                         {isLoading ? (
                             <span className="flex items-center justify-center">
                                 <span className="animate-spin mr-2">⏳</span>

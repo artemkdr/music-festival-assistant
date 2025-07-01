@@ -7,6 +7,8 @@
 import { useAuth } from '@/lib/contexts/auth-context';
 import { usePathname } from 'next/navigation';
 import { type ReactNode } from 'react';
+import { MdFestival } from 'react-icons/md';
+import { TbDashboard, TbMoodSing } from 'react-icons/tb';
 
 interface AdminLayoutProps {
     children: ReactNode;
@@ -17,9 +19,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     const pathname = usePathname();
 
     const navigation = [
-        { name: 'Dashboard', href: '/admin', icon: '📊' },
-        { name: 'Festivals', href: '/admin/festivals', icon: '🎪' },
-        { name: 'Artists', href: '/admin/artists', icon: '🎤' },
+        { name: 'Dashboard', href: '/admin', icon: <TbDashboard /> },
+        { name: 'Festivals', href: '/admin/festivals', icon: <MdFestival /> },
+        { name: 'Artists', href: '/admin/artists', icon: <TbMoodSing /> },
     ];
 
     const isActive = (href: string) => {
@@ -39,10 +41,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                         <div className="flex">
                             {' '}
                             <div className="flex-shrink-0 flex items-center">
-                                <a href="/admin" className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                                        <span className="text-white font-bold text-sm">🎵</span>
-                                    </div>
+                                <a href="/admin" className="flex items-center space-x-3">                                    
                                     <span className="text-xl font-bold text-gray-900">Admin Panel</span>
                                 </a>
                             </div>

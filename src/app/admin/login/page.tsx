@@ -4,6 +4,7 @@
  */
 'use client';
 
+import { Logo } from '@/components/logo';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { useEffect, useState } from 'react';
 
@@ -43,14 +44,12 @@ export default function AdminLoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
             <div className="max-w-md w-full space-y-8 p-8">
-                <div className="bg-white rounded-lg shadow-lg p-8">
+                <div className="bg-white rounded-lg shadow-lg p-8 gap-4 flex flex-col">
                     {/* Header */}
-                    <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                            <span className="text-white font-bold text-xl">🎵</span>
-                        </div>
+                    <div className="text-center flex flex-col items-center gap-1">
+                        <Logo className="w-12 h-12 mx-auto" size={26} />
                         <h2 className="text-3xl font-bold text-gray-900">Admin Login</h2>
-                        <p className="mt-2 text-gray-600">Sign in to access the admin dashboard</p>
+                        <p className="text-gray-600">Sign in to access the admin dashboard</p>
                     </div>
 
                     {/* Error Display */}
@@ -107,7 +106,7 @@ export default function AdminLoginPage() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-400 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? (
                                     <>

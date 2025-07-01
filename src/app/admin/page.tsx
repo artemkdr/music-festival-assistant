@@ -9,6 +9,10 @@ import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { statsApi } from '@/app/lib/api/stats-api';
 import { useEffect, useState } from 'react';
+import { FaSpotify, FaEdit } from "react-icons/fa";
+import { MdFestival } from "react-icons/md";
+import { GiLoveSong } from "react-icons/gi";
+import { TbMoodSing } from "react-icons/tb";
 
 export default function AdminDashboardPage() {
     const { user } = useAuth();
@@ -48,37 +52,37 @@ export default function AdminDashboardPage() {
         {
             title: 'Crawl Festival',
             description: 'Add a new festival by URL',
-            icon: '🎪',
+            icon: <MdFestival />,
             href: '/admin/festivals/crawl',
             color: 'bg-blue-500 hover:bg-blue-600',
         },
         {
             title: 'Add Artists',
             description: 'Crawl artist data from Spotify',
-            icon: '🎤',
+            icon: <FaSpotify />,
             href: '/admin/artists/crawl',
             color: 'bg-green-500 hover:bg-green-600',
         },
         {
             title: 'Manage Festivals',
             description: 'View and edit festival data',
-            icon: '📝',
+            icon: <FaEdit />,
             href: '/admin/festivals',
             color: 'bg-purple-500 hover:bg-purple-600',
         },
         {
             title: 'Manage Artists',
             description: 'View and edit artist data',
-            icon: '👤',
+            icon: <TbMoodSing />,
             href: '/admin/artists',
             color: 'bg-indigo-500 hover:bg-indigo-600',
         },
     ];
 
     const statsDisplay = [
-        { name: 'Festivals', value: stats.festivals.toString(), icon: '🎪', color: 'text-blue-600' },
-        { name: 'Artists', value: stats.artists.toString(), icon: '🎤', color: 'text-green-600' },
-        { name: 'Live acts', value: stats.acts.toString(), icon: '🎭', color: 'text-purple-600' },
+        { name: 'Festivals', value: stats.festivals.toString(), icon: <MdFestival />, color: 'text-blue-600' },
+        { name: 'Artists', value: stats.artists.toString(), icon: <TbMoodSing />, color: 'text-green-600' },
+        { name: 'Live acts', value: stats.acts.toString(), icon: <GiLoveSong />, color: 'text-purple-600' },
     ];
 
     return (

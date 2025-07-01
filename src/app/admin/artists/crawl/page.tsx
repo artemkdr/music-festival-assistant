@@ -10,6 +10,7 @@ import { ProtectedRoute } from '@/components/protected-route';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
+import { MdFestival } from 'react-icons/md';
 
 interface CrawlResult {
     name: string;
@@ -149,7 +150,7 @@ export default function ArtistsCrawlPage() {
                                             className="h-4 w-4 "
                                         />
                                         <div className="ml-3">
-                                            <div className="text-sm font-medium text-gray-900">🎪 Crawl from Festival Lineup</div>
+                                            <div className="text-sm font-medium text-gray-900"><MdFestival /> Crawl from Festival Lineup</div>
                                             <div className="text-sm text-gray-500">Crawl all artists from an existing festival&apos;s lineup</div>
                                         </div>
                                     </label>

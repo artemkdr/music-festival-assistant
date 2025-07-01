@@ -90,8 +90,11 @@
 }
 
 @layer components {
+  .bg-magic {
+    @apply bg-gradient-to-br from-purple-600 to-primary hover:from-primary hover:to-purple-600;    
+  }
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;    
   }
   
   .btn-secondary {
