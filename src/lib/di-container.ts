@@ -14,9 +14,8 @@ import { AuthService } from '@/lib/services/auth/auth-service';
 import { DummyAuthProvider } from '@/lib/services/auth/dummy-auth-provider';
 import type { IAuthService } from '@/lib/services/auth/interfaces';
 import { ArtistCrawlerService } from '@/lib/services/crawler/artist-crawler-service';
-import { DuckDuckGoSearchService } from '@/lib/services/crawler/duckduckgo-search';
 import { FestivalCrawlerService } from '@/lib/services/crawler/festival-crawler-service';
-import type { IArtistCrawlerService, IFestivalCrawlerService, ISearchService } from '@/lib/services/crawler/interfaces';
+import type { IArtistCrawlerService, IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
 import { FestivalService, IFestivalService } from '@/lib/services/festival-service';
 import type { IRecommendationService } from '@/lib/services/interfaces';
 import { RecommendationService } from '@/lib/services/recommendation-service';
@@ -43,7 +42,6 @@ export class DIContainer {
     private _recommendationService: IRecommendationService | null = null;
     private _artistCrawlerService: ArtistCrawlerService | null = null;
     private _authService: IAuthService | null = null;
-    private _searchService: ISearchService | null = null;
 
     /**
      * Get singleton instance
@@ -76,18 +74,6 @@ export class DIContainer {
             this._logger.info('Logger initialized');
         }
         return this._logger;
-    }
-
-    /**
-     * Get search service instance
-     */
-    public getSearchService(): ISearchService {
-        if (!this._searchService) {
-            const logger = this.getLogger();
-            this._searchService = new DuckDuckGoSearchService(logger, this.getRetryHandler());
-            logger.info('Search service initialized');
-        }
-        return this._searchService;
     }
 
     /**
