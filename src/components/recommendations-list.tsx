@@ -125,8 +125,10 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             {/* Recommendations */}
             <div className="grid gap-6">
                 {recommendations.map(recommendation => (
-                    <div key={`${recommendation.act.id}-${recommendation.artist.id}`} 
-                        className="bg-gradient-to-br from-violet-50 to-white border-1 border-violet-100 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div
+                        key={`${recommendation.act.id}-${recommendation.artist.id}`}
+                        className="bg-gradient-to-br from-violet-50 to-white border-1 border-violet-100 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                    >
                         <div className="p-6 flex flex-col gap-4">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1 flex flex-col gap-2">
@@ -190,19 +192,19 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                             <FaSpotify />
                                             <span>Spotify</span>
                                         </Link>
-                                    )}                                    
+                                    )}
                                     {/* Link to youtube search for live from the artist this year */}
-                                    <Link href={`https://www.youtube.com/results?search_query=${encodeURIComponent(recommendation.artist.name)} live ${new Date().getFullYear()}`} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        className="btn-destructive flex items-center gap-2">
-                                        <FaYoutube /> 
+                                    <Link
+                                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(recommendation.artist.name)} live ${new Date().getFullYear()}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn-destructive flex items-center gap-2"
+                                    >
+                                        <FaYoutube />
                                         <span>YouTube</span>
                                     </Link>
-                                    
-                                    <Link href={getGoogleArtistUrl(recommendation.artist)} 
-                                        target="_blank" rel="noopener noreferrer" 
-                                        className="btn-neutral flex items-center gap-2">
+
+                                    <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="btn-neutral flex items-center gap-2">
                                         <FaGoogle />
                                         <span>Web Search</span>
                                     </Link>

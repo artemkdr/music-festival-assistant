@@ -9,10 +9,10 @@ import { ProtectedRoute } from '@/components/protected-route';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { statsApi } from '@/app/lib/api/stats-api';
 import { useEffect, useState } from 'react';
-import { FaSpotify, FaEdit } from "react-icons/fa";
-import { MdFestival } from "react-icons/md";
-import { GiLoveSong } from "react-icons/gi";
-import { TbMoodSing } from "react-icons/tb";
+import { FaSpotify, FaEdit } from 'react-icons/fa';
+import { MdFestival } from 'react-icons/md';
+import { GiLoveSong } from 'react-icons/gi';
+import { TbMoodSing } from 'react-icons/tb';
 
 export default function AdminDashboardPage() {
     const { user } = useAuth();

@@ -1,11 +1,9 @@
-import './globals.css';
+import { Logo } from '@/components/logo';
+import { AuthProvider } from '@/lib/contexts/auth-context';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Suspense, type ReactNode } from 'react';
-import { AuthProvider } from '@/lib/contexts/auth-context';
-import Link from 'next/link';
-import { RiMusicAiFill } from 'react-icons/ri';
-import { Logo } from '@/components/logo';
+import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -30,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }): React
                         <header className="bg-white shadow-sm border-b">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="flex justify-between items-center py-4">
-                                    <div className="flex items-center space-x-3 text-purple-600">                                        
+                                    <div className="flex items-center space-x-3 text-purple-600">
                                         <Logo size={20} />
                                         <h1 className="text-xl font-bold text-gray-900">Festival Assistant</h1>
                                     </div>

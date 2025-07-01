@@ -190,7 +190,9 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                             {acts.map((act, index) => (
                                                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                                     <div className="flex items-center space-x-4">
-                                                        <span className="text-2xl"><MdFestival /></span>
+                                                        <span className="text-2xl">
+                                                            <MdFestival />
+                                                        </span>
                                                         <div>
                                                             <a href={`/admin/festivals/${act.festivalId}`} className="text-blue-600 hover:text-blue-800 font-medium">
                                                                 {act.festivalName}
@@ -210,7 +212,9 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                                         </div>
                                     ) : (
                                         <div className="text-center py-8">
-                                            <span className="text-4xl mb-4 block"><MdFestival /></span>
+                                            <span className="text-4xl mb-4 block">
+                                                <MdFestival />
+                                            </span>
                                             <h3 className="text-lg font-medium text-gray-900 mb-2">No festival live acts</h3>
                                             <p className="text-gray-600">This artist is not currently associated with any festivals.</p>
                                         </div>

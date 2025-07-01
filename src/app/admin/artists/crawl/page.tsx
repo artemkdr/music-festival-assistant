@@ -150,7 +150,9 @@ export default function ArtistsCrawlPage() {
                                             className="h-4 w-4 "
                                         />
                                         <div className="ml-3">
-                                            <div className="text-sm font-medium text-gray-900"><MdFestival /> Crawl from Festival Lineup</div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                <MdFestival /> Crawl from Festival Lineup
+                                            </div>
                                             <div className="text-sm text-gray-500">Crawl all artists from an existing festival&apos;s lineup</div>
                                         </div>
                                     </label>

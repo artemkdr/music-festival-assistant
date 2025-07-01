@@ -41,7 +41,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                         <div className="flex">
                             {' '}
                             <div className="flex-shrink-0 flex items-center">
-                                <a href="/admin" className="flex items-center space-x-3">                                    
+                                <a href="/admin" className="flex items-center space-x-3">
                                     <span className="text-xl font-bold text-gray-900">Admin Panel</span>
                                 </a>
                             </div>

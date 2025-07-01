@@ -4,6 +4,7 @@ import { discoverApi, FestivalInfo } from '@/app/lib/api/discover-api';
 import { GenresGrid } from '@/components/genres-grid';
 import { UserPreferences } from '@/lib/schemas';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { MdFestival } from 'react-icons/md';
@@ -35,6 +36,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [userNotes, setUserNotes] = useState('');
     const [recommendationsCount, setRecommendationsCount] = useState(5); // Default to 5 recommendations
+    const searchParams = useSearchParams();
 
     // Load festivals on component mount
     useEffect(() => {
@@ -48,6 +50,21 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                         return new Date(a.startDate).getTime() - new Date(b.startDate).getTime() || a.name.localeCompare(b.name);
                     });
                     setFestivals(sortedData);
+
+                    // check if festival id is in URL
+                    const festivalId = searchParams.get('festival');
+                    if (festivalId) {
+                        const festival = response.data.find(f => f.id === festivalId);
+                        if (festival) {
+                            setSelectedFestivalId(festivalId);
+                            setFestivalSearchTerm(festival.name);
+                            setShowFestivalDropdown(false);
+                        }
+                    } else {
+                        setSelectedFestivalId('');
+                        setFestivalSearchTerm('');
+                        setShowFestivalDropdown(false);
+                    }
                 }
             } catch (error) {
                 // TODO: use logger
@@ -57,7 +74,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
             }
         };
         loadFestivals();
-    }, []);
+    }, [searchParams]);
 
     // Load genres when a festival is selected
     useEffect(() => {
@@ -220,23 +237,19 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                     {selectedFestival && (
                         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
                             <div className="flex items-start">
-                                <span className="text-blue-400 mt-1 mr-2"><MdFestival /></span>
+                                <span className="text-blue-400 mt-1 mr-2">
+                                    <MdFestival />
+                                </span>
                                 <div className="flex flex-col gap-0.5">
                                     <div className="font-bold text-primary flex flex-wrap items-center gap-2">
                                         {selectedFestival.name}
-                                        <Link
-                                            href={`/festival/${selectedFestival.id}`}
-                                            className="link-primary"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            >
-                                            <TbExternalLink />   
+                                        <Link href={`/festival/${selectedFestival.id}`} className="link-primary" target="_blank" rel="noopener noreferrer" title="View festival lineup and details">
+                                            <TbExternalLink />
                                         </Link>
                                     </div>
                                     <div className="text-sm text-primary">{selectedFestival.location}</div>
                                     <div className="text-xs text-primary/80">
-                                        {selectedFestival.startDate} - {selectedFestival.endDate},
-                                        {` ${selectedFestival.artistsCount}+ artists`}
+                                        {selectedFestival.startDate} - {selectedFestival.endDate},{` ${selectedFestival.artistsCount}+ artists`}
                                     </div>
                                 </div>
                             </div>

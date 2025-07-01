@@ -14,6 +14,13 @@ class FestivalsApi {
         return this.client.request(`/admin/festivals/${id}`);
     }
 
+    /**
+     * Public: Get festival by ID (public endpoint, no admin required)
+     */
+    async getPublicFestival(id: string): Promise<ApiResponse<Festival>> {
+        return this.client.request(`/discover/festivals/${id}`);
+    }
+
     async updateFestival(id: string, festivalData: Partial<Festival>): Promise<ApiResponse<Festival>> {
         return this.client.request(`/admin/festivals/${id}`, {
             method: 'PUT',
