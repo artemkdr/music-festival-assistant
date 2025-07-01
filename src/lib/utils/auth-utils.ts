@@ -1,12 +1,15 @@
 /**
- * Authentication middleware for API routes
+ * Authentication utilities for API routes
+ * These are higher-order functions that wrap API route handlers
  */
 import { NextRequest } from 'next/server';
 import { DIContainer } from '@/lib/di-container';
 import type { User } from '@/lib/services/auth/interfaces';
 
 /**
- * Extract user from request
+ * Extract user from request using the auth service
+ * @param request - The Next.js request object
+ * @returns The authenticated user or null if not authenticated
  */
 export async function getCurrentUser(request: NextRequest): Promise<User | null> {
     const container = DIContainer.getInstance();
@@ -17,7 +20,9 @@ export async function getCurrentUser(request: NextRequest): Promise<User | null>
 }
 
 /**
- * Require authentication for a route handler
+ * Higher-order function that requires authentication for a route handler
+ * @param handler - The route handler that requires an authenticated user
+ * @returns A wrapped handler that checks authentication
  */
 export function requireAuth(
     handler: (
@@ -54,7 +59,9 @@ export function requireAuth(
 }
 
 /**
- * Require admin role for a route handler
+ * Higher-order function that requires admin role for a route handler
+ * @param handler - The route handler that requires admin access
+ * @returns A wrapped handler that checks authentication and admin role
  */
 export function requireAdmin(
     handler: (

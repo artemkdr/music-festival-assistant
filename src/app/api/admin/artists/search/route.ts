@@ -3,7 +3,7 @@
  * Returns up to 10 matching artists for linking with festival acts
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const GET = requireAdmin(async (request: NextRequest): Promise<Response> => {

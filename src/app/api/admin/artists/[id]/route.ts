@@ -4,7 +4,7 @@
  * PUT /api/admin/artists/[id] - Update artist by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { UpdateArtistSchema } from '@/lib/schemas';
 import { Artist } from '@/lib/schemas';
 import { User } from '@/lib/services/auth';

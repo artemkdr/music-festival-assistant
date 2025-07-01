@@ -3,7 +3,7 @@
  * GET /api/admin/festivals/cache/[cacheId] - Get cached festival data by cache ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import type { User } from '@/lib/services/auth/interfaces';
 import { NextRequest, NextResponse } from 'next/server';
 

@@ -3,7 +3,7 @@
  * GET /api/admin/artists - Get all artists
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { NextResponse } from 'next/server';
 
 export const GET = requireAdmin(async (): Promise<Response> => {

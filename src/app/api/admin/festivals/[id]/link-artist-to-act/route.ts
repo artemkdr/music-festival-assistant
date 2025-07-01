@@ -3,7 +3,7 @@
  * Handles both linking to existing artists and creating new artists from Spotify data
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { User } from '@/lib/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';

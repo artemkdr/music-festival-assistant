@@ -1,5 +1,5 @@
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { NextRequest } from 'next/server';
 
 export const GET = requireAdmin(async (request: NextRequest): Promise<Response> => {

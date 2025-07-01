@@ -2,7 +2,7 @@
  * Admin endpoint for crawling artist data
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 

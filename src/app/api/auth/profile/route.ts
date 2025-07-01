@@ -2,7 +2,7 @@
  * User profile API endpoint
  * GET /api/auth/profile - Get current user profile
  */
-import { requireAuth } from '@/lib/middleware/auth-middleware';
+import { requireAuth } from '@/lib/utils/auth-utils';
 import { User } from '@/lib/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 

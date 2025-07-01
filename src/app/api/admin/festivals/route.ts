@@ -4,7 +4,7 @@
  * POST /api/admin/festivals - Create/save a new festival
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { FestivalSchema } from '@/lib/schemas';
 import type { User } from '@/lib/services/auth/interfaces';
 import { toError } from '@/lib/utils/error-handler';

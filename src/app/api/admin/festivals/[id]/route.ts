@@ -4,7 +4,7 @@
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/middleware/auth-middleware';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { Festival, UpdateFestivalSchema } from '@/lib/schemas';
 import { User } from '@/lib/services/auth';
 import { generateFestivalId } from '@/lib/utils/id-generator';
