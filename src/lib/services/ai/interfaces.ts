@@ -42,6 +42,7 @@ export interface AIRequest {
     topP?: number; // Optional, for controlling diversity
     topK?: number; // Optional, for controlling diversity
     files?: AIFileInput[]; // Optional file inputs for multimodal AI
+    useStorageCache?: boolean; // Use local/remote cache for responses
 }
 
 /**

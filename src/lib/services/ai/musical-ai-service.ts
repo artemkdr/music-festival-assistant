@@ -181,8 +181,9 @@ Generate music recommendations based on the provided user preferences:
 
         // add the most important instructions to the end of the prompt
         aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
+        aiRequest.useStorageCache = true; // Use local/remote cache for responses
 
-        const result = await this.aiService.generateObject<z.infer<typeof RecommentationsAIResponseSchema>>({
+        const result = await this.aiService.generateStreamObject<z.infer<typeof RecommentationsAIResponseSchema>>({
             ...aiRequest,
             // remove score strict requirement for 0 to 1 range, AI can return any value
             schema: z.object({
@@ -209,6 +210,7 @@ Generate music recommendations based on the provided user preferences:
                 Schema: ${JSON.stringify(zodToJsonSchema(ParserFestivalSchema))}
                 Content: ${html}
             `,
+            useStorageCache: false,
         };
         const parserFunction = await this.aiService.generateCompletion(aiRequest);
         return this.stripMarkdownBackticks(parserFunction.content);

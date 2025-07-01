@@ -40,7 +40,11 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
             try {
                 const response = await discoverApi.getFestivals();
                 if (response.status === 'success' && response.data) {
-                    setFestivals(response.data as FestivalInfo[]);
+                    const sortedData = response.data.sort((a, b) => {
+                        // Sort by start date, then by name
+                        return new Date(a.startDate).getTime() - new Date(b.startDate).getTime() || a.name.localeCompare(b.name);
+                    });
+                    setFestivals(sortedData);
                 }
             } catch (error) {
                 // TODO: use logger
@@ -167,13 +171,13 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                                 }
                             }}
                             onFocus={() => setShowFestivalDropdown(true)}
-                            placeholder="Search for a festival..."
+                            placeholder="Select a festival..."
                             className={`input w-full ${errors.festival ? 'border-red-500' : ''}`}
                             disabled={isLoading || loadingFestivals}
                             autoComplete="off"
                         />
 
-                        <p className="mt-1 text-sm text-gray-500">Search and select from {festivals.length} festivals in our database</p>
+                        <p className="mt-1 text-sm text-gray-500">Select from {festivals.length} festivals</p>
 
                         {/* Loading indicator */}
                         {loadingFestivals && (

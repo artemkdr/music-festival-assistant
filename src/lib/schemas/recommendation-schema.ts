@@ -20,7 +20,7 @@ export const RecommendationSchema = z.object({
 export const RecommendationShortSchema = z.object({
     artistId: z.string().min(1),
     artistName: z.string().min(1).max(200),
-    score: z.number().min(0).max(1), // Confidence score
+    score: z.number().min(0).max(10), // Confidence score
     reasons: z.array(z.string()), // Why this artist is recommended
 });
 

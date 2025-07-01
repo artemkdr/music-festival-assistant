@@ -1,16 +1,18 @@
-import type { ILogger } from '@/lib/types/logger';
 import { AIProviderConfig, AIRequest, AIResponse, IAIService, SchemaAIRequest } from '@/lib/services/ai/interfaces';
+import type { ILogger } from '@/lib/types/logger';
 import { createVertex } from '@ai-sdk/google-vertex';
-import { openai } from '@ai-sdk/openai';
 import { groq } from '@ai-sdk/groq';
+import { openai } from '@ai-sdk/openai';
 import { LanguageModelV1 } from '@ai-sdk/provider';
 import { generateObject, generateText, streamObject } from 'ai';
+import { hash } from 'ohash';
 
 export class AIService implements IAIService {
     private readonly maxTokens: number;
     private readonly maxRetries: number = 3; // Default retry count
     private readonly temperature: number;
     private readonly model: LanguageModelV1;
+    private readonly cache = new Map<string, unknown>();
 
     constructor(
         private readonly config: AIProviderConfig,
@@ -45,10 +47,22 @@ export class AIService implements IAIService {
     }
 
     /**
+     * Generate a deterministic cache key for a given request
+     */
+    private static generateCacheKey(input: AIRequest): string {
+        return hash(input);
+    }
+
+    /**
      * Generate text completion using Vertex AI SDK
      */
     async generateCompletion(request: AIRequest): Promise<AIResponse> {
         try {
+            const cacheKey = AIService.generateCacheKey(request);
+            if (request.useStorageCache === true && this.cache.has(cacheKey)) {
+                this.logger.debug(`Cache hit for request ${cacheKey}`);
+                return this.cache.get(cacheKey) as AIResponse;
+            }
             const response = await generateText({
                 model: this.model,
                 messages: [
@@ -70,7 +84,7 @@ export class AIService implements IAIService {
                 temperature: this.temperature,
                 maxRetries: this.maxRetries,
             });
-            return {
+            const result: AIResponse = {
                 model: this.model.modelId,
                 content: response.text,
                 usage: {
@@ -79,6 +93,8 @@ export class AIService implements IAIService {
                     totalTokens: response.usage?.totalTokens || 0,
                 },
             };
+            this.cache.set(cacheKey, result);
+            return result;
         } catch (error) {
             this.logger.error('AI text generation failed', error instanceof Error ? error : new Error(String(error)));
             throw new Error(`AI text generation failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -90,6 +106,11 @@ export class AIService implements IAIService {
      */
     async generateObject<T>(request: SchemaAIRequest<T>): Promise<T> {
         try {
+            const cacheKey = AIService.generateCacheKey(request);
+            if (request.useStorageCache === true && this.cache.has(cacheKey)) {
+                this.logger.debug(`Cache hit for request ${cacheKey}`);
+                return this.cache.get(cacheKey) as T;
+            }
             const result = await generateObject<T>({
                 model: this.model,
                 messages: [
@@ -121,6 +142,9 @@ export class AIService implements IAIService {
                 temperature: this.temperature,
                 maxRetries: this.maxRetries,
             });
+            if (!!result.object) {
+                this.cache.set(cacheKey, result.object as T);
+            }
             return result.object as T;
         } catch (error) {
             this.logger.error('AI object generation failed', error instanceof Error ? error : new Error(String(error)));
@@ -133,6 +157,11 @@ export class AIService implements IAIService {
      */
     async generateStreamObject<T>(request: SchemaAIRequest<T>): Promise<T> {
         try {
+            const cacheKey = AIService.generateCacheKey(request);
+            if (request.useStorageCache === true && this.cache.has(cacheKey)) {
+                this.logger.info(`Cache hit for request ${cacheKey}`);
+                return this.cache.get(cacheKey) as T;
+            }
             const result = streamObject<T>({
                 model: this.model,
                 messages: [
@@ -170,7 +199,11 @@ export class AIService implements IAIService {
                 chunkCount++;
             }
 
-            return (await result.object) as T;
+            const finalResult = (await result.object) as T;
+            if (!!finalResult) {
+                this.cache.set(cacheKey, finalResult);
+            }
+            return finalResult;
         } catch (error) {
             this.logger.error('AI object generation failed', error instanceof Error ? error : new Error(String(error)));
             throw new Error(`AI object generation failed: ${error instanceof Error ? error.message : String(error)}`);

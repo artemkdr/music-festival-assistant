@@ -109,7 +109,7 @@ export default function HomePage(): ReactElement {
                 <div className="text-center py-12">
                     <div className="text-6xl mb-4">🎵</div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to Discover Amazing Music?</h3>
-                    <p className="text-gray-600">Enter a festival URL above to get started with personalized recommendations.</p>
+                    <p className="text-gray-600">Select a festival above to get started with personalized recommendations.</p>
                 </div>
             )}
         </div>

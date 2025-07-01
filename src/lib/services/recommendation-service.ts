@@ -37,7 +37,7 @@ export class RecommendationService implements IRecommendationService {
             const artistsMap: Record<string, Artist> = {};
             const artistInfos = await Promise.all(
                 festivalArtists.map(async artist => {
-                    const detailedArtist = await this.artistRepository.searchArtistByName(artist.name);
+                    const detailedArtist = artist.id ? await this.artistRepository.getArtistById(artist.id) : await this.artistRepository.searchArtistByName(artist.name);
                     if (detailedArtist) {
                         artistsMap[artist.name.toLowerCase()] = detailedArtist;
                     }
