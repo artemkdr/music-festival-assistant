@@ -2,6 +2,7 @@
  * Next.js Middleware - runs on Edge Runtime
  * Handles route-level authentication and authorization
  */
+import { DIContainer } from '@/lib/di-container';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -9,8 +10,8 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export default function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-
-    // @TODO migrate auth logic here
+    const logger = DIContainer.getInstance().getLogger();
+    logger.info(`Middleware processing request for: ${pathname}`);
 
     return NextResponse.next();
 }
@@ -18,7 +19,7 @@ export default function middleware(request: NextRequest) {
 /**
  * Configure which routes this middleware should run on
  */
-export const config = {    
+export const config = {
     matcher: [
         '/admin/:path*', // Match all admin routes
         '/api/:path*', // Match all API routes

@@ -24,8 +24,8 @@ const nextConfig = {
                     { key: 'Access-Control-Allow-Origin', value: 'https://festival.artem.work' },
                     { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
                     { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
-                    { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-                    { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" }
+                    { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+                    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
                 ],
             },
         ];
