@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-ts"
+  output = "../src/app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Artist {
+  id             String  @id @default(cuid())
+  name           String  @db.VarChar(500)
+  genre          Json?   // Array of genres
+  description    String? @db.Text
+  imageUrl       String? @map("image_url") @db.VarChar(1000)
+  mappingIds     Json?   @map("mapping_ids") // Object with external service IDs
+  streamingLinks Json?   @map("streaming_links") // Object with streaming platform links
+  socialLinks    Json?   @map("social_links") // Object with social media links
+  sources        Json?   // Array of source URLs
+  popularity     Json?   // Object with popularity metrics
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("artists")
+  @@index([name])
+  @@index([createdAt])
+}
+
+model Festival {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(500)
+  description String?  @db.Text
+  location    String?  @db.VarChar(500)
+  website     String?  @db.VarChar(1000)
+  imageUrl    String?  @map("image_url") @db.VarChar(1000)
+  lineup      Json     @default("[]") // Array of lineup acts
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("festivals")
+  @@index([name])
+  @@index([location])
+  @@index([website])
+  @@index([createdAt])
+}
