@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import { Suspense, type ReactNode } from 'react';
 import './globals.css';
 import Link from 'next/link';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }): React
     return (
         <html lang="en" className="h-full">
             <body className={`${inter.className} h-full antialiased`}>
+                <Analytics />
                 <AuthProvider>
                     <div className="min-h-full bg-gradient-to-br from-purple-50 to-blue-50">
                         <header className="bg-white shadow-sm border-b">
