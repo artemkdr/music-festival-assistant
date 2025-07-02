@@ -10,6 +10,7 @@ export const UserSchema = z.object({
     id: z.string(),
     email: z.string().email(),
     name: z.string(),
+    password: z.string().optional(),
     role: z.enum(['admin', 'user']).default('user'),
     preferences: z
         .object({

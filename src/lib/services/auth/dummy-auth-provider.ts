@@ -13,6 +13,7 @@ const DUMMY_USERS: User[] = [
     {
         id: 'admin-1',
         email: 'admin@music-festival.com',
+        password: process.env.ADMIN_PASSWORD,
         name: 'Admin User',
         role: 'admin',
         createdAt: new Date().toISOString(),
@@ -45,18 +46,14 @@ export class DummyAuthProvider implements IAuthProvider {
      * Login with any email/password (always succeeds in dummy mode)
      */
     async login(request: LoginRequest): Promise<AuthResult> {
-        this.logger.info('Dummy auth login attempt', { email: request.email }); // Find user or create a new one
-        let user = DUMMY_USERS.find(u => u.email === request.email);
-        if (!user) {
-            user = {
-                id: `user-${Date.now()}`,
-                email: request.email,
-                name: request.email.split('@')[0] || 'User',
-                role: 'user' as const,
-                createdAt: new Date().toISOString(),
-                lastLoginAt: new Date().toISOString(),
+        this.logger.info('Dummy auth login attempt', { email: request.email });
+        const user = DUMMY_USERS.find(u => u.email === request.email);
+        if (!user || user.password !== request.password) {
+            this.logger.warn('Dummy auth login failed - incorrect password', { email: request.email });
+            return {
+                success: false,
+                error: 'Invalid email or password',
             };
-            DUMMY_USERS.push(user);
         } else {
             user.lastLoginAt = new Date().toISOString();
         }

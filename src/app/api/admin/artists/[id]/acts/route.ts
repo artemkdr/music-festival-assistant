@@ -58,11 +58,11 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
                         acts.push(act);
                     }
                 }
-                for (const act of actsByName) {                    
+                for (const act of actsByName) {
                     if (!acts.some(existingAct => existingAct.id === act.id)) {
                         acts.push(act);
                     }
-                }                
+                }
             }
         }
 
