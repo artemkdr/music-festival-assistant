@@ -33,7 +33,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 }
 
                 this.logger.info('Artist found by ID', { id, name: artist.name });
-                return artist;
+                return artist as unknown as Artist;
             },
             'getArtistById',
             this.generateCacheKey('getArtistById', { id })
@@ -61,7 +61,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                     foundCount: artists.length,
                 });
 
-                return artists;
+                return artists as unknown as Artist[];
             },
             'getArtistsByGenres',
             this.generateCacheKey('getArtistsByGenres', { genres })
@@ -84,7 +84,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                     foundCount: artists.length,
                 });
 
-                return artists;
+                return artists as unknown as Artist[];
             },
             'searchArtistsByName',
             this.generateCacheKey('searchArtistsByName', { name, exact })
@@ -95,7 +95,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
         const artists = await this.searchArtistsByName(name, true);
         if (artists.length > 0 && artists[0]) {
             this.logger.info('Artist found by exact name', { name, artistId: artists[0].id });
-            return artists[0];
+            return artists[0] as unknown as Artist;
         }
 
         this.logger.info('No artist found by exact name', { name });
@@ -110,11 +110,18 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 });
 
                 this.logger.info('Retrieved all artists from database', { count: artists.length });
-                return artists;
+                return artists as unknown as Artist[];
             },
             'getAllArtists',
             this.generateCacheKey('getAllArtists')
         );
+    }
+
+    async toNullable(value: unknown) {
+        if (value === undefined) {
+            return null;
+        }
+        return value;
     }
 
     async saveArtist(artist: Artist): Promise<Artist> {
@@ -123,16 +130,27 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 where: { id: artist.id },
                 update: {
                     name: artist.name,
-                    genre: artist.genre,
-                    description: artist.description,
-                    imageUrl: artist.imageUrl,
-                    mappingIds: artist.mappingIds,
-                    streamingLinks: artist.streamingLinks,
-                    socialLinks: artist.socialLinks,
-                    sources: artist.sources,
-                    popularity: artist.popularity,
+                    genre: artist.genre ?? [],
+                    description: artist.description ?? null,
+                    imageUrl: artist.imageUrl ?? null,
+                    mappingIds: artist.mappingIds ?? {},
+                    streamingLinks: artist.streamingLinks ?? {},
+                    socialLinks: artist.socialLinks ?? {},
+                    sources: artist.sources ?? {},
+                    popularity: artist.popularity ?? {},
                 },
-                create: artist,
+                create: {
+                    id: artist.id,
+                    name: artist.name,
+                    genre: artist.genre ?? [],
+                    description: artist.description ?? null,
+                    imageUrl: artist.imageUrl ?? null,
+                    mappingIds: artist.mappingIds ?? {},
+                    streamingLinks: artist.streamingLinks ?? {},
+                    socialLinks: artist.socialLinks ?? {},
+                    sources: artist.sources ?? {},
+                    popularity: artist.popularity ?? {},
+                },
             });
 
             // Invalidate cache for this artist
@@ -141,7 +159,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
             this.invalidateCachePattern(artist.name.toLowerCase());
 
             this.logger.info('Saved artist to database', { artistId: artist.id });
-            return savedArtist;
+            return savedArtist as unknown as Artist;
         } catch (error) {
             this.handleDatabaseError(error, `saving artist: ${artist.id}`);
         }

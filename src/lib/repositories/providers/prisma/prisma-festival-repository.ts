@@ -49,7 +49,7 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
                 }
 
                 this.logger.info('Festival found by ID', { id, name: festival.name });
-                return festival;
+                return festival as unknown as Festival;
             },
             'getFestivalById',
             this.generateCacheKey('getFestivalById', { id })
@@ -69,7 +69,7 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
                 }
 
                 this.logger.info('Festival found by URL', { url, id: festival.id, name: festival.name });
-                return festival;
+                return festival as unknown as Festival;
             },
             'getFestivalByUrl',
             this.generateCacheKey('getFestivalByUrl', { url })
@@ -84,7 +84,7 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
                 });
 
                 this.logger.info('Retrieved all festivals from database', { count: festivals.length });
-                return festivals;
+                return festivals as unknown as Festival[];
             },
             'getAllFestivals',
             this.generateCacheKey('getAllFestivals')
@@ -113,7 +113,7 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
             this.invalidateCachePattern(festival.id);
 
             this.logger.info('Saved festival to database', { festivalId: festival.id });
-            return savedFestival;
+            return savedFestival as unknown as Festival;
         } catch (error) {
             this.handleDatabaseError(error, `saving festival: ${festival.id}`);
         }
