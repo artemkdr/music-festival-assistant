@@ -8,7 +8,6 @@ import { useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { MdFestival } from 'react-icons/md';
-import { TbExternalLink } from 'react-icons/tb';
 
 interface FestivalDiscoveryFormProps {
     onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;
@@ -170,8 +169,6 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
     return (
         <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Festival Discovery</h2>
-
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Festival Selection */}
                 <div>
@@ -180,7 +177,8 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                     </label>
                     <div className="relative">
                         <input
-                            type="search"
+                            type="text"
+                            readOnly={true}
                             id="festival-search"
                             value={festivalSearchTerm}
                             onChange={e => {
@@ -195,6 +193,9 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                             className={`input w-full ${errors.festival ? 'border-red-500' : ''}`}
                             disabled={isLoading || loadingFestivals}
                             autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck="false"
+                            aria-label="Search for a festival"
                         />
 
                         <p className="mt-1 text-sm text-gray-500">Select from {festivals.length} festivals</p>
@@ -208,7 +209,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
                         {/* Dropdown */}
                         {showFestivalDropdown && !loadingFestivals && (
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                            <div className="absolute z-10 w-full -mt-4 bg-white border border-gray-300 rounded-md shadow-lg max-h-110 overflow-auto">
                                 {festivals?.map(festival => (
                                     <button
                                         key={festival.id}
@@ -241,16 +242,20 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                                     <MdFestival />
                                 </span>
                                 <div className="flex flex-col gap-0.5">
-                                    <div className="font-bold text-primary flex flex-wrap items-center gap-2">
-                                        {selectedFestival.name}
-                                        <Link href={`/festival/${selectedFestival.id}`} className="link-primary" target="_blank" rel="noopener noreferrer" title="View festival lineup and details">
-                                            <TbExternalLink />
-                                        </Link>
-                                    </div>
+                                    <div className="font-bold text-primary">{selectedFestival.name}</div>
                                     <div className="text-sm text-primary">{selectedFestival.location}</div>
                                     <div className="text-xs text-primary/80">
                                         {selectedFestival.startDate} - {selectedFestival.endDate},{` ${selectedFestival.artistsCount}+ artists`}
                                     </div>
+                                    <Link
+                                        href={`/festival/${selectedFestival.id}`}
+                                        className="link-primary underline font-medium"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="View festival lineup and details"
+                                    >
+                                        View lineup
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -261,7 +266,10 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                 <div>
                     <label className="block font-bold text-base mb-3">Music Preferences</label>
                     {loadingGenres ? (
-                        <div className="text-gray-500 text-sm">Loading genres...</div>
+                        <div className="text-magic text-sm flex gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-magic"></div>
+                            <span>Loading genres...</span>
+                        </div>
                     ) : (
                         <GenresGrid genres={availableGenres} selectedGenres={selectedGenres} onGenreToggle={handleGenreToggle} isLoading={isLoading} />
                     )}

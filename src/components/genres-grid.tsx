@@ -21,12 +21,16 @@ export const GenresGrid: React.FC<GenresGridProps> = ({ genres, selectedGenres, 
     return (
         <div className="flex flex-col gap-2">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {displayedGenres.map(genre => (
+                {displayedGenres.map((genre, index) => (
                     <button
                         key={genre.name}
                         type="button"
                         onClick={() => handleGenreToggle(genre.name)}
-                        className={`text-sm transition-colors ${selectedGenres.includes(genre.name) ? 'btn-primary' : 'btn-primary-light border-1 border-primary/30'}`}
+                        className={`text-sm transition-all duration-300 ease-out opacity-0 animate-fade-in ${selectedGenres.includes(genre.name) ? 'btn-primary' : 'btn-primary-light border-1 border-primary/30'}`}
+                        style={{
+                            animationDelay: `${index < maxGenres ? index * 30 : 0}ms`,
+                            animationFillMode: 'forwards',
+                        }}
                         disabled={isLoading}
                     >
                         {genre.name} ({genre.count})

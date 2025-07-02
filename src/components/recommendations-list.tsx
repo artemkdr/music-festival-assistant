@@ -7,6 +7,7 @@ import { createFestivalEvent, downloadICSFile } from '@/lib/utils/ics-util';
 import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { FaGoogle, FaSpotify, FaYoutube } from 'react-icons/fa';
+import { LuCalendarArrowDown } from 'react-icons/lu';
 
 interface RecommendationsListProps {
     festival: Festival;
@@ -18,8 +19,8 @@ interface RecommendationsListProps {
  * Component to display festival recommendations
  */
 export function RecommendationsList({ festival, recommendations }: RecommendationsListProps): ReactElement {
-    const addToGoogleCalendar = async (event: { date: string; time: string; festival: string; artist: string }) => {
-        const { date, time, festival, artist } = event;
+    const addToGoogleCalendar = async (event: { date: string; time: string; festival: string; artist: string; stage: string }) => {
+        const { date, time, festival, artist, stage } = event;
         const actDateTime = new Date(`${date}T${time}`);
         let formattedStartDate = '';
         let formattedEndDate = '';
@@ -36,7 +37,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             endDate.setHours(endDate.getHours() + 1);
             formattedEndDate = endDate.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
         }
-        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(artist)} at ${encodeURIComponent(festival)}&dates=${formattedStartDate}/${formattedEndDate}`;
+        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(artist)} at ${encodeURIComponent(festival)}&dates=${formattedStartDate}/${formattedEndDate}&location=${encodeURIComponent(stage)}`;
         window.open(calendarUrl, '_blank');
     };
 
@@ -46,6 +47,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             time: recommendation.act.time || '',
             festival: festival.name,
             artist: recommendation.artist.name,
+            stage: recommendation.act.stage || festival.location || '',
         });
     };
 
@@ -103,6 +105,13 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
 
     return (
         <div className="space-y-6">
+            {/* Disclaimer */}
+            <div className="bg-accent/70 border-l-4 border-yellow-300 p-4 text-yellow-800">
+                <p className="text-sm">
+                    <strong>Disclaimer:</strong> These recommendations are AI generated based on your preferences and the festival lineup. They may not be fully accurate or reflect the latest changes
+                    in the festival schedule.
+                </p>
+            </div>
             {/* Festival Header */}
             <div className="bg-gradient-to-br from-violet-50 to-white rounded-lg shadow-md p-6">
                 <div className="flex items-start justify-between">
@@ -135,12 +144,11 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                     <h3 className="text-xl font-bold text-gray-900">{recommendation.artist.name}</h3>
                                     <div className="flex flex-wrap gap-2 ">
                                         {recommendation.artist.genre?.map(genre => (
-                                            <span key={genre} className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-md">
+                                            <span key={genre} className="px-2 py-1 text-xs bg-magic/10 text-foreground rounded-md">
                                                 {genre}
                                             </span>
                                         ))}
                                     </div>
-                                    <p className="text-gray-600">{recommendation.artist.description}</p>
                                 </div>
                             </div>
 
@@ -154,9 +162,13 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                 </ul>
                             </div>
 
+                            <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="link-primary underline">
+                                Read more about {recommendation.artist.name}
+                            </Link>
+
                             {/* Act Info */}
-                            <div className="bg-gray-200 rounded-md p-4 flex flex-col gap-2">
-                                <h4 className="font-medium text-gray-900 ">Performance details</h4>
+                            <div className="bg-gradient-to-br from-magic/10 to-muted/20 rounded-md p-4 flex flex-col gap-2">
+                                <h4 className="font-medium text-gray-900">Performance details</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-1 text-sm">
                                     <div>
                                         <span className="text-gray-500">Day:</span>
@@ -174,41 +186,36 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                 {/* Show 'Add to calendars button only if the date is valid */}
                                 {isValidDate(new Date(`${recommendation.act.date}T${recommendation.act.time}`)) && (
                                     <div className="flex flex-wrap gap-4 py-2">
-                                        <button onClick={() => addToGoogleCalendarHandler(recommendation)} className="link-secondary underline">
-                                            Add to Google Agenda
+                                        <button onClick={() => downloadICSCalendarHandler(recommendation)} className="link-secondary underline flex items-center gap-2">
+                                            <LuCalendarArrowDown size={20} />
+                                            <span>Download calendar event file</span>
                                         </button>
-                                        <button onClick={() => downloadICSCalendarHandler(recommendation)} className="link-secondary underline">
-                                            📅 Download calendar event file
+                                        <button onClick={() => addToGoogleCalendarHandler(recommendation)} className="link-secondary underline flex items-center gap-2">
+                                            <FaGoogle size={20} />
+                                            <span>Add to Google Agenda</span>
                                         </button>
                                     </div>
                                 )}
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex flex-wrap justify-end gap-4">
-                                <div className="flex gap-2">
-                                    {recommendation.artist.streamingLinks?.spotify && (
-                                        <Link href={recommendation.artist.streamingLinks.spotify} target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2">
-                                            <FaSpotify />
-                                            <span>Spotify</span>
-                                        </Link>
-                                    )}
-                                    {/* Link to youtube search for live from the artist this year */}
-                                    <Link
-                                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(recommendation.artist.name)} live ${new Date().getFullYear()}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn-destructive flex items-center gap-2"
-                                    >
-                                        <FaYoutube />
-                                        <span>YouTube</span>
+                            <div className="flex flex-wrap md:justify-end gap-2 md:gap-4">
+                                {recommendation.artist.streamingLinks?.spotify && (
+                                    <Link href={recommendation.artist.streamingLinks.spotify} target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2">
+                                        <FaSpotify />
+                                        <span>Spotify</span>
                                     </Link>
-
-                                    <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="btn-neutral flex items-center gap-2">
-                                        <FaGoogle />
-                                        <span>Web Search</span>
-                                    </Link>
-                                </div>
+                                )}
+                                {/* Link to youtube search for live from the artist this year */}
+                                <Link
+                                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(recommendation.artist.name)} live ${new Date().getFullYear()}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn-destructive flex items-center gap-2"
+                                >
+                                    <FaYoutube />
+                                    <span>YouTube</span>
+                                </Link>
                             </div>
                         </div>
                     </div>

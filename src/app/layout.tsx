@@ -52,9 +52,16 @@ export default function RootLayout({ children }: { children: ReactNode }): React
                         </main>
 
                         <footer className="bg-white border-t">
-                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-2">
                                 <div className="text-center text-gray-600">
                                     <p>© 2025 Music Festival Assistant. Discover your next favorite artist.</p>
+                                </div>
+                                {/* About public information used on the site */}
+                                <div className="text-center text-foreground/70 text-xs">
+                                    <p>
+                                        This site uses public data from festival websites, Spotify and AI generated information. Please verify artist details on official festival pages or streaming
+                                        platforms. We do not guarantee the accuracy of artist information. We do not store any personal data.
+                                    </p>
                                 </div>
                             </div>
                         </footer>

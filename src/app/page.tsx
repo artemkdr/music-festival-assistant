@@ -25,6 +25,9 @@ export default function HomePage(): ReactElement {
         setIsLoading(true);
         setError(null);
 
+        // scroll to bottom of the page
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
         try {
             const response = await discoverApi.getRecommendations(festivalId, userPreferences);
             if (response.status === 'success' && response.data) {
@@ -62,9 +65,9 @@ export default function HomePage(): ReactElement {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
             {/* Hero Section */}
-            <div className="text-center p-4 flex flex-col gap-2">
+            <div className="text-center p-2 md:p-4 flex flex-col gap-2">
                 <h1 className="text-2xl font-bold text-gray-900">Discover Your Next Favorite Artist</h1>
                 <p className="text-base text-gray-600 max-w-3xl mx-auto">
                     Choose from our collection of festivals and get personalized artist recommendations based on your music preferences. Never miss out on discovering amazing music again.

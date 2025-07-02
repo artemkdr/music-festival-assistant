@@ -212,7 +212,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                             <MdLanguage className="text-primary text-xl" />
                                         </div>
                                         <Link href={festival.website} target="_blank" rel="noopener noreferrer" className="font-semibold link-primary text-sm underline">
-                                            Visit Site
+                                            View website
                                         </Link>
                                     </div>
                                 )}
@@ -301,20 +301,20 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                             {dayLineup.list
                                                 .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
                                                 .map((performance, index) => (
-                                                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <div key={index} className="flex flex-col gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                                         <div className="flex items-center space-x-4">
-                                                            <div className="flex items-center text-sm text-gray-600">
-                                                                <TbClock className="mr-1" />
+                                                            <div className="flex flex-col gap-1.5 items-center text-sm text-gray-600 pt-1">
+                                                                <TbClock />
                                                                 {performance.time}
                                                             </div>
-                                                            <div>
+                                                            <div className="flex flex-col">
                                                                 <div className="font-semibold text-gray-900">{performance.artistName}</div>
                                                                 {performance.stage && <div className="text-sm text-gray-600 flex items-center">{performance.stage}</div>}
                                                             </div>
                                                         </div>
 
                                                         {/* spotify link, youtube live serach link, google search link */}
-                                                        <div className="flex items-center space-x-4">
+                                                        <div className="flex justify-end space-x-4">
                                                             <Link
                                                                 href={`https://www.youtube.com/results?search_query=${encodeURIComponent(performance.artistName)} live ${new Date().getFullYear()}`}
                                                                 target="_blank"

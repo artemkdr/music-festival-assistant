@@ -22,8 +22,8 @@
     --muted-foreground: 220 10% 30%;
 
     /* yellow */
-    --accent: 40 50% 70%; /* A more cheerful and clear yellow */
-    --accent-foreground: 40 10% 15%;
+    --accent: 50 80% 90%; /* A more cheerful and clear yellow */
+    --accent-foreground: 50 10% 15%;
 
     /* red */
     --destructive: 0 55% 55%; /* A brighter, more impactful red */
