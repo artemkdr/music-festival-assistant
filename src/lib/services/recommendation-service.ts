@@ -6,7 +6,7 @@ import { IArtistRepository } from '@/lib/repositories/interfaces';
 import { Artist, type Festival, type Recommendation, type UserPreferences } from '@/lib/schemas';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
 import type { ILogger } from '@/lib/types/logger';
-import { getActsByArtistName, getFestivalArtists } from '@/lib/utils/festival-util';
+import { getActsByArtistId, getActsByArtistName, getFestivalArtists } from '@/lib/utils/festival-util';
 import type { IRecommendationService } from './interfaces';
 
 /**
@@ -73,14 +73,14 @@ export class RecommendationService implements IRecommendationService {
             for (const rec of aiRecommendations) {
                 const artist = artistsMap[rec.artistName.toLowerCase()];
                 const artistName = artist?.name ?? rec.artistName;
-                const act = getActsByArtistName(festival, artistName);
-                if (act) {
+                const acts = artist?.id ? getActsByArtistId(festival, artist.id) : getActsByArtistName(festival, artistName);
+                if (acts && acts.length > 0 && acts[0]) {
                     recommendations.push({
                         artist: artist || {
                             id: '', // Fallback if artist not found
                             name: artistName,
                         },
-                        act: act,
+                        act: acts[0],
                         score: rec.score,
                         reasons: rec.reasons,
                         aiEnhanced: true,

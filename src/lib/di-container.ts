@@ -4,7 +4,7 @@
  */
 import { getAIConfig, validateAIConfig } from '@/config/ai-config';
 import type { IArtistRepository, IFestivalRepository } from '@/lib/repositories/interfaces';
-import { LocalJsonArtistRepository, LocalJsonFestivalRepository } from '@/lib/repositories/providers/local';
+import { PrismaArtistRepository, PrismaFestivalRepository } from '@/lib/repositories/providers/prisma';
 import type { IAIService } from '@/lib/services/ai';
 import { AIServiceFactory } from '@/lib/services/ai';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
@@ -174,7 +174,7 @@ export class DIContainer {
      */
     public getFestivalRepository(): IFestivalRepository {
         if (!this._festivalRepository) {
-            this._festivalRepository = new LocalJsonFestivalRepository(this.getLogger());
+            this._festivalRepository = new PrismaFestivalRepository(this.getLogger());
             this.getLogger().info('Festival repository initialized');
         }
         return this._festivalRepository;
@@ -185,7 +185,7 @@ export class DIContainer {
      */
     public getArtistRepository(): IArtistRepository {
         if (!this._artistRepository) {
-            this._artistRepository = new LocalJsonArtistRepository(this.getLogger());
+            this._artistRepository = new PrismaArtistRepository(this.getLogger());
             this.getLogger().info('Artist repository initialized');
         }
         return this._artistRepository;

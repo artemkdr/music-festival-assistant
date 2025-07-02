@@ -6,7 +6,7 @@ import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/utils/auth-utils';
 import { FestivalAct } from '@/lib/schemas';
 import { User } from '@/lib/services/auth';
-import { getActsByArtistName, isFestivalFinished } from '@/lib/utils/festival-util';
+import { getActsByArtistId, getActsByArtistName, isFestivalFinished } from '@/lib/utils/festival-util';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
@@ -51,10 +51,18 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         for (const festival of allFestivals) {
             if (!isFestivalFinished(festival)) {
                 // Check if the artist is performing in this festival
-                const act = getActsByArtistName(festival, artist.name);
-                if (act) {
-                    acts.push(act);
+                const actsById = artist.id ? getActsByArtistId(festival, artist.id) : [];
+                const actsByName = getActsByArtistName(festival, artist.name);
+                for (const act of actsById) {
+                    if (!acts.some(existingAct => existingAct.id === act.id)) {
+                        acts.push(act);
+                    }
                 }
+                for (const act of actsByName) {                    
+                    if (!acts.some(existingAct => existingAct.id === act.id)) {
+                        acts.push(act);
+                    }
+                }                
             }
         }
 

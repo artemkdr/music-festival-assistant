@@ -58,7 +58,14 @@ export const getFestivalDates = (festival: Festival): { startDate: string | unde
  * Get acts by artist name in a festival's lineup.
  */
 export const getActsByArtistName = (festival: Festival, artistName: string) => {
-    return festival.lineup.find(act => act.artistName.toLowerCase() === artistName.toLowerCase());
+    return festival.lineup.filter(act => act.artistName.toLowerCase() === artistName.toLowerCase());
+};
+
+/**
+ * Get acts by artist name in a festival's lineup.
+ */
+export const getActsByArtistId = (festival: Festival, artistId: string) => {
+    return festival.lineup.filter(act => act.artistId === artistId);
 };
 
 /**
