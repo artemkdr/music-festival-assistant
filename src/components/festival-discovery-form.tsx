@@ -201,8 +201,8 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
                         {/* Loading indicator */}
                         {loadingFestivals && (
-                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            <div className="absolute right-3 top-3">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-magic"></div>
                             </div>
                         )}
 
@@ -237,7 +237,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                     {selectedFestival && (
                         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
                             <div className="flex items-start">
-                                <span className="text-blue-400 mt-1 mr-2">
+                                <span className="text-primary mt-1 mr-2">
                                     <MdFestival />
                                 </span>
                                 <div className="flex flex-col gap-0.5">

@@ -4,6 +4,10 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
+
+    /* purple */
+    --magic: 270 55% 60%; /* A vibrant, magical purple */
+    --magic-foreground: 270 10% 95%; /* A light, contrasting color for text on the purple background */
     
     /* blue */
     --primary: 210 45% 55%; /* A brighter, more vibrant blue */
@@ -67,6 +71,7 @@
 }
 
 @theme {
+  --color-magic: hsl(var(--magic));
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-secondary: hsl(var(--secondary));
@@ -91,7 +96,7 @@
 
 @layer components {
   .bg-magic {
-    @apply bg-gradient-to-br from-purple-600 to-primary hover:from-primary hover:to-purple-600;    
+    @apply bg-gradient-to-br from-magic to-primary hover:from-primary hover:to-magic shadow-md;    
   }
   .btn-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;    

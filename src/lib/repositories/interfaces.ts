@@ -48,6 +48,13 @@ export interface IArtistRepository {
     getArtistById(id: string): Promise<Artist | null>;
 
     /**
+     * Get artists by multiple IDs
+     * @param ids Array of artist identifiers
+     * @returns Promise resolving to array of artists
+     */
+    getArtistsByIds(ids: string[]): Promise<Artist[]>;
+
+    /**
      * Get artists by genre
      * @param genres Array of genre strings
      * @returns Promise resolving to array of matching artists

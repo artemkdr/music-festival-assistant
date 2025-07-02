@@ -9,7 +9,7 @@ import type { ILogger } from '@/lib/types/logger';
 export class PrismaArtistRepository extends BasePrismaRepository implements IArtistRepository {
     constructor(logger: ILogger) {
         super(logger, 'artists', {
-            defaultTtl: 15 * 60 * 1000, // 15 minutes for artists
+            defaultTtl: 30 * 24 * 60 * 60 * 1000, // 1 month for artists
             maxSize: 2000,
             enabled: true,
         });
@@ -114,6 +114,23 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
             },
             'getAllArtists',
             this.generateCacheKey('getAllArtists')
+        );
+    }
+
+    async getArtistsByIds(ids: string[]): Promise<Artist[]> {
+        return this.executeOperation(
+            async () => {
+                const artists = await this.prisma.artist.findMany({
+                    where: {
+                        id: { in: ids },
+                    },
+                    orderBy: { name: 'asc' },
+                });
+                this.logger.info('Retrieved artists by IDs', { ids, count: artists.length });
+                return artists as unknown as Artist[];
+            },
+            'getArtistsByIds',
+            this.generateCacheKey('getArtistsByIds', { ids })
         );
     }
 

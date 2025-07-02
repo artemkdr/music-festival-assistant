@@ -18,6 +18,16 @@ export class MockArtistRepository implements IArtistRepository {
         return artist;
     }
 
+    async getArtistsByIds(ids: string[]): Promise<Artist[]> {
+        this.logger.debug('Getting artists by IDs', { ids });
+        const matchingArtists = this.artists.filter(artist => ids.includes(artist.id));
+        this.logger.info('Artist ID-based lookup result', {
+            ids,
+            foundCount: matchingArtists.length,
+        });
+        return matchingArtists;
+    }
+
     async getArtistsByGenres(genres: string[]): Promise<Artist[]> {
         this.logger.debug('Getting artists by genres', { genres });
         const matchingArtists = this.artists.filter(artist =>

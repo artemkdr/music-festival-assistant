@@ -1,6 +1,6 @@
 import { AIProviderConfig, AIRequest, AIResponse, IAIService, SchemaAIRequest } from '@/lib/services/ai/interfaces';
 import type { ILogger } from '@/lib/types/logger';
-import { createVertex } from '@ai-sdk/google-vertex';
+import { createVertex } from '@ai-sdk/google-vertex/edge';
 import { groq } from '@ai-sdk/groq';
 import { openai } from '@ai-sdk/openai';
 import { LanguageModelV1 } from '@ai-sdk/provider';
@@ -35,9 +35,17 @@ export class AIService implements IAIService {
                 if (!config.projectId) {
                     throw new Error('Project ID is required for Vertex AI');
                 }
+                if (!config.clientEmail || !config.privateKey || !config.privateKeyId) {
+                    throw new Error('Google service account credentials are required for Vertex AI');
+                }
                 this.model = createVertex({
                     project: config.projectId,
                     location: config.location || 'us-central1', // Default to us-central1 if not specified
+                    googleCredentials: {
+                        clientEmail: config.clientEmail,
+                        privateKey: config.privateKey,
+                        privateKeyId: config.privateKeyId,
+                    },
                 })(config.model, {
                     structuredOutputs: true,
                 }); // Initialize Vertex AI model

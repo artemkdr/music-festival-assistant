@@ -73,7 +73,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
             <div className="min-h-screen bg-gray-50">
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex justify-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-magic"></div>
                     </div>
                 </div>
             </div>

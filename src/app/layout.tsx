@@ -29,9 +29,9 @@ export default function RootLayout({ children }: { children: ReactNode }): React
                         <header className="bg-white shadow-sm border-b">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="flex justify-between items-center py-4">
-                                    <Link href="/" className="flex items-center space-x-3 text-purple-600">
+                                    <Link href="/" className="flex items-center space-x-3 text-magic">
                                         <Logo size={20} />
-                                        <h1 className="text-xl font-bold text-gray-900">Festival Assistant</h1>
+                                        <h1 className="text-xl font-bold text-gray-900">Swiss Festival Assistant</h1>
                                     </Link>
                                     {/*<nav className="hidden md:flex space-x-6">
                                         <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">

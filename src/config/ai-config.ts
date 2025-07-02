@@ -44,6 +44,9 @@ export function getAIConfig(prefix: string = ''): AIConfig {
             // use api key json file for other props
             config.model = process.env[prefixKey('GOOGLE_VERTEX_MODEL')] || 'gemini-2.5-flash';
             config.projectId = process.env[prefixKey('GOOGLE_VERTEX_PROJECT_ID')] || '';
+            config.clientEmail = process.env[prefixKey('GOOGLE_VERTEX_CLIENT_EMAIL')];
+            config.privateKey = process.env[prefixKey('GOOGLE_VERTEX_PRIVATE_KEY')]?.replace(/\\n/g, '\n');
+            config.privateKeyId = process.env[prefixKey('GOOGLE_VERTEX_PRIVATE_KEY_ID')];
             config.maxTokens = process.env[prefixKey('GOOGLE_VERTEX_MAX_TOKENS')] ? parseInt(process.env[prefixKey('GOOGLE_VERTEX_MAX_TOKENS')]!, 10) : 4000;
             config.temperature = process.env[prefixKey('GOOGLE_VERTEX_TEMPERATURE')] ? parseFloat(process.env[prefixKey('GOOGLE_VERTEX_TEMPERATURE')]!) : 0.7;
             break;

@@ -8,7 +8,7 @@ import type { ILogger } from '@/lib/types/logger';
 export class PrismaFestivalRepository extends BasePrismaRepository implements IFestivalRepository {
     constructor(logger: ILogger) {
         super(logger, 'festivals', {
-            defaultTtl: 10 * 60 * 1000, // 10 minutes for festivals
+            defaultTtl: 30 * 24 * 60 * 60 * 1000, // 1 month for festivals
             maxSize: 500,
             enabled: true,
         });

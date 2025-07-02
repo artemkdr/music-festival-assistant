@@ -19,6 +19,9 @@ export interface AIProviderConfig {
     // Vertex AI specific properties
     projectId?: string;
     location?: string; // e.g., 'us-central1'
+    clientEmail?: string | undefined; // For Google Vertex AI
+    privateKey?: string | undefined; // For Google Vertex AI
+    privateKeyId?: string | undefined; // For Google Vertex AI
 }
 
 /**

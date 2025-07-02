@@ -16,6 +16,7 @@ interface CreateArtistData {
 
 export interface IArtistService {
     getArtistById(id: string): Promise<Artist | null>;
+    getArtistsByIds(ids: string[]): Promise<Artist[]>;
     searchArtistByName(name: string): Promise<Artist | null>;
     searchArtistsByName(name: string): Promise<Artist[]>;
     saveArtist(artist: Artist): Promise<void>;
@@ -42,6 +43,11 @@ export class ArtistService implements IArtistService {
     async getArtistById(id: string): Promise<Artist | null> {
         this.logger.info(`Fetching artist with ID: ${id}`);
         return this.repository.getArtistById(id);
+    }
+
+    async getArtistsByIds(ids: string[]): Promise<Artist[]> {
+        this.logger.info(`Fetching artists by IDs: ${ids.join(', ')}`);
+        return this.repository.getArtistsByIds(ids);
     }
 
     async searchArtistByName(name: string): Promise<Artist | null> {

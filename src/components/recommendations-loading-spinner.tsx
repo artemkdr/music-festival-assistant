@@ -9,7 +9,10 @@ const LOADING_MESSAGES = [
     'Processing a lot of artists and their musical characteristics...',
     'Cross-referencing your taste with festival lineups...',
     'Almost there! Finalizing your personalized recommendations...',
-];
+    'It could take up to 1 minute to find the best matches for you...',
+    'La la la... just kidding, we are almost there!',
+    'Any plan for the weekend? We are working on it!',
+].sort(() => Math.random() - 0.5); // Shuffle messages on load
 
 /**
  * Loading spinner component with progressive messages
@@ -36,7 +39,7 @@ export function RecommendationsLoadingSpinner(): ReactElement {
 
     return (
         <div className="flex flex-col items-center justify-center space-y-4 min-h-[200px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-magic"></div>
 
             <div className="text-center space-y-2 max-w-md">
                 {/* Current message with fade-in animation */}

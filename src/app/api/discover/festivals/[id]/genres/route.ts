@@ -46,14 +46,14 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         // Count genres in lineup
         const genreCount: Record<string, number> = {};
         const artists = getFestivalArtists(festival);
-        for (const artistInfo of artists) {
-            if (artistInfo.id) {
-                const artist = await artistService.getArtistById(artistInfo.id);
-                if (artist && artist.genre && artist.genre.length > 0) {
-                    for (const genre of artist.genre) {
-                        const genreLower = genre.toLowerCase();
-                        genreCount[genreLower] = (genreCount[genreLower] || 0) + 1;
-                    }
+        const ids = artists.map(artist => artist.id).filter(id => id !== undefined);
+        const artistsById = await artistService.getArtistsByIds(ids);
+
+        for (const artist of artistsById) {
+            if (artist.genre && artist.genre.length > 0) {
+                for (const genre of artist.genre) {
+                    const genreLower = genre.toLowerCase();
+                    genreCount[genreLower] = (genreCount[genreLower] || 0) + 1;
                 }
             }
         }
