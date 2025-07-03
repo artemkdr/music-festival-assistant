@@ -201,11 +201,12 @@ export class AIService implements IAIService {
                 temperature: this.temperature,
                 maxRetries: this.maxRetries,
             });
-            let chunkCount = 0;
-            for await (const chunk of result.partialObjectStream) {
-                console.log('chunk received:', chunkCount, chunk);
+            //let chunkCount = 0;
+            // @TODO handle partial object stream properly
+            // currently we just count chunks and return final object
+            /*for await (const chunk of result.partialObjectStream) {
                 chunkCount++;
-            }
+            }*/
 
             const finalResult = (await result.object) as T;
             if (!!finalResult) {

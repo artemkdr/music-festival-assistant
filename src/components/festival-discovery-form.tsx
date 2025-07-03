@@ -11,13 +11,14 @@ import { MdFestival } from 'react-icons/md';
 
 interface FestivalDiscoveryFormProps {
     onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;
+    onChange?: (festivalId: string) => void;
     isLoading: boolean;
 }
 
 /**
  * Form component for festival discovery input
  */
-export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscoveryFormProps): ReactElement {
+export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: FestivalDiscoveryFormProps): ReactElement {
     const [festivals, setFestivals] = useState<FestivalInfo[]>([]);
     const [selectedFestivalId, setSelectedFestivalId] = useState('');
     const [festivalSearchTerm, setFestivalSearchTerm] = useState('');
@@ -49,7 +50,6 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                         return new Date(a.startDate).getTime() - new Date(b.startDate).getTime() || a.name.localeCompare(b.name);
                     });
                     setFestivals(sortedData);
-
                     // check if festival id is in URL
                     const festivalId = searchParams.get('festival');
                     if (festivalId) {
@@ -77,11 +77,14 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
 
     // Load genres when a festival is selected
     useEffect(() => {
+        onChange?.(selectedFestivalId); // Notify parent of festival change
         if (!selectedFestivalId) {
             setAvailableGenres([]);
             setSelectedGenres([]);
             return;
         }
+        // reset results and inputs
+        setUserNotes('');
         setLoadingGenres(true);
         discoverApi
             .getFestivalGenres(selectedFestivalId)
@@ -101,7 +104,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading }: FestivalDiscovery
                 setAvailableGenres([]);
             })
             .finally(() => setLoadingGenres(false));
-    }, [selectedFestivalId]);
+    }, [selectedFestivalId, onChange]);
 
     // Get selected festival details
     const selectedFestival = festivals.find(f => f.id === selectedFestivalId);

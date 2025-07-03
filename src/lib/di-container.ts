@@ -5,7 +5,7 @@
 import { getAIConfig, validateAIConfig } from '@/config/ai-config';
 import type { IArtistRepository, IFestivalRepository } from '@/lib/repositories/interfaces';
 import { PrismaArtistRepository, PrismaFestivalRepository } from '@/lib/repositories/providers/prisma';
-import type { IAIService } from '@/lib/services/ai';
+import type { AIProvider, IAIService } from '@/lib/services/ai';
 import { AIServiceFactory } from '@/lib/services/ai';
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
 import { MusicalAIService } from '@/lib/services/ai/musical-ai-service';
@@ -32,7 +32,8 @@ export class DIContainer {
 
     // Singletons
     private _logger: ILogger | null = null;
-    private _aiService: IAIService | null = null;
+    private _aiDefaultService: IAIService | null = null;
+    private _aiSimpleService: IAIService | null = null;
     private _musicalAIService: IMusicalAIService | null = null;
     private _artistService: IArtistService | null = null;
     private _festivalService: IFestivalService | null = null;
@@ -108,19 +109,38 @@ export class DIContainer {
      * Get AI service instance (optional - may return null if disabled or not configured)
      */
     public getAIService(): IAIService | null {
-        if (!this._aiService) {
+        if (!this._aiDefaultService) {
             try {
-                const aiConfig = getAIConfig();
+                const aiConfig = getAIConfig((process.env['AI_PROVIDER'] as AIProvider) || 'vertex', 'default' as const);
                 validateAIConfig(aiConfig);
                 const factory = new AIServiceFactory(this.getLogger());
-                this._aiService = factory.createAIService(aiConfig.provider, aiConfig.config);
+                this._aiDefaultService = factory.createAIService(aiConfig.provider, aiConfig.config);
                 this.getLogger().info('AI service initialized', { provider: aiConfig.provider, model: aiConfig.config.model });
             } catch (error) {
                 this.getLogger().error('Failed to initialize AI service', error instanceof Error ? error : new Error(String(error)));
                 // Return null instead of throwing to allow the app to continue without AI features
             }
         }
-        return this._aiService;
+        return this._aiDefaultService;
+    }
+
+    /**
+     * Get AI service instance - simpler version
+     */
+    public getAISimpleService(): IAIService | null {
+        if (!this._aiSimpleService) {
+            try {
+                const aiConfig = getAIConfig((process.env['AI_SIMPLE_PROVIDER'] as AIProvider) || 'openai', 'simple' as const);
+                validateAIConfig(aiConfig);
+                const factory = new AIServiceFactory(this.getLogger());
+                this._aiSimpleService = factory.createAIService(aiConfig.provider, aiConfig.config);
+                this.getLogger().info('AI service initialized', { provider: aiConfig.provider, model: aiConfig.config.model });
+            } catch (error) {
+                this.getLogger().error('Failed to initialize AI service', error instanceof Error ? error : new Error(String(error)));
+                // Return null instead of throwing to allow the app to continue without AI features
+            }
+        }
+        return this._aiSimpleService;
     }
 
     /**
@@ -129,9 +149,12 @@ export class DIContainer {
     public getMusicalAIService(): IMusicalAIService | null {
         if (!this._musicalAIService) {
             const aiService = this.getAIService();
-            if (aiService) {
-                this._musicalAIService = new MusicalAIService(aiService);
+            const aiSimple = this.getAISimpleService();
+            if (aiService && aiSimple) {
+                this._musicalAIService = new MusicalAIService(aiService, aiSimple);
                 this.getLogger().info('Musical AI service initialized');
+            } else {
+                throw new Error('AI default service and AI simple service are required for musical AI service');
             }
         }
         return this._musicalAIService;
@@ -253,7 +276,7 @@ export class DIContainer {
     public reset(): void {
         this.getLogger().info('Resetting DI container singletons');
         this._logger = null;
-        this._aiService = null;
+        this._aiDefaultService = null;
         this._festivalRepository = null;
         this._artistRepository = null;
         this._recommendationService = null;

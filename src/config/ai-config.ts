@@ -14,10 +14,7 @@ export interface AIConfig {
 /**
  * Get AI service configuration from environment variables
  */
-export function getAIConfig(prefix: string = ''): AIConfig {
-    const prefixKey = (key: string) => (prefix ? `${prefix}_${key}` : key);
-    const provider = (process.env[prefixKey('AI_PROVIDER')] as AIProvider) || 'openai';
-
+export function getAIConfig(provider: AIProvider = 'vertex', type: 'default' | 'simple' = 'default'): AIConfig {
     // Base configuration
     const config: AIProviderConfig = {
         apiKey: '',
@@ -25,43 +22,39 @@ export function getAIConfig(prefix: string = ''): AIConfig {
         provider,
     };
 
+    const modelSuffix = type === 'simple' ? 'SIMPLE_' : '';
+
     // Provider-specific configuration
     switch (provider) {
         case 'openai':
-            config.apiKey = process.env[prefixKey('OPENAI_API_KEY')] || '';
-            config.model = process.env[prefixKey('OPENAI_MODEL')] || 'gpt-4.1';
-            config.maxTokens = process.env[prefixKey('OPENAI_MAX_TOKENS')] ? parseInt(process.env[prefixKey('OPENAI_MAX_TOKENS')]!, 10) : 4000;
-            config.temperature = process.env[prefixKey('OPENAI_TEMPERATURE')] ? parseFloat(process.env[prefixKey('OPENAI_TEMPERATURE')]!) : 0.7;
+            config.apiKey = process.env['OPENAI_API_KEY'] || '';
+            config.model = process.env[`OPENAI_${modelSuffix}MODEL`] || 'gpt-4.1';
+            config.maxTokens = process.env['OPENAI_MAX_TOKENS'] ? parseInt(process.env['OPENAI_MAX_TOKENS']!, 10) : 4000;
+            config.temperature = process.env['OPENAI_TEMPERATURE'] ? parseFloat(process.env['OPENAI_TEMPERATURE']!) : 0.7;
             break;
 
         case 'anthropic':
-            config.apiKey = process.env[prefixKey('ANTHROPIC_API_KEY')] || '';
-            config.model = process.env[prefixKey('ANTHROPIC_MODEL')] || 'claude-3-opus-20240229';
+            config.apiKey = process.env['ANTHROPIC_API_KEY'] || '';
+            config.model = process.env[`ANTHROPIC_${modelSuffix}MODEL`] || 'claude-3-opus-20240229';
             break;
 
         case 'vertex':
         case 'google':
             // use api key json file for other props
-            config.model = process.env[prefixKey('GOOGLE_VERTEX_MODEL')] || 'gemini-2.5-flash';
-            config.projectId = process.env[prefixKey('GOOGLE_VERTEX_PROJECT_ID')] || '';
-            config.clientEmail = process.env[prefixKey('GOOGLE_VERTEX_CLIENT_EMAIL')];
-            config.privateKey = process.env[prefixKey('GOOGLE_VERTEX_PRIVATE_KEY')]?.replace(/\\n/g, '\n');
-            config.privateKeyId = process.env[prefixKey('GOOGLE_VERTEX_PRIVATE_KEY_ID')];
-            config.maxTokens = process.env[prefixKey('GOOGLE_VERTEX_MAX_TOKENS')] ? parseInt(process.env[prefixKey('GOOGLE_VERTEX_MAX_TOKENS')]!, 10) : 4000;
-            config.temperature = process.env[prefixKey('GOOGLE_VERTEX_TEMPERATURE')] ? parseFloat(process.env[prefixKey('GOOGLE_VERTEX_TEMPERATURE')]!) : 0.7;
-            break;
-
-        case 'azure':
-            config.apiKey = process.env[prefixKey('AZURE_OPENAI_API_KEY')] || '';
-            config.model = process.env[prefixKey('AZURE_OPENAI_MODEL')] || 'gpt-4';
-            config.baseUrl = process.env[prefixKey('AZURE_OPENAI_ENDPOINT')] || '';
+            config.model = process.env[`GOOGLE_VERTEX_${modelSuffix}MODEL`] || 'gemini-2.5-flash';
+            config.projectId = process.env['GOOGLE_VERTEX_PROJECT_ID'] || '';
+            config.clientEmail = process.env['GOOGLE_VERTEX_CLIENT_EMAIL'];
+            config.privateKey = process.env['GOOGLE_VERTEX_PRIVATE_KEY']?.replace(/\\n/g, '\n');
+            config.privateKeyId = process.env['GOOGLE_VERTEX_PRIVATE_KEY_ID'];
+            config.maxTokens = process.env['GOOGLE_VERTEX_MAX_TOKENS'] ? parseInt(process.env['GOOGLE_VERTEX_MAX_TOKENS']!, 10) : 4000;
+            config.temperature = process.env['GOOGLE_VERTEX_TEMPERATURE'] ? parseFloat(process.env['GOOGLE_VERTEX_TEMPERATURE']!) : 0.7;
             break;
 
         case 'groq':
-            config.apiKey = process.env[prefixKey('GROQ_API_KEY')] || '';
-            config.model = process.env[prefixKey('GROQ_MODEL')] || 'groq-1';
-            config.maxTokens = process.env[prefixKey('GROQ_MAX_TOKENS')] ? parseInt(process.env[prefixKey('GROQ_MAX_TOKENS')]!, 10) : 4000;
-            config.temperature = process.env[prefixKey('GROQ_TEMPERATURE')] ? parseFloat(process.env[prefixKey('GROQ_TEMPERATURE')]!) : 0.7;
+            config.apiKey = process.env['GROQ_API_KEY'] || '';
+            config.model = process.env[`GROQ_${modelSuffix}MODEL`] || 'groq-1';
+            config.maxTokens = process.env['GROQ_MAX_TOKENS'] ? parseInt(process.env['GROQ_MAX_TOKENS']!, 10) : 4000;
+            config.temperature = process.env['GROQ_TEMPERATURE'] ? parseFloat(process.env['GROQ_TEMPERATURE']!) : 0.7;
             break;
 
         default:
@@ -118,7 +111,7 @@ export function getAIConfigStatus(): {
     location?: string;
 } {
     try {
-        const aiConfig = getAIConfig();
+        const aiConfig = getAIConfig((process.env['AI_PROVIDER'] as AIProvider) || 'vertex', (process.env['AI_TYPE'] as 'default' | 'simple') || 'default');
         validateAIConfig(aiConfig);
 
         return {

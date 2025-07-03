@@ -12,7 +12,6 @@ import { LuCalendarArrowDown } from 'react-icons/lu';
 interface RecommendationsListProps {
     festival: Festival;
     recommendations: Recommendation[];
-    onFeedback: (recommendationId: string, artistId: string, rating: 'like' | 'dislike' | 'love' | 'skip') => Promise<void>;
 }
 
 /**
@@ -108,8 +107,9 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             {/* Disclaimer */}
             <div className="bg-accent/70 border-l-4 border-yellow-300 p-4 text-yellow-800">
                 <p className="text-sm">
-                    <strong>Disclaimer:</strong> These recommendations are AI generated based on your preferences and the festival lineup. They may not be fully accurate or reflect the latest changes
-                    in the festival schedule.
+                    <strong>Disclaimer:</strong>
+                    These recommendations are AI generated based on your preferences and the festival lineup. They may not be fully accurate, some information could be invented or outdated. Please
+                    verify the details on the official festival website or app before making plans.
                 </p>
             </div>
             {/* Festival Header */}
@@ -163,7 +163,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                             </div>
 
                             <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="link-primary underline">
-                                Read more about {recommendation.artist.name}
+                                More about <strong>{recommendation.artist.name}</strong> on Google
                             </Link>
 
                             {/* Act Info */}

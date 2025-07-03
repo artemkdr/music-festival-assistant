@@ -2,9 +2,9 @@
 
 import { discoverApi, FestivalDiscoveryResponse } from '@/app/lib/api/discover-api';
 import { FestivalDiscoveryForm } from '@/components/festival-discovery-form';
-import { RecommendationsLoadingSpinner } from '@/components/recommendations-loading-spinner';
 import { Logo } from '@/components/logo';
 import { RecommendationsList } from '@/components/recommendations-list';
+import { RecommendationsLoadingSpinner } from '@/components/recommendations-loading-spinner';
 import { UserPreferences } from '@/lib/schemas';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
@@ -16,24 +16,27 @@ export default function HomePage(): ReactElement {
     const [isLoading, setIsLoading] = useState(false);
     const [discoveryResponse, setDiscoveryResponse] = useState<FestivalDiscoveryResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [sessionId] = useState(() => crypto.randomUUID());
 
     /**
      * Handle festival discovery request
      */
-    const handleDiscovery = async (festivalId: string, userPreferences: UserPreferences): Promise<void> => {
+    const handleSubmit = async (festivalId: string, userPreferences: UserPreferences): Promise<void> => {
         setIsLoading(true);
         setError(null);
 
         // scroll to bottom of the page
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        if (typeof window !== 'undefined' && 'scrollBy' in window) {
+            setTimeout(() => {
+                window.scrollBy({ top: 200, behavior: 'smooth' });
+            }, 100);
+        }
 
         try {
             const response = await discoverApi.getRecommendations(festivalId, userPreferences);
             if (response.status === 'success' && response.data) {
                 setDiscoveryResponse(response.data);
             } else {
-                throw new Error(response.message || 'Discovery failed');
+                throw new Error('Failed to fetch recommendations. Please try again later.');
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unexpected error occurred');
@@ -42,26 +45,9 @@ export default function HomePage(): ReactElement {
         }
     };
 
-    /**
-     * Handle user feedback on recommendations
-     */
-    const handleFeedback = async (recommendationId: string, artistId: string, rating: 'like' | 'dislike' | 'love' | 'skip'): Promise<void> => {
-        try {
-            await fetch('/api/feedback', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    recommendationId,
-                    artistId,
-                    rating,
-                    sessionId,
-                }),
-            });
-        } catch (err) {
-            console.error('Failed to submit feedback:', err);
-        }
+    const handleChange = (): void => {
+        setDiscoveryResponse(null);
+        setError(null);
     };
 
     return (
@@ -76,19 +62,19 @@ export default function HomePage(): ReactElement {
 
             {/* Discovery Form */}
             <div className="mb-8">
-                <FestivalDiscoveryForm onSubmit={handleDiscovery} isLoading={isLoading} />
+                <FestivalDiscoveryForm onSubmit={handleSubmit} onChange={handleChange} isLoading={isLoading} />
             </div>
 
             {/* Error Display */}
             {error && (
-                <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="mb-8 p-4 bg-text-destructive/50 border border-destructive rounded-lg">
                     <div className="flex">
                         <div className="flex-shrink-0">
-                            <span className="text-red-400">⚠️</span>
+                            <span className="text-destructive">⚠️</span>
                         </div>
                         <div className="ml-3">
-                            <h3 className="text-sm font-medium text-red-800">Error</h3>
-                            <p className="mt-1 text-sm text-red-700">{error}</p>
+                            <h3 className="text-sm font-medium text-destructive">Error</h3>
+                            <p className="mt-1 text-sm text-destructive">{error}</p>
                         </div>
                     </div>
                 </div>
@@ -104,7 +90,7 @@ export default function HomePage(): ReactElement {
             {/* Results */}
             {discoveryResponse && !isLoading && (
                 <div className="animate-fade-in">
-                    <RecommendationsList festival={discoveryResponse.festival} recommendations={discoveryResponse.recommendations} onFeedback={handleFeedback} />
+                    <RecommendationsList festival={discoveryResponse.festival} recommendations={discoveryResponse.recommendations} />
                 </div>
             )}
 

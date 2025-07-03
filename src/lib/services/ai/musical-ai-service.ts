@@ -9,9 +9,15 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 export class MusicalAIService implements IMusicalAIService {
-    constructor(protected readonly aiService: IAIService) {
+    constructor(
+        protected readonly aiService: IAIService,
+        protected readonly aiSimpleService: IAIService
+    ) {
         if (!this.aiService) {
             throw new Error('AI service is not configured');
+        }
+        if (!this.aiSimpleService) {
+            throw new Error('AI simple service is not configured');
         }
     }
 
@@ -183,7 +189,7 @@ Generate music recommendations based on the provided user preferences:
         aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
         aiRequest.useStorageCache = true; // Use local/remote cache for responses
 
-        const result = await this.aiService.generateStreamObject<z.infer<typeof RecommentationsAIResponseSchema>>({
+        const result = await this.aiSimpleService.generateStreamObject<z.infer<typeof RecommentationsAIResponseSchema>>({
             ...aiRequest,
             // remove score strict requirement for 0 to 1 range, AI can return any value
             schema: z.object({
