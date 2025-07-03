@@ -124,7 +124,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
         const newErrors: Record<string, string> = {};
 
         if (!selectedFestivalId) {
-            newErrors.festival = 'Please select a festival';
+            newErrors.festival = 'Please select a festival on the top of the form';
         }
 
         if (selectedGenres.length === 0 && !userNotes.trim()) {
@@ -157,6 +157,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
         setShowFestivalDropdown(false);
         setSelectedGenres([]); // reset genres on festival change
         onChange?.(selectedFestivalId); // Notify parent of festival change
+        setErrors({});
     };
 
     /**
@@ -195,7 +196,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Festival Selection */}
                 <div>
-                    <label htmlFor="festival-search" className="block font-bold text-base mb-3">
+                    <label htmlFor="festival-search" className={`block font-bold text-base mb-3 ${errors.festival ? 'text-red-500' : ''}`}>
                         Select Festival
                     </label>
                     <div className="relative">
@@ -254,9 +255,6 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                         {/* Click outside to close dropdown */}
                         {showFestivalDropdown && <div className="fixed inset-0 z-5" onClick={() => setShowFestivalDropdown(false)} />}
                     </div>
-
-                    {errors.festival && <p className="mt-1 text-sm text-red-600">{errors.festival}</p>}
-
                     {/* Selected Festival Display */}
                     {selectedFestival && (
                         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
@@ -287,7 +285,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
                 {/* Genre Selection */}
                 <div>
-                    <label className="block font-bold text-base mb-3">Music Preferences</label>
+                    <label className={`block font-bold text-base mb-3 ${errors.genres ? 'text-red-500' : ''}`}>Genre Preferences</label>
                     {loadingGenres ? (
                         <div className="text-magic text-sm flex gap-2">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-magic"></div>
@@ -296,7 +294,6 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                     ) : (
                         <GenresGrid genres={availableGenres} selectedGenres={selectedGenres} onGenreToggle={handleGenreToggle} isLoading={isLoading} />
                     )}
-                    {errors.genres && <p className="mt-2 text-sm text-red-600">{errors.genres}</p>}
                 </div>
 
                 {/* Additional Preferences (Free Text) */}
@@ -378,6 +375,9 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                         <span className="text-sm text-gray-500">We will try recommend you {recommendationsCount} concerts</span>
                     </div>
                 </div>
+
+                {errors.festival && <p className="mt-1 text-sm text-red-600">{errors.festival}</p>}
+                {errors.genres && <p className="mt-2 text-sm text-red-600">{errors.genres}</p>}
 
                 {/* Submit Button */}
                 <div className="flex justify-center">
