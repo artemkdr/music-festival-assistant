@@ -201,13 +201,19 @@ export class AIService implements IAIService {
                 temperature: this.temperature,
                 maxRetries: this.maxRetries,
             });
-            //let chunkCount = 0;
+            let chunkCount = 0;
+            let chunkSize = 0;
             // @TODO handle partial object stream properly
             // currently we just count chunks and return final object
-            /*for await (const chunk of result.partialObjectStream) {
+            for await (const chunk of result.partialObjectStream) {
+                if (chunk.type === 'text') {
+                    chunkSize += chunk.text.length;
+                } else if (chunk.type === 'file') {
+                    chunkSize += chunk.data.length;
+                }
                 chunkCount++;
-            }*/
-
+            }
+            this.logger.info(`Streamed ${chunkCount} chunks with total size ${chunkSize} bytes for request ${cacheKey}`);
             const finalResult = (await result.object) as T;
             if (!!finalResult) {
                 this.cache.set(cacheKey, finalResult);
