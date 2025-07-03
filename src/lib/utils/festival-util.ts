@@ -140,3 +140,12 @@ export const groupFestivalActsByDate = (
             return new Date(a.date).getTime() - new Date(b.date).getTime();
         });
 };
+
+export const getGoogleArtistUrl = (artistName: string, festivalUrl?: string | undefined, festivalName?: string | undefined): string => {
+    const festivalBaseUrl = festivalUrl ? new URL(festivalUrl).hostname : '';
+    return `https://www.google.com/search?q=${encodeURIComponent(artistName)}%20${festivalBaseUrl ? `site:${festivalBaseUrl}` : festivalName}`;
+};
+
+export const getYouTubeSearchArtistUrl = (artistName: string): string => {
+    return `https://www.youtube.com/results?search_query=${encodeURIComponent(artistName)} live ${new Date().getFullYear()}`;
+};

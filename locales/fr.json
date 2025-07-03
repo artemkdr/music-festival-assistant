@@ -13,9 +13,12 @@
     },
     "HomePage": {
         "HeroTitle": "Découvrez votre prochain artiste préféré",
-        "HeroDescription": "Choisissez parmi notre sélection de festivals et obtenez des recommandations personnalisées d'artistes selon vos goûts musicaux. Ne manquez plus jamais de découvrir de la musique incroyable.",
+        "HeroDescription": [
+            "Choisissez parmi notre sélection de festivals et obtenez des recommandations personnalisées d'artistes selon vos goûts musicaux.", 
+            "Ne manquez plus jamais de découvrir de la musique incroyable."
+        ],
         "EmptyStateTitle": "Prêt à découvrir de la musique incroyable ?",
-        "EmptyStateDescription": "Sélectionnez un festival ci-dessus et vos préférences pour commencer à recevoir des recommandations personnalisées.",
+        "EmptyStateDescription": "Sélectionnez un festival ci-dessus et vos préférences pour génerer des recommandations personnalisées.",
         "EmptyStateDisclaimer": [
             "Les recommandations sont générées par l'IA selon vos préférences et la programmation du festival.",
             "Les recommandations peuvent ne pas être totalement exactes.",
@@ -26,9 +29,10 @@
     "FestivalDiscovery": {
         "SelectFestival": "Sélectionnez un festival",
         "FestivalPlaceholder": "Tapez pour rechercher des festivals...",
+        "ArtistsCount": "{count}+ artistes",
         "NoFestivalsFound": "Aucun festival trouvé",        
         "LoadingGenres": "Chargement des genres...",
-        "FestivalInfo": "Informations sur le festival",
+        "FestivalInfo": "Voir le programme du festival",
         "DateTBA": "Date à annoncer",
         "Location": "Lieu",
         "Website": "Site web",
@@ -51,7 +55,7 @@
         "LoadingRecommendations": "Découverte en cours...",
         "ValidationSelectFestival": "Veuillez sélectionner un festival en haut du formulaire",
         "ValidationSelectGenres": "Veuillez sélectionner au moins un genre ou fournir des préférences supplémentaires",
-        "SupportMe": "Soutenez-moi"
+        "SupportMe": "Soutenez le projet"
     },
     "GenresGrid": {
         "Sort": "Trier",
@@ -73,13 +77,12 @@
         "Time": "Heure",
         "Date": "Date",
         "AddToGoogleCalendar": "Ajouter à Google Agenda",
-        "DownloadICS": "Télécharger ICS",
-        "SearchArtist": "Rechercher plus d'info sur",
+        "DownloadICS": "Télécharger le fichier d'événement",
+        "SearchArtist": "Plus d'info sur",
         "ReasonTitle": "Pourquoi cette recommandation ?",
         "NoRecommendationsTitle": "Aucune recommandation trouvée",
         "RecommendationsTitle": "{count} recommandation(s) trouvée(s)",
-        "NoRecommendationsDescription": "Essayez de modifier vos préférences de genre ou le mode de découverte.",
-        "PatientMessage": "Merci de votre patience ! Nous travaillons dur pour trouver les festivals parfaits pour vous."
+        "NoRecommendationsDescription": "Essayez de modifier vos préférences de genre ou le mode de découverte."        
     },
     "LoadingSpinner": {
         "Messages": [
@@ -96,7 +99,7 @@
         "PatienceMessage": "Merci de votre patience ! Nous travaillons dur pour trouver les festivals parfaits pour vous."
     },
     "SupportMe": {
-        "DefaultTitle": "Chaque requête IA est payante, soutenez-moi s'il vous plaît",
+        "DefaultTitle": "Chaque requête IA est payante, soutenez le projet",
         "LinkTitle": "Soutenez-moi par paiement TWINT"
     },
     "Layout": {
@@ -114,14 +117,21 @@
         "NotFound": "Festival introuvable",
         "NotFoundDescription": "Le festival que vous recherchez n'existe pas.",
         "FestivalSchedule": "Programme du festival",
+        "TotalDays": "{count} jour(s)",
+        "TotalArtists": "Artistes",
         "LineupFilter": "Filtrer la programmation...",
         "SearchByArtistOrStage": "Rechercher par artiste ou nom de scène",
         "ClearFilter": "Effacer le filtre",
         "ShowingResults": "Affichage",
         "Of": "de",
-        "Performances": "performances",
+        "Performances": "Performances",
+        "VisitWebsite": "Voir le site du festival",
+        "WebSearch": "Rechercher sur le web",
+        "WatchOnYouTube": "Regarder sur YouTube",
         "CallToActionTitle": "Envie de recommandations personnalisées ?",
         "CallToActionDescription": "Obtenez des recommandations d'artistes basées sur vos goûts musicaux et la programmation de ce festival.",
-        "GetRecommendations": "Obtenir des recommandations"
+        "GetRecommendations": "Obtenir des recommandations",
+        "AddToGoogleCalendar": "Ajouter à Google Agenda",
+        "DownloadICS": "Télécharger le fichier d'événement"
     }
 }

@@ -13,7 +13,10 @@
     },
     "HomePage": {
         "HeroTitle": "Discover Your Next Favorite Artist",
-        "HeroDescription": "Choose from our collection of festivals and get personalized artist recommendations based on your music preferences. Never miss out on discovering amazing music again.",
+        "HeroDescription": [
+            "Choose from our collection of festivals and get personalized artist recommendations based on your music preferences.", 
+            "Never miss out on discovering amazing music again."
+        ],
         "EmptyStateTitle": "Ready to Discover Amazing Music?",
         "EmptyStateDescription": "Select a festival above and your preferences to get started with personalized recommendations.",
         "EmptyStateDisclaimer": [
@@ -26,9 +29,10 @@
     "FestivalDiscovery": {
         "SelectFestival": "Select a Festival",
         "FestivalPlaceholder": "Type to search festivals...",
+        "ArtistsCount": "{count}+ artists",
         "NoFestivalsFound": "No festivals found",
         "LoadingGenres": "Loading genres...",
-        "FestivalInfo": "Festival Information",
+        "FestivalInfo": "View festival lineup",
         "DateTBA": "Date To Be Announced",
         "Location": "Location",
         "Website": "Website",
@@ -51,7 +55,7 @@
         "LoadingRecommendations": "Discovering...",
         "ValidationSelectFestival": "Please select a festival on the top of the form",
         "ValidationSelectGenres": "Please select at least one genre or provide additional preferences",
-        "SupportMe": "Support me"
+        "SupportMe": "Support the project"
     },
     "GenresGrid": {
         "Sort": "Sort",
@@ -73,13 +77,12 @@
         "Time": "Time",
         "Date": "Date",
         "AddToGoogleCalendar": "Add to Google Calendar",
-        "DownloadICS": "Download ICS",
+        "DownloadICS": "Download event file",
         "SearchArtist": "Search more about",
         "ReasonTitle": "Why this recommendation?",
         "RecommendationsTitle": "{count} recommendation(s) found",
         "NoRecommendationsTitle": "No recommendations found",        
-        "NoRecommendationsDescription": "Try adjusting your genre preferences or discovery mode.",
-        "PatientMessage": "Thank you for your patience! We're working hard to find the perfect festivals for you."
+        "NoRecommendationsDescription": "Try adjusting your genre preferences or discovery mode."        
     },
     "LoadingSpinner": {
         "Messages": [
@@ -96,7 +99,7 @@
         "PatienceMessage": "Thank you for your patience! We're working hard to find the perfect festivals for you."
     },
     "SupportMe": {
-        "DefaultTitle": "Every AI request is paid, support me please",
+        "DefaultTitle": "Every AI request is paid, support the project",
         "LinkTitle": "Support me by TWINT payment"
     },
     "Layout": {
@@ -114,14 +117,21 @@
         "NotFound": "Festival Not Found",
         "NotFoundDescription": "The festival you're looking for doesn't exist.",
         "FestivalSchedule": "Festival Schedule",
+        "TotalDays": "{count} day(s)",
+        "TotalArtists": "Artists",
         "LineupFilter": "Filter lineup...",
         "SearchByArtistOrStage": "Search by artist or stage name",
         "ClearFilter": "Clear filter",
         "ShowingResults": "Showing",
         "Of": "of",
-        "Performances": "performances",
+        "Performances": "Performances",
+        "VisitWebsite": "Visit Festival Website",
+        "WebSearch": "Web Search",
+        "WatchOnYouTube": "Watch on YouTube",
         "CallToActionTitle": "Want Personalized Recommendations?",
         "CallToActionDescription": "Get AI-powered artist recommendations based on your music taste and this festival's lineup.",
-        "GetRecommendations": "Get Recommendations"
+        "GetRecommendations": "Get Recommendations",
+        "AddToGoogleCalendar": "Add to Google Calendar",
+        "DownloadICS": "Download event file"
     }
 }

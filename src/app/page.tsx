@@ -58,7 +58,13 @@ export default function HomePage(): ReactElement {
             <div className="text-center p-2 md:p-4 flex flex-col gap-2">
                 <h1 className="text-2xl font-bold text-gray-900">{t('HomePage.HeroTitle')}</h1>
                 {/* Hero Description */}
-                <p className="text-base text-gray-600 max-w-xl mx-auto">{t('HomePage.HeroDescription')}</p>
+                <div className="flex flex-col">
+                    {(t.raw('HomePage.HeroDescription') as string[]).map((line, index) => (
+                        <p key={index} className="text-base text-gray-600 max-w-xl mx-auto">
+                            {line}
+                        </p>
+                    ))}
+                </div>
             </div>
 
             {/* Discovery Form */}

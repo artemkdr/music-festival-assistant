@@ -1,11 +1,11 @@
 'use client';
 
-import { Artist, Festival, Recommendation } from '@/lib/schemas';
-import { isValidDate } from '@/lib/utils/date-util';
-import { DATE_TBA, getFestivalDates } from '@/lib/utils/festival-util';
-import { createFestivalEvent, downloadICSFile } from '@/lib/utils/ics-util';
-import Link from 'next/link';
+import { Festival, Recommendation } from '@/lib/schemas';
+import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
+import { formatDateString, isValidDate } from '@/lib/utils/date-util';
+import { DATE_TBA, getFestivalDates, getGoogleArtistUrl, getYouTubeSearchArtistUrl } from '@/lib/utils/festival-util';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { FaGoogle, FaSpotify, FaYoutube } from 'react-icons/fa';
 import { LuCalendarArrowDown } from 'react-icons/lu';
@@ -20,27 +20,6 @@ interface RecommendationsListProps {
  */
 export function RecommendationsList({ festival, recommendations }: RecommendationsListProps): ReactElement {
     const t = useTranslations('Recommendations');
-    const addToGoogleCalendar = async (event: { date: string; time: string; festival: string; artist: string; stage: string }) => {
-        const { date, time, festival, artist, stage } = event;
-        const actDateTime = new Date(`${date}T${time}`);
-        let formattedStartDate = '';
-        let formattedEndDate = '';
-        if (isValidDate(actDateTime)) {
-            // if actDateTime hours are less than 5:00, it's likely the next day actually,
-            // because most festivals start in the afternoon or evening and they don't put the next day date in the time field
-            if (actDateTime.getHours() < 5) {
-                actDateTime.setDate(actDateTime.getDate() + 1);
-            }
-            // Format as YYYYMMDDTHHMMSSZ
-            formattedStartDate = actDateTime.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
-            // add 1 hour for end time
-            const endDate = new Date(actDateTime);
-            endDate.setHours(endDate.getHours() + 1);
-            formattedEndDate = endDate.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
-        }
-        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(artist)} at ${encodeURIComponent(festival)}&dates=${formattedStartDate}/${formattedEndDate}&details=${encodeURIComponent(stage)}`;
-        window.open(calendarUrl, '_blank');
-    };
 
     const addToGoogleCalendarHandler = (recommendation: Recommendation) => {
         addToGoogleCalendar({
@@ -50,34 +29,6 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             artist: recommendation.artist.name,
             stage: recommendation.act.stage || festival.location || '',
         });
-    };
-
-    const downloadICSCalendar = (event: { date: string; time: string; artist: string; stage?: string }) => {
-        const { date, time, artist, stage } = event;
-
-        const eventParams: Parameters<typeof createFestivalEvent>[0] = {
-            artistName: artist,
-            festivalName: festival.name,
-            date,
-            time,
-        };
-
-        if (stage) {
-            eventParams.stage = stage;
-        }
-
-        if (festival.location) {
-            eventParams.festivalLocation = festival.location;
-        }
-
-        if (festival.website) {
-            eventParams.festivalWebsite = festival.website;
-        }
-
-        const calendarEvent = createFestivalEvent(eventParams);
-
-        const filename = `${artist.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${festival.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}`;
-        downloadICSFile(calendarEvent, filename);
     };
 
     const downloadICSCalendarHandler = (recommendation: Recommendation) => {
@@ -90,36 +41,13 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             eventData.stage = recommendation.act.stage;
         }
         try {
-            downloadICSCalendar(eventData);
+            downloadICSCalendar(festival, eventData);
         } catch {
             // @TODO handle error gracefully, maybe show a toast notification
         }
     };
 
     const { startDate: festivalStartDate, endDate: festivalEndDate } = getFestivalDates(festival);
-
-    const festivalBaseUrl = new URL(festival.website || '').hostname;
-
-    const getGoogleArtistUrl = (artist: Artist): string => {
-        return `https://www.google.com/search?q=${encodeURIComponent(artist.name)}%20${festival.website ? `site:${festivalBaseUrl}` : festival.name}`;
-    };
-
-    /**
-     * Format date string for display
-     */
-    const formatDate = (dateString: string) => {
-        if (dateString === DATE_TBA) {
-            return t('DateTBA');
-        }
-        if (!isValidDate(new Date(dateString))) {
-            return dateString; // Return as is if invalid date
-        }
-        return new Date(dateString).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
 
     return (
         <div className="space-y-6">
@@ -139,7 +67,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                             <span>📍 {festival.location}</span>
                             {festival.lineup && festival.lineup.length > 0 && (
                                 <span>
-                                    📅 {formatDate(festivalStartDate || DATE_TBA)} - {formatDate(festivalEndDate || DATE_TBA)}
+                                    📅 {formatDateString(festivalStartDate || DATE_TBA)} - {formatDateString(festivalEndDate || DATE_TBA)}
                                 </span>
                             )}
                             <span>🎵 {recommendations.length > 0 ? t('RecommendationsTitle', { count: recommendations.length }) : t('NoRecommendationsTitle')}</span>
@@ -179,7 +107,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                 </ul>
                             </div>
 
-                            <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="link-primary underline">
+                            <Link href={getGoogleArtistUrl(recommendation.artist.name, festival.website, festival.name)} target="_blank" rel="noopener noreferrer" className="link-primary underline">
                                 {t('SearchArtist')} <strong>{recommendation.artist.name}</strong>
                             </Link>
 
@@ -189,7 +117,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-1 text-sm">
                                     <div>
                                         <span className="text-gray-500">{t('Date')}:</span>
-                                        <span className="ml-2 font-medium">{formatDate(recommendation.act.date || DATE_TBA)}</span>
+                                        <span className="ml-2 font-medium">{formatDateString(recommendation.act.date || DATE_TBA)}</span>
                                     </div>
                                     <div>
                                         <span className="text-gray-500">{t('Time')}:</span>
@@ -224,12 +152,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                     </Link>
                                 )}
                                 {/* Link to youtube search for live from the artist this year */}
-                                <Link
-                                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(recommendation.artist.name)} live ${new Date().getFullYear()}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn-destructive flex items-center gap-2"
-                                >
+                                <Link href={getYouTubeSearchArtistUrl(recommendation.artist.name)} target="_blank" rel="noopener noreferrer" className="btn-destructive flex items-center gap-2">
                                     <FaYoutube />
                                     <span>YouTube</span>
                                 </Link>

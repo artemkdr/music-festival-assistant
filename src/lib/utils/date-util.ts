@@ -11,6 +11,31 @@ export const formatDate = (date: Date): string | undefined => {
 };
 
 /**
+ * Format date string for display
+ */
+export const formatDateString = (
+    dateString: string,
+    format: {
+        year: 'numeric' | '2-digit';
+        month: 'numeric' | '2-digit' | 'short' | 'long';
+        day: 'numeric' | '2-digit';
+    } = {
+        year: 'numeric' as const,
+        month: 'short' as const,
+        day: 'numeric' as const,
+    },
+    fallbackString = 'TBA'
+) => {
+    if (!dateString || dateString === 'TBA') {
+        return fallbackString; // Return fallback string for TBA
+    }
+    if (!isValidDate(new Date(dateString))) {
+        return dateString; // Return as is if invalid date
+    }
+    return new Date(dateString).toLocaleDateString(undefined, format);
+};
+
+/**
  * Checks if a date is valid.
  * @param date The date to check.
  * @returns True if the date is valid, false otherwise.

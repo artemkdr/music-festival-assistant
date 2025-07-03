@@ -3,6 +3,34 @@
  */
 
 import { CalendarEvent } from '@/lib/schemas';
+import { isValidDate } from '@/lib/utils/date-util';
+
+/**
+ * Adds an event to Google Calendar *
+ * @param event - Event details including date, time, festival, artist, and stage
+ * @returns URL to add the event to Google Calendar
+ */
+export const addToGoogleCalendar = async (event: { date: string; time: string; festival: string; artist: string; stage: string }) => {
+    const { date, time, festival, artist, stage } = event;
+    const actDateTime = new Date(`${date}T${time}`);
+    let formattedStartDate = '';
+    let formattedEndDate = '';
+    if (isValidDate(actDateTime)) {
+        // if actDateTime hours are less than 5:00, it's likely the next day actually,
+        // because most festivals start in the afternoon or evening and they don't put the next day date in the time field
+        if (actDateTime.getHours() < 5) {
+            actDateTime.setDate(actDateTime.getDate() + 1);
+        }
+        // Format as YYYYMMDDTHHMMSSZ
+        formattedStartDate = actDateTime.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+        // add 1 hour for end time
+        const endDate = new Date(actDateTime);
+        endDate.setHours(endDate.getHours() + 1);
+        formattedEndDate = endDate.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+    }
+    const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(artist)} at ${encodeURIComponent(festival)}&dates=${formattedStartDate}/${formattedEndDate}&details=${encodeURIComponent(stage)}`;
+    window.open(calendarUrl, '_blank');
+};
 
 /**
  * Formats a date to ICS format (YYYYMMDDTHHMMSSZ)
@@ -125,4 +153,32 @@ export const createFestivalEvent = (params: {
     }
 
     return event;
+};
+
+export const downloadICSCalendar = (festival: { name: string; location?: string | undefined; website?: string | undefined }, event: { date: string; time: string; artist: string; stage?: string }) => {
+    const { date, time, artist, stage } = event;
+
+    const eventParams: Parameters<typeof createFestivalEvent>[0] = {
+        artistName: artist,
+        festivalName: festival.name,
+        date,
+        time,
+    };
+
+    if (stage) {
+        eventParams.stage = stage;
+    }
+
+    if (festival.location) {
+        eventParams.festivalLocation = festival.location;
+    }
+
+    if (festival.website) {
+        eventParams.festivalWebsite = festival.website;
+    }
+
+    const calendarEvent = createFestivalEvent(eventParams);
+
+    const filename = `${artist.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${festival.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}`;
+    downloadICSFile(calendarEvent, filename);
 };

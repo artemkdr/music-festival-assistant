@@ -4,14 +4,14 @@ import { discoverApi, FestivalInfo } from '@/app/lib/api/discover-api';
 import { GenresGrid } from '@/components/genres-grid';
 import { SupportMeButton } from '@/components/support-me-button';
 import { UserPreferences } from '@/lib/schemas';
-import { isValidDate } from '@/lib/utils/date-util';
-import { DATE_TBA } from '@/lib/utils/festival-util';
+import { formatDateString } from '@/lib/utils/date-util';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { MdFestival } from 'react-icons/md';
+import { BsMusicNoteList } from 'react-icons/bs';
 
 interface FestivalDiscoveryFormProps {
     onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;
@@ -178,23 +178,6 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
         setDiscoveryMode(mode);
     };
 
-    /**
-     * Format date string for display
-     */
-    const formatDate = (dateString: string) => {
-        if (dateString === DATE_TBA) {
-            return t('DateTBA');
-        }
-        if (!isValidDate(new Date(dateString))) {
-            return dateString; // Return as is if invalid date
-        }
-        return new Date(dateString).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
     return (
         <div className="bg-white rounded-lg shadow-md p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -247,7 +230,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                                         <div className="font-medium text-gray-900">{festival.name}</div>
                                         <div className="text-sm text-gray-500">{festival.location}</div>
                                         <div className="text-xs text-gray-400">
-                                            {formatDate(festival.startDate)} - {formatDate(festival.endDate)}
+                                            {formatDateString(festival.startDate)} - {formatDateString(festival.endDate)}
                                         </div>
                                         <div className="text-xs text-gray-400">
                                             {festival.artistsCount}+ {t('TotalArtists').toLowerCase()}
@@ -271,10 +254,17 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                                     <div className="font-bold text-primary">{selectedFestival.name}</div>
                                     <div className="text-sm text-primary">{selectedFestival.location}</div>
                                     <div className="text-xs text-primary/80">
-                                        {selectedFestival.startDate} - {selectedFestival.endDate},{` ${selectedFestival.artistsCount}+ artists`}
+                                        {formatDateString(selectedFestival.startDate)} - {formatDateString(selectedFestival.endDate)}, {t('ArtistsCount', { count: selectedFestival.artistsCount })}
                                     </div>
-                                    <Link href={`/festival/${selectedFestival.id}`} className="link-primary underline font-medium" target="_blank" rel="noopener noreferrer" title={t('FestivalInfo')}>
-                                        {t('FestivalInfo')}
+                                    <Link
+                                        href={`/festival/${selectedFestival.id}`}
+                                        className="link-primary underline font-bold flex items-center gap-2"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title={t('FestivalInfo')}
+                                    >
+                                        <BsMusicNoteList />
+                                        <span>{t('FestivalInfo')}</span>
                                     </Link>
                                 </div>
                             </div>

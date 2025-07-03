@@ -14,10 +14,10 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Music Festival Assistant',
+    title: 'Swiss Music Festival Assistant',
     description: 'Discover artists at music festivals based on your preferences',
     keywords: ['music', 'festival', 'discovery', 'recommendations', 'artists'],
-    authors: [{ name: 'Music Festival Assistant Team' }],
+    authors: [{ name: 'Artem Kudryavtsev' }],
 };
 
 export const viewport: Viewport = {

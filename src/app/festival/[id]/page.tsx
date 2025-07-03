@@ -6,14 +6,17 @@
 
 import { festivalsApi } from '@/app/lib/api';
 import { Festival } from '@/lib/schemas';
-import { DATE_TBA, getFestivalArtists, getFestivalDates, groupFestivalActsByDate } from '@/lib/utils/festival-util';
+import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
+import { formatDateString, isValidDate } from '@/lib/utils/date-util';
+import { getFestivalArtists, getGoogleArtistUrl, getYouTubeSearchArtistUrl, groupFestivalActsByDate } from '@/lib/utils/festival-util';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { FaGoogle, FaYoutube } from 'react-icons/fa';
 import { GiLoveSong } from 'react-icons/gi';
+import { LuCalendarArrowDown } from 'react-icons/lu';
 import { MdCalendarToday, MdFestival, MdLanguage, MdLocationOn } from 'react-icons/md';
 import { TbClock, TbMoodSing } from 'react-icons/tb';
-import { useTranslations } from 'next-intl';
 
 interface FestivalPageProps {
     params: Promise<{ id: string }>;
@@ -56,20 +59,6 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
 
         loadFestival();
     }, [params]);
-
-    /**
-     * Format date string for display
-     */
-    const formatDate = (dateString: string) => {
-        if (dateString === DATE_TBA) {
-            return t('DateTBA');
-        }
-        return new Date(dateString).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    };
 
     // Loading state
     if (isLoading) {
@@ -126,16 +115,8 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
             </div>
         );
     }
-
-    const { startDate, endDate } = getFestivalDates(festival);
     const totalArtists = getFestivalArtists(festival).length;
     const totalDays = groupFestivalActsByDate(festival).length;
-
-    const festivalBaseUrl = new URL(festival.website || '').hostname;
-
-    const getGoogleArtistUrl = (artistName: string): string => {
-        return `https://www.google.com/search?q=${encodeURIComponent(artistName)}%20${festival.website ? `site:${festivalBaseUrl}` : festival.name}`;
-    };
 
     /**
      * Filter lineup based on search term
@@ -150,6 +131,32 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
         .filter(dayLineup => dayLineup.list.length > 0);
 
     const totalFilteredPerformances = filteredLineup.reduce((total, day) => total + day.list.length, 0);
+
+    const addToGoogleCalendarHandler = (act: { date: string; time: string; artist: string; stage?: string }) => {
+        addToGoogleCalendar({
+            date: act.date || '',
+            time: act.time || '',
+            festival: festival.name,
+            artist: act.artist,
+            stage: act.stage || festival.location || '',
+        });
+    };
+
+    const downloadICSCalendarHandler = (act: { date: string; time: string; artist: string; stage?: string }) => {
+        const eventData: { date: string; time: string; artist: string; stage?: string } = {
+            date: act.date || '',
+            time: act.time || '',
+            artist: act.artist,
+        };
+        if (act.stage) {
+            eventData.stage = act.stage;
+        }
+        try {
+            downloadICSCalendar(festival, eventData);
+        } catch {
+            // @TODO handle error gracefully, maybe show a toast notification
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -194,7 +201,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                         <MdCalendarToday className="text-primary text-xl" />
                                     </div>
                                     <div className="text-sm text-gray-600">{t('FestivalSchedule')}</div>
-                                    <div className="font-semibold">{startDate && endDate && startDate !== endDate ? `${totalDays} ${t('TotalDays')}` : `1 ${t('TotalDays')}`}</div>
+                                    <div className="font-semibold">{totalDays > 0 ? t('TotalDays', { count: totalDays }) : ''}</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="flex items-center justify-center mb-2">
@@ -298,7 +305,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                     <div key={dayIndex}>
                                         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                                             <MdCalendarToday className="mr-2 text-primary" />
-                                            {formatDate(dayLineup.date)}
+                                            {formatDateString(dayLineup.date)}
                                         </h3>
 
                                         <div className="grid gap-3">
@@ -317,27 +324,60 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                             </div>
                                                         </div>
 
+                                                        {/* Show 'Add to calendars button only if the date is valid */}
+                                                        {isValidDate(new Date(`${dayLineup.date}T${performance.time}`)) && (
+                                                            <div className="flex flex-wrap gap-4 py-2">
+                                                                <button
+                                                                    onClick={() =>
+                                                                        downloadICSCalendarHandler({
+                                                                            date: dayLineup.date,
+                                                                            time: performance.time || '20:00',
+                                                                            artist: performance.artistName,
+                                                                            stage: performance.stage || festival.location || '',
+                                                                        })
+                                                                    }
+                                                                    className="link-secondary underline flex items-center gap-2"
+                                                                >
+                                                                    <LuCalendarArrowDown size={20} />
+                                                                    <span>{t('DownloadICS')}</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        addToGoogleCalendarHandler({
+                                                                            date: dayLineup.date,
+                                                                            time: performance.time || '20:00',
+                                                                            artist: performance.artistName,
+                                                                            stage: performance.stage || festival.location || '',
+                                                                        })
+                                                                    }
+                                                                    className="link-secondary underline flex items-center gap-2"
+                                                                >
+                                                                    <FaGoogle size={20} />
+                                                                    <span>{t('AddToGoogleCalendar')}</span>
+                                                                </button>
+                                                            </div>
+                                                        )}
+
                                                         {/* spotify link, youtube live serach link, google search link */}
                                                         <div className="flex justify-end space-x-4">
                                                             <Link
-                                                                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(performance.artistName)} live ${new Date().getFullYear()}`}
+                                                                href={getYouTubeSearchArtistUrl(performance.artistName)}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="link-destructive underline flex items-center gap-2"
+                                                                className="link-destructive p-2 rounded-full bg-primary/10"
                                                                 title={t('WatchOnYouTube')}
                                                             >
-                                                                <FaYoutube />
-                                                                <span>YouTube</span>
+                                                                <FaYoutube size={24} />
                                                             </Link>
 
                                                             <Link
-                                                                href={getGoogleArtistUrl(performance.artistName)}
+                                                                href={getGoogleArtistUrl(performance.artistName, festival.website, festival.name)}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="link-neutral underline flex items-center gap-2"
+                                                                title={t('WebSearch')}
+                                                                className="link-primary p-2 rounded-full bg-primary/10"
                                                             >
-                                                                <FaGoogle />
-                                                                <span>{t('WebSearch')}</span>
+                                                                <FaGoogle size={24} />
                                                             </Link>
                                                         </div>
                                                     </div>
