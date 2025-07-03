@@ -2,7 +2,10 @@
 
 import { discoverApi, FestivalInfo } from '@/app/lib/api/discover-api';
 import { GenresGrid } from '@/components/genres-grid';
+import { SupportMeButton } from '@/components/support-me-button';
 import { UserPreferences } from '@/lib/schemas';
+import { isValidDate } from '@/lib/utils/date-util';
+import { DATE_TBA } from '@/lib/utils/festival-util';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
@@ -170,6 +173,23 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
         setDiscoveryMode(mode);
     };
 
+    /**
+     * Format date string for display
+     */
+    const formatDate = (dateString: string) => {
+        if (dateString === DATE_TBA) {
+            return 'Date To Be Announced';
+        }
+        if (!isValidDate(new Date(dateString))) {
+            return dateString; // Return as is if invalid date
+        }
+        return new Date(dateString).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-md p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -223,7 +243,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                                         <div className="font-medium text-gray-900">{festival.name}</div>
                                         <div className="text-sm text-gray-500">{festival.location}</div>
                                         <div className="text-xs text-gray-400">
-                                            {festival.startDate} - {festival.endDate}
+                                            {formatDate(festival.startDate)} - {formatDate(festival.endDate)}
                                         </div>
                                         <div className="text-xs text-gray-400">{festival.artistsCount}+ artists</div>
                                     </button>
@@ -371,6 +391,10 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             'Discover Artists'
                         )}
                     </button>
+                </div>
+                {/* Support me button */}
+                <div className="flex justify-center">
+                    <SupportMeButton variant="link" title="Support me" />
                 </div>
             </form>
         </div>
