@@ -1,24 +1,30 @@
+
 # Music Festival Assistant
 
-A TypeScript/Next.js application that helps users discover artists at music festivals based on their preferences.
+Modern, modular TypeScript/Next.js app for discovering artists and planning your music festival experience. Built with Clean Architecture, strong validation, and a focus on extensibility.
 
 ## Features
 
-🎵 **Festival Discovery**: Enter any festival URL to get personalized artist recommendations  
-🎯 **Smart Recommendations**: AI-powered matching based on your music preferences  
-📊 **Discovery Modes**: Conservative, Balanced, or Adventurous recommendation styles  
-👍 **User Feedback**: Like/dislike system to improve recommendations  
-📅 **Performance Details**: Complete schedule information for recommended artists  
-🔗 **External Links**: Direct links to Spotify, artist websites, and social media  
+- **Festival Discovery**: Get artist recommendations for supported festivals
+- **Personalized Matching**: AI-powered suggestions based on genres and discovery mode
+- **Flexible Discovery Modes**: Conservative (popular), Balanced (mix), Adventurous (hidden gems)
+- **Performance Schedules**: See when and where artists perform
+- **External Links**: Quick access to Spotify, artist sites, etc
+- **Admin Tools**: (WIP) Manage artists and festivals via admin UI
+
+---
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15.2, React 19, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Clean Architecture pattern
+- **Frontend**: Next.js 15+, React 19, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes with Clean Architecture
+- **Database**: Prisma ORM (schema defined, migration scripts ready)
+- **AI Integration**: Google Vertex AI for recommendations
 - **Validation**: Zod schemas for type-safe API contracts
 - **Testing**: Vitest for unit and integration tests
-- **Logging**: tslog with dependency injection
-- **Architecture**: Repository pattern with mock data services
+- **Logging**: tslog with dependency injection throughout
+- **Architecture**: Layered services, Repository pattern, DI container
+- **External APIs**: Spotify integration for artist data
 
 ## Getting Started
 
@@ -44,116 +50,126 @@ npm run dev
 
 ### Usage
 
-1. **Enter Festival URL**: Paste any festival website URL (currently using mock data)
-2. **Select Preferences**: Choose your favorite music genres
-3. **Pick Discovery Mode**: 
+1. **Festival Discovery**: Browse available festivals
+2. **Set Preferences**: Select your favorite music genres from the grid
+3. **Choose Discovery Mode**: 
    - Conservative: Popular, well-known artists
    - Balanced: Mix of popular and emerging artists  
    - Adventurous: Hidden gems and new discoveries
-4. **Get Recommendations**: View personalized artist suggestions with performance details
-5. **Provide Feedback**: Like/dislike artists to improve future recommendations
-
-## Architecture
-
-The application follows clean architecture principles:
-
-```
-src/
-├── app/                 # Next.js App Router (pages, layouts, API routes)
-├── components/          # React components
-├── services/           # Business logic layer
-├── repositories/       # Data access layer  
-├── controllers/        # API request handlers
-├── types/              # TypeScript type definitions
-├── schemas/            # Zod validation schemas
-├── lib/                # Utility functions and configurations
-└── test/               # Test utilities and setup
-```
-
-### Key Design Patterns
-
-- **Dependency Injection**: Loose coupling between layers
-- **Repository Pattern**: Abstract data access
-- **Clean Architecture**: Separation of concerns
-- **SOLID Principles**: Maintainable and extensible code
+4. **Get AI Recommendations**: View personalized artist suggestions with performance details
+5. **Admin Access**: Use `/admin` to manage artists and festivals (development feature)
 
 ## API Endpoints
 
-### Festival Discovery
-`POST /api/festivals/discover`
-```json
-{
-  "festivalUrl": "https://festival-website.com",
-  "userPreferences": {
-    "genres": ["Electronic", "Indie Rock"],
-    "discoveryMode": "balanced"
-  }
-}
-```
+### Core Discovery Flow
+- `GET /api/discover/festivals` - List available festivals with summary info
+- `GET /api/discover/festivals/[id]` - Get detailed festival information
+- `GET /api/discover/festivals/[id]/genres` - Get genres available at a specific festival
+- `POST /api/discover/recommendations` - Get AI-powered personalized recommendations
 
-### User Feedback
-`POST /api/feedback`
-```json
-{
-  "recommendationId": "perf-1",
-  "artistId": "artist-1", 
-  "rating": "like",
-  "sessionId": "session-123"
-}
+### Authentication & User Management
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login  
+- `GET /api/auth/profile` - Get user profile
+
+### Admin - Artist Management
+- `GET /api/admin/artists` - List all artists
+- `GET /api/admin/artists/search?q={query}` - Search artists by name (up to 10 results)
+- `GET /api/admin/artists/[id]` - Get artist details by ID
+- `PUT /api/admin/artists/[id]` - Update artist information
+- `GET /api/admin/artists/[id]/acts` - Get festival acts for an artist
+
+### Admin - Festival Management  
+- `GET /api/admin/festivals` - List all festivals
+- `GET /api/admin/festivals/[id]` - Get festival details by ID
+- `POST /api/admin/festivals/[id]/link-artist-to-act` - Link festival acts with artists
+- `GET /api/admin/festivals/cache/[cacheId]` - Get cached festival data
+
+### Admin - Data Crawling
+- `POST /api/admin/crawl/artists` - Crawl and import artist data (by festival or artist names)
+- `POST /api/admin/crawl/artist` - Crawl individual artist data
+- `POST /api/admin/crawl/festival` - Crawl festival lineup data
+
+### Admin - Statistics & External APIs
+- `GET /api/admin/stats` - Get system statistics (artists, festivals, etc.)
+- `GET /api/admin/spotify/search?q={query}` - Search Spotify for artist data
 ```
 
 ## Development
 
-### Running Tests
+### Environment Setup
 ```bash
-npm test           # Run tests once
-npm run test:watch # Run tests in watch mode
-npm run test:coverage # Run with coverage report
+# Install dependencies
+npm install
+
+# Set up environment variables (copy .env.example to .env.local)
+# Configure Google Vertex AI credentials if needed
+
+# Run database migrations (when ready)
+npx prisma migrate dev
+
+# Start development server
+npm run dev
 ```
 
-### Code Quality
+### Available Scripts
 ```bash
-npm run lint       # Check linting
-npm run lint:fix   # Fix linting issues
-npm run type-check # TypeScript type checking
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run test         # Run tests once
+npm run test:watch   # Run tests in watch mode
+npm run lint:fix     # Check code quality and fix issues (prettier + eslint)
+npm run type-check   # TypeScript validation
 ```
 
-### Building for Production
-```bash
-npm run build      # Build for production
-npm start          # Start production server
-```
+### Code Quality & Standards
+- **TypeScript**: Strict type checking enabled, no `any` types
+- **ESLint + Prettier**: Consistent code formatting
+- **Clean Architecture**: Modular, testable design
+- **Dependency Injection**: Loose coupling between layers
+- **File Size Limit**: Keep files under 300 lines, split when needed
 
-## Mock Data
+## Data Sources & Integration
 
-Currently using mock data for:
-- Festival lineup (Summer Sound Festival 2024)
-- Artist information with genres and descriptions
-- Performance schedules across multiple stages
+### Current Implementation
+- **Mock Data**: Possibility to use mock data for development
+- **Local Storage**: Possibility to store everything locally in json files
+- **Neon Database + Prisma ORM**: Neon Postgres + Prisma schema
+- **Spotify API**: Artist search and profile linking (admin features)
+- **LLM Providers (Vertex, OpenAI, Groq..)**: Recommendation engine integration
 
-In production, this would be replaced with:
-- Web scraping services for festival data
-- Music APIs (Spotify, Last.fm) for artist information
-- External recommendation engines
 
 ## Contributing
 
+We follow clean code practices and modular architecture. Please ensure your contributions align with these guidelines:
+
+### Development Guidelines
+1. **Architecture**: Follow Clean Architecture patterns, use dependency injection
+2. **TypeScript**: Strict typing, no `any` types allowed
+3. **File Organization**: Keep files under 300 lines, use kebab-case naming
+4. **Testing**: Write tests for business logic and API endpoints
+5. **Documentation**: Include JSDoc comments for complex functions
+
+### Contribution Workflow
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+3. Follow coding standards (TypeScript strict, ESLint, Prettier)
+4. Add tests for new functionality
+5. Commit with clear messages: `git commit -m 'Add amazing feature'`
+6. Push to your branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request with detailed description
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Roadmap
-
-- [ ] Real festival website scraping
-- [ ] Spotify API integration
-- [ ] User accounts and saved preferences
-- [ ] Calendar export functionality
-- [ ] Mobile app companion
-- [ ] Social sharing features
-- [ ] Advanced recommendation algorithms
+- [x] Clean Architecture foundation with DI
+- [x] AI-powered recommendations via Google Vertex / OpenAI
+- [x] Admin panel for artist/festival management
+- [x] Complete Prisma database integration
+- [ ] Unit tests for all business logic and UI
+- [ ] User authentication and profiles
+- [ ] Enhanced recommendation algorithms
+- [ ] Multi-language support
