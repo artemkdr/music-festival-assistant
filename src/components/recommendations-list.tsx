@@ -36,7 +36,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             endDate.setHours(endDate.getHours() + 1);
             formattedEndDate = endDate.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
         }
-        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(artist)} at ${encodeURIComponent(festival)}&dates=${formattedStartDate}/${formattedEndDate}&location=${encodeURIComponent(stage)}`;
+        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(artist)} at ${encodeURIComponent(festival)}&dates=${formattedStartDate}/${formattedEndDate}&details=${encodeURIComponent(stage)}`;
         window.open(calendarUrl, '_blank');
     };
 
@@ -163,7 +163,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                             </div>
 
                             <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="link-primary underline">
-                                More about <strong>{recommendation.artist.name}</strong> on Google
+                                More about <strong>{recommendation.artist.name}</strong>
                             </Link>
 
                             {/* Act Info */}

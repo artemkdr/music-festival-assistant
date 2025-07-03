@@ -6,7 +6,7 @@ This script migrates data from local JSON files to a Neon PostgreSQL database.
 
 ### Prerequisites
 
-1. **Environment Variables**: Ensure your `.env.local` file contains:
+1. **Environment Variables**: Ensure your `.env` file contains:
    ```
    DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
    ```
@@ -136,7 +136,7 @@ Migration completed with 100.00% success rate
 
 ### Troubleshooting
 
-1. **DATABASE_URL not found**: Check your `.env.local` file
+1. **DATABASE_URL not found**: Check your `.env` file
 2. **JSON files not found**: Ensure data files exist in correct locations
 3. **Connection timeout**: Check your database connection and network
 4. **Permission errors**: Ensure database user has CREATE TABLE permissions

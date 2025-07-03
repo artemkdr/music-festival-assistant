@@ -39,6 +39,7 @@ Your task is to generate detailed music festival information based on the provid
     - If you find the lineup, then extract it as a list of acts with stage, artists names and their act time (if available).
 - Festival description must be max 500 characters and focused on the festival's atmosphere, history, and unique features.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
+- Respond in English.
 
 DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.
 `,
@@ -99,6 +100,7 @@ Your task is to generate detailed artist information based on the provided artis
 - Provide at least 2 genres.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
 - Provide sources for the information you provide, if available.
+- Respond in English.
 
 DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.
 `,

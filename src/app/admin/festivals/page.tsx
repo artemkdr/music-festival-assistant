@@ -53,8 +53,9 @@ export default function FestivalsPage() {
                             <p className="mt-2 text-gray-600">Manage festival data and crawl new festivals</p>
                         </div>
                         <div className="flex space-x-3">
-                            <Link href="/admin/festivals/crawl" className="btn-primary">
-                                <MdFestival /> Crawl New Festival
+                            <Link href="/admin/festivals/crawl" className="btn-primary flex items-center gap-2">
+                                <MdFestival />
+                                <span>Crawl New Festival</span>
                             </Link>
                         </div>
                     </div>
