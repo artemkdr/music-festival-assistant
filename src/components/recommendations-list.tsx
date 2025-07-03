@@ -2,9 +2,10 @@
 
 import { Artist, Festival, Recommendation } from '@/lib/schemas';
 import { isValidDate } from '@/lib/utils/date-util';
-import { getFestivalDates } from '@/lib/utils/festival-util';
+import { DATE_TBA, getFestivalDates } from '@/lib/utils/festival-util';
 import { createFestivalEvent, downloadICSFile } from '@/lib/utils/ics-util';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import type { ReactElement } from 'react';
 import { FaGoogle, FaSpotify, FaYoutube } from 'react-icons/fa';
 import { LuCalendarArrowDown } from 'react-icons/lu';
@@ -18,6 +19,7 @@ interface RecommendationsListProps {
  * Component to display festival recommendations
  */
 export function RecommendationsList({ festival, recommendations }: RecommendationsListProps): ReactElement {
+    const t = useTranslations('Recommendations');
     const addToGoogleCalendar = async (event: { date: string; time: string; festival: string; artist: string; stage: string }) => {
         const { date, time, festival, artist, stage } = event;
         const actDateTime = new Date(`${date}T${time}`);
@@ -102,14 +104,29 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
         return `https://www.google.com/search?q=${encodeURIComponent(artist.name)}%20${festival.website ? `site:${festivalBaseUrl}` : festival.name}`;
     };
 
+    /**
+     * Format date string for display
+     */
+    const formatDate = (dateString: string) => {
+        if (dateString === DATE_TBA) {
+            return t('DateTBA');
+        }
+        if (!isValidDate(new Date(dateString))) {
+            return dateString; // Return as is if invalid date
+        }
+        return new Date(dateString).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
+    };
+
     return (
         <div className="space-y-6">
             {/* Disclaimer */}
             <div className="bg-accent/70 border-l-4 border-yellow-300 p-4 text-yellow-800">
                 <p className="text-sm">
-                    <strong>Disclaimer:</strong>
-                    These recommendations are AI generated based on your preferences and the festival lineup. They may not be fully accurate, some information could be invented or outdated. Please
-                    verify the details on the official festival website or app before making plans.
+                    <strong>{t('DisclaimerTitle')}</strong> {t('DisclaimerText')}
                 </p>
             </div>
             {/* Festival Header */}
@@ -122,10 +139,10 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                             <span>📍 {festival.location}</span>
                             {festival.lineup && festival.lineup.length > 0 && (
                                 <span>
-                                    📅 {festivalStartDate} - {festivalEndDate}
+                                    📅 {formatDate(festivalStartDate || DATE_TBA)} - {formatDate(festivalEndDate || DATE_TBA)}
                                 </span>
                             )}
-                            <span>🎵 {recommendations.length} recommendations</span>
+                            <span>🎵 {recommendations.length > 0 ? t('RecommendationsTitle', { count: recommendations.length }) : t('NoRecommendationsTitle')}</span>
                         </div>
                     </div>
                 </div>
@@ -154,7 +171,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
 
                             {/* Recommendation Reasons */}
                             <div className="flex flex-col gap-2 p-4 border-1 border-foreground/20 rounded-md">
-                                <h4 className="font-medium text-gray-900">Why we recommend this artist:</h4>
+                                <h4 className="font-medium text-gray-900">{t('ReasonTitle')}</h4>
                                 <ul className="list-disc list-inside text-gray-600 space-y-1 px-4">
                                     {recommendation.reasons.map((reason, index) => (
                                         <li key={index}>{reason}</li>
@@ -163,23 +180,23 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                             </div>
 
                             <Link href={getGoogleArtistUrl(recommendation.artist)} target="_blank" rel="noopener noreferrer" className="link-primary underline">
-                                More about <strong>{recommendation.artist.name}</strong>
+                                {t('SearchArtist')} <strong>{recommendation.artist.name}</strong>
                             </Link>
 
                             {/* Act Info */}
                             <div className="bg-gradient-to-br from-magic/10 to-muted/20 rounded-md p-4 flex flex-col gap-2">
-                                <h4 className="font-medium text-gray-900">Performance details</h4>
+                                <h4 className="font-medium text-gray-900">{t('ArtistPerformance')}</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-1 text-sm">
                                     <div>
-                                        <span className="text-gray-500">Day:</span>
-                                        <span className="ml-2 font-medium">{recommendation.act.date}</span>
+                                        <span className="text-gray-500">{t('Date')}:</span>
+                                        <span className="ml-2 font-medium">{formatDate(recommendation.act.date || DATE_TBA)}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-500">Time:</span>
+                                        <span className="text-gray-500">{t('Time')}:</span>
                                         <span className="ml-2 font-medium">{recommendation.act.time}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-500">Stage:</span>
+                                        <span className="text-gray-500">{t('Stage')}:</span>
                                         <span className="ml-2 font-medium">{recommendation.act.stage}</span>
                                     </div>
                                 </div>
@@ -188,11 +205,11 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                     <div className="flex flex-wrap gap-4 py-2">
                                         <button onClick={() => downloadICSCalendarHandler(recommendation)} className="link-secondary underline flex items-center gap-2">
                                             <LuCalendarArrowDown size={20} />
-                                            <span>Download calendar event file</span>
+                                            <span>{t('DownloadICS')}</span>
                                         </button>
                                         <button onClick={() => addToGoogleCalendarHandler(recommendation)} className="link-secondary underline flex items-center gap-2">
                                             <FaGoogle size={20} />
-                                            <span>Add to Google Agenda</span>
+                                            <span>{t('AddToGoogleCalendar')}</span>
                                         </button>
                                     </div>
                                 )}
@@ -225,8 +242,8 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             {recommendations.length === 0 && (
                 <div className="text-center py-12">
                     <div className="text-4xl ">🔍</div>
-                    <h3 className="text-lg font-medium text-gray-900 ">No recommendations found</h3>
-                    <p className="text-gray-600">Try adjusting your genre preferences or discovery mode.</p>
+                    <h3 className="text-lg font-medium text-gray-900 ">{t('NoRecommendationsTitle')}</h3>
+                    <p className="text-gray-600">{t('NoRecommendationsDescription')}</p>
                 </div>
             )}
         </div>

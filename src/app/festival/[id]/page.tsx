@@ -13,6 +13,7 @@ import { FaGoogle, FaYoutube } from 'react-icons/fa';
 import { GiLoveSong } from 'react-icons/gi';
 import { MdCalendarToday, MdFestival, MdLanguage, MdLocationOn } from 'react-icons/md';
 import { TbClock, TbMoodSing } from 'react-icons/tb';
+import { useTranslations } from 'next-intl';
 
 interface FestivalPageProps {
     params: Promise<{ id: string }>;
@@ -22,6 +23,9 @@ interface FestivalPageProps {
  * Public festival page component displaying lineup and schedule
  */
 export default function FestivalPage({ params }: FestivalPageProps): React.ReactElement {
+    const t = useTranslations('FestivalPage');
+    const tCommon = useTranslations('Common');
+
     const [festival, setFestival] = useState<Festival | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -58,7 +62,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
      */
     const formatDate = (dateString: string) => {
         if (dateString === DATE_TBA) {
-            return 'Date To Be Announced';
+            return t('DateTBA');
         }
         return new Date(dateString).toLocaleDateString(undefined, {
             year: 'numeric',
@@ -91,14 +95,14 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                 <span className="text-red-400">⚠️</span>
                             </div>
                             <div className="ml-3">
-                                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                                <h3 className="text-sm font-medium text-red-800">{tCommon('Error')}</h3>
                                 <p className="mt-1 text-sm text-red-700">{error}</p>
                             </div>
                         </div>
                     </div>
                     <div className="mt-4 text-center">
                         <Link href="/" className="link-primary">
-                            ← Back to Home
+                            {tCommon('BackToHome')}
                         </Link>
                     </div>
                 </div>
@@ -112,10 +116,10 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
             <div className="min-h-screen bg-gray-50">
                 <div className="container mx-auto px-4 py-8">
                     <div className="text-center py-12">
-                        <h2 className="text-2xl font-bold text-gray-900">Festival Not Found</h2>
-                        <p className="text-gray-600 mt-2">The festival you&apos;re looking for doesn&apos;t exist.</p>
+                        <h2 className="text-2xl font-bold text-gray-900">{t('NotFound')}</h2>
+                        <p className="text-gray-600 mt-2">{t('NotFoundDescription')}</p>
                         <Link href="/" className="mt-4 link-primary">
-                            ← Back to Home
+                            {tCommon('BackToHome')}
                         </Link>
                     </div>
                 </div>
@@ -153,7 +157,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                 {/* Header */}
                 <div className="mb-8">
                     <Link href="/" className="link-primary mb-4 inline-block">
-                        ← Back to Home
+                        {tCommon('BackToHome')}
                     </Link>
 
                     {/* Festival Hero Section */}
@@ -189,21 +193,21 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                     <div className="flex items-center justify-center mb-2">
                                         <MdCalendarToday className="text-primary text-xl" />
                                     </div>
-                                    <div className="text-sm text-gray-600">Duration</div>
-                                    <div className="font-semibold">{startDate && endDate && startDate !== endDate ? `${totalDays} days` : '1 day'}</div>
+                                    <div className="text-sm text-gray-600">{t('FestivalSchedule')}</div>
+                                    <div className="font-semibold">{startDate && endDate && startDate !== endDate ? `${totalDays} ${t('TotalDays')}` : `1 ${t('TotalDays')}`}</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="flex items-center justify-center mb-2">
                                         <TbMoodSing className="text-primary text-xl" />
                                     </div>
-                                    <div className="text-sm text-gray-600">Artists</div>
+                                    <div className="text-sm text-gray-600">{t('TotalArtists')}</div>
                                     <div className="font-semibold">{totalArtists}</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="flex items-center justify-center mb-2">
                                         <GiLoveSong className="text-primary text-xl" />
                                     </div>
-                                    <div className="text-sm text-gray-600">Performances</div>
+                                    <div className="text-sm text-gray-600">{t('Performances')}</div>
                                     <div className="font-semibold">{festival.lineup.length}</div>
                                 </div>
                                 {festival.website && (
@@ -212,7 +216,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                             <MdLanguage className="text-primary text-xl" />
                                         </div>
                                         <Link href={festival.website} target="_blank" rel="noopener noreferrer" className="font-semibold link-primary text-sm underline">
-                                            View website
+                                            {t('VisitWebsite')}
                                         </Link>
                                     </div>
                                 )}
@@ -223,7 +227,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                         {festival.description && (
                             <div className="px-6 pb-6">
                                 <div className="bg-gray-50 rounded-lg p-4">
-                                    <h3 className="font-semibold text-gray-900 mb-2">About the Festival</h3>
+                                    <h3 className="font-semibold text-gray-900 mb-2">{t('AboutFestival')}</h3>
                                     <p className="text-gray-700">{festival.description}</p>
                                 </div>
                             </div>
@@ -234,15 +238,15 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                 {/* Festival Schedule */}
                 <div className="bg-white rounded-lg shadow-md">
                     <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-2xl font-bold text-gray-900">Festival Lineup</h2>
-                        <p className="text-gray-600 mt-1">Complete schedule and artist information</p>
+                        <h2 className="text-2xl font-bold text-gray-900">{t('FestivalSchedule')}</h2>
+                        <p className="text-gray-600 mt-1">{t('LineupFilter')}</p>
 
                         {/* Search Filter */}
                         <div className="mt-4">
                             <div className="relative">
                                 <input
                                     type="text"
-                                    placeholder="Search artists or stages..."
+                                    placeholder={t('SearchByArtistOrStage')}
                                     value={searchFilter}
                                     onChange={e => setSearchFilter(e.target.value)}
                                     className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
@@ -256,12 +260,12 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                             {searchFilter && (
                                 <div className="mt-2 text-sm text-gray-600">
                                     {totalFilteredPerformances === 0 ? (
-                                        <span>No performances match your search</span>
+                                        <span>{t('NoResults')}</span>
                                     ) : (
                                         <span>
-                                            Showing {totalFilteredPerformances} of {festival.lineup.length} performances
+                                            {t('ShowingResults', { count: totalFilteredPerformances })} {t('Of')} {festival.lineup.length} {t('Performances')}
                                             <button onClick={() => setSearchFilter('')} className="ml-2 text-primary hover:text-primary/80 underline">
-                                                Clear filter
+                                                {t('ClearFilter')}
                                             </button>
                                         </span>
                                     )}
@@ -274,18 +278,18 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                         {groupFestivalActsByDate(festival).length === 0 ? (
                             <div className="text-center py-12">
                                 <MdFestival className="mx-auto text-4xl text-gray-400 mb-4" />
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">No lineup available</h3>
-                                <p className="text-gray-600">The festival lineup hasn&apos;t been announced yet.</p>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('NoLineup')}</h3>
+                                <p className="text-gray-600">{t('NoLineupDescription')}</p>
                             </div>
                         ) : searchFilter && filteredLineup.length === 0 ? (
                             <div className="text-center py-12">
                                 <svg className="mx-auto text-4xl text-gray-400 mb-4 h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">No results found</h3>
-                                <p className="text-gray-600">No artists or stages match &quot;{searchFilter}&quot;. Try a different search term.</p>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('NoResults')}</h3>
+                                <p className="text-gray-600">{t('NoResultsDescription', { term: searchFilter })}</p>
                                 <button onClick={() => setSearchFilter('')} className="mt-4 btn-primary-light">
-                                    Clear search
+                                    {t('ClearFilter')}
                                 </button>
                             </div>
                         ) : (
@@ -320,7 +324,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="link-destructive underline flex items-center gap-2"
-                                                                title="Watch on YouTube Live"
+                                                                title={t('WatchOnYouTube')}
                                                             >
                                                                 <FaYoutube />
                                                                 <span>YouTube</span>
@@ -333,7 +337,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                                 className="link-neutral underline flex items-center gap-2"
                                                             >
                                                                 <FaGoogle />
-                                                                <span>Web Search</span>
+                                                                <span>{t('WebSearch')}</span>
                                                             </Link>
                                                         </div>
                                                     </div>
@@ -349,11 +353,11 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                 {/* Call to Action */}
                 <div className="mt-8 text-center">
                     <div className="bg-primary/5 border border-primary/20 rounded-lg p-6">
-                        <h3 className="text-lg font-semibold text-primary mb-2">Want Personalized Recommendations?</h3>
-                        <p className="text-gray-700 mb-4">Get AI-powered artist recommendations based on your music preferences for this festival.</p>
+                        <h3 className="text-lg font-semibold text-primary mb-2">{t('CallToActionTitle')}</h3>
+                        <p className="text-gray-700 mb-4">{t('CallToActionDescription')}</p>
                         <Link href={`/?festival=${festival.id}`} className="btn-primary inline-flex items-center">
                             <MdFestival className="mr-2" />
-                            Get My Recommendations
+                            {t('GetRecommendations')}
                         </Link>
                     </div>
                 </div>

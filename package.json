@@ -35,7 +35,9 @@
     "dotenv": "^16.5.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.518.0",
+    "negotiator": "^1.0.0",
     "next": "^15.2.0",
+    "next-intl": "^4.3.4",
     "ohash": "^2.0.11",
     "playwright": "^1.53.1",
     "prisma": "^6.11.0",
@@ -49,6 +51,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.10",
+    "@types/negotiator": "^0.6.4",
     "@types/node": "^20.14.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

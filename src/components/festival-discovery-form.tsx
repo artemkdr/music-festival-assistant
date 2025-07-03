@@ -6,6 +6,7 @@ import { SupportMeButton } from '@/components/support-me-button';
 import { UserPreferences } from '@/lib/schemas';
 import { isValidDate } from '@/lib/utils/date-util';
 import { DATE_TBA } from '@/lib/utils/festival-util';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
@@ -22,6 +23,8 @@ interface FestivalDiscoveryFormProps {
  * Form component for festival discovery input
  */
 export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: FestivalDiscoveryFormProps): ReactElement {
+    const t = useTranslations('FestivalDiscovery');
+    const locale = useLocale(); // Get locale dynamically, default to 'en' if not set
     const [festivals, setFestivals] = useState<FestivalInfo[]>([]);
     const [selectedFestivalId, setSelectedFestivalId] = useState('');
     const [festivalSearchTerm, setFestivalSearchTerm] = useState('');
@@ -124,11 +127,11 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
         const newErrors: Record<string, string> = {};
 
         if (!selectedFestivalId) {
-            newErrors.festival = 'Please select a festival on the top of the form';
+            newErrors.festival = t('ValidationSelectFestival');
         }
 
         if (selectedGenres.length === 0 && !userNotes.trim()) {
-            newErrors.genres = 'Please select at least one genre or provide additional preferences';
+            newErrors.genres = t('ValidationSelectGenres');
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -138,6 +141,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
         // Create user preferences
         const userPreferences: UserPreferences = {
+            language: locale,
             genres: selectedGenres,
             recommendationStyle: discoveryMode,
             comment: userNotes.trim().substring(0, 500) ?? undefined,
@@ -179,7 +183,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
      */
     const formatDate = (dateString: string) => {
         if (dateString === DATE_TBA) {
-            return 'Date To Be Announced';
+            return t('DateTBA');
         }
         if (!isValidDate(new Date(dateString))) {
             return dateString; // Return as is if invalid date
@@ -197,7 +201,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                 {/* Festival Selection */}
                 <div>
                     <label htmlFor="festival-search" className={`block font-bold text-base mb-3 ${errors.festival ? 'text-red-500' : ''}`}>
-                        Select Festival
+                        {t('SelectFestival')}
                     </label>
                     <div className="relative">
                         <input
@@ -213,16 +217,14 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                                 }
                             }}
                             onFocus={() => setShowFestivalDropdown(true)}
-                            placeholder="Select a festival..."
+                            placeholder={t('FestivalPlaceholder')}
                             className={`input w-full ${errors.festival ? 'border-red-500' : ''}`}
                             disabled={isLoading || loadingFestivals}
                             autoComplete="off"
                             autoCorrect="off"
                             spellCheck="false"
-                            aria-label="Search for a festival"
+                            aria-label={t('SelectFestival')}
                         />
-
-                        <p className="mt-1 text-sm text-gray-500">Select from {festivals.length} festivals</p>
 
                         {/* Loading indicator */}
                         {loadingFestivals && (
@@ -233,7 +235,8 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
                         {/* Dropdown */}
                         {showFestivalDropdown && !loadingFestivals && (
-                            <div className="absolute z-10 w-full -mt-4 bg-white border border-gray-300 rounded-md shadow-lg max-h-110 overflow-auto">
+                            <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-md shadow-lg max-h-110 overflow-auto">
+                                {festivals?.length === 0 && <div className="p-4 text-gray-500 text-center text-sm">{t('NoFestivalsFound')}</div>}
                                 {festivals?.map(festival => (
                                     <button
                                         key={festival.id}
@@ -246,7 +249,9 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                                         <div className="text-xs text-gray-400">
                                             {formatDate(festival.startDate)} - {formatDate(festival.endDate)}
                                         </div>
-                                        <div className="text-xs text-gray-400">{festival.artistsCount}+ artists</div>
+                                        <div className="text-xs text-gray-400">
+                                            {festival.artistsCount}+ {t('TotalArtists').toLowerCase()}
+                                        </div>
                                     </button>
                                 ))}
                             </div>
@@ -268,14 +273,8 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                                     <div className="text-xs text-primary/80">
                                         {selectedFestival.startDate} - {selectedFestival.endDate},{` ${selectedFestival.artistsCount}+ artists`}
                                     </div>
-                                    <Link
-                                        href={`/festival/${selectedFestival.id}`}
-                                        className="link-primary underline font-medium"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        title="View festival lineup and details"
-                                    >
-                                        View lineup
+                                    <Link href={`/festival/${selectedFestival.id}`} className="link-primary underline font-medium" target="_blank" rel="noopener noreferrer" title={t('FestivalInfo')}>
+                                        {t('FestivalInfo')}
                                     </Link>
                                 </div>
                             </div>
@@ -285,11 +284,11 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
                 {/* Genre Selection */}
                 <div>
-                    <label className={`block font-bold text-base mb-3 ${errors.genres ? 'text-red-500' : ''}`}>Genre Preferences</label>
+                    <label className={`block font-bold text-base mb-3 ${errors.genres ? 'text-red-500' : ''}`}>{t('GenrePreferences')}</label>
                     {loadingGenres ? (
                         <div className="text-magic text-sm flex gap-2">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-magic"></div>
-                            <span>Loading genres...</span>
+                            <span>{t('LoadingGenres')}</span>
                         </div>
                     ) : (
                         <GenresGrid genres={availableGenres} selectedGenres={selectedGenres} onGenreToggle={handleGenreToggle} isLoading={isLoading} />
@@ -299,39 +298,38 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                 {/* Additional Preferences (Free Text) */}
                 <div>
                     <label htmlFor="user-notes" className="block font-bold text-base mb-3">
-                        Additional Preferences
+                        {t('AdditionalPreferences')}
                     </label>
                     <textarea
                         id="user-notes"
                         value={userNotes}
                         maxLength={500}
                         onChange={e => setUserNotes(e.target.value)}
-                        placeholder="Tell us anything else about your music taste, artists, or festival experience..."
+                        placeholder={t('AdditionalPreferencesPlaceholder')}
                         className="input w-full min-h-[80px] resize-y border-gray-300 rounded-md focus:ring-primary focus:border-primary"
                         disabled={isLoading}
                     />
-                    <p className="mt-1 text-sm text-gray-500">Add any extra info to help us personalize your recommendations</p>
                 </div>
 
                 {/* Discovery Mode */}
                 <div>
-                    <label className="block font-bold text-base mb-3">Discovery Mode</label>
+                    <label className="block font-bold text-base mb-3">{t('DiscoveryMode')}</label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {[
                             {
                                 value: 'conservative' as const,
-                                title: 'Conservative',
-                                description: 'Stick to popular, well-known artists',
+                                title: t('Conservative'),
+                                description: t('ConservativeDesc'),
                             },
                             {
                                 value: 'balanced' as const,
-                                title: 'Balanced',
-                                description: 'Mix of popular and emerging artists',
+                                title: t('Balanced'),
+                                description: t('BalancedDesc'),
                             },
                             {
                                 value: 'adventurous' as const,
-                                title: 'Adventurous',
-                                description: 'Discover hidden gems and new artists',
+                                title: t('Adventurous'),
+                                description: t('AdventurousDesc'),
                             },
                         ].map(mode => (
                             <div
@@ -361,7 +359,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
                 {/* Recommendations count */}
                 <div>
-                    <label className="block font-bold text-base mb-3">How many concerts do you want to visit?</label>
+                    <label className="block font-bold text-base mb-3">{t('RecommendationsCount')}</label>
                     <div className="flex items-center space-x-4">
                         <input
                             type="range"
@@ -372,7 +370,9 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             disabled={isLoading}
                             onChange={e => setRecommendationsCount(Number(e.target.value))}
                         />
-                        <span className="text-sm text-gray-500">We will try recommend you {recommendationsCount} concerts</span>
+                        <span className="text-sm text-gray-500">
+                            {t('GetRecommendationsOf', { count: recommendationsCount })} {/* Updated to use new translation key */}
+                        </span>
                     </div>
                 </div>
 
@@ -385,16 +385,16 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                         {isLoading ? (
                             <span className="flex items-center justify-center">
                                 <span className="animate-spin mr-2">⏳</span>
-                                Discovering Artists...
+                                {t('LoadingRecommendations')}
                             </span>
                         ) : (
-                            'Discover Artists'
+                            t('GetRecommendations')
                         )}
                     </button>
                 </div>
                 {/* Support me button */}
                 <div className="flex justify-center">
-                    <SupportMeButton variant="link" title="Support me" />
+                    <SupportMeButton variant="link" title={t('SupportMe')} />
                 </div>
             </form>
         </div>

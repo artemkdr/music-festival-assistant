@@ -53,6 +53,7 @@ export class RecommendationService implements IRecommendationService {
             // Generate AI recommendations
             const aiRecommendations = await this.aiService.generateRecommendations({
                 userPreferences: {
+                    language: userPreferences.language || 'en', // Default to English if not specified
                     comment: userPreferences.comment,
                     genres: userPreferences.genres,
                     preferredArtists: userPreferences.preferredArtists || [],

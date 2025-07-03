@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { FaSortAlphaDown, FaSortAmountDown } from 'react-icons/fa';
 
 interface GenresGridProps {
@@ -12,6 +13,7 @@ interface GenresGridProps {
 type SortMode = 'default' | 'alphabetical';
 
 export const GenresGrid: React.FC<GenresGridProps> = ({ genres, selectedGenres, onGenreToggle, maxGenres = 20, isLoading = false }) => {
+    const t = useTranslations('GenresGrid');
     const [showAll, setShowAll] = useState(false);
     const [sortMode, setSortMode] = useState<SortMode>('default');
 
@@ -32,12 +34,16 @@ export const GenresGrid: React.FC<GenresGridProps> = ({ genres, selectedGenres, 
     return (
         <div className="flex flex-col gap-2">
             {/* Sort button */}
-            <div className="flex justify-end -mt-2">
-                <button type="button" onClick={handleSortToggle} className="btn-primary-light text-xs px-3 py-1 rounded-lg flex items-center gap-1" disabled={isLoading}>
-                    <span>Sort: {sortMode === 'default' ? 'Popularity' : 'A-Z'}</span>
-                    <span>{sortMode === 'default' ? <FaSortAmountDown size={12} /> : <FaSortAlphaDown size={12} />}</span>
-                </button>
-            </div>
+            {genres.length > 0 ? (
+                <div className="flex justify-end -mt-2">
+                    <button type="button" onClick={handleSortToggle} className="btn-primary-light text-xs px-3 py-1 rounded-lg flex items-center gap-1" disabled={isLoading}>
+                        <span>
+                            {t('Sort')}: {sortMode === 'default' ? t('SortPopularity') : t('SortAlphabetical')}
+                        </span>
+                        <span>{sortMode === 'default' ? <FaSortAmountDown size={12} /> : <FaSortAlphaDown size={12} />}</span>
+                    </button>
+                </div>
+            ) : null}
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {displayedGenres.map((genre, index) => (
@@ -60,7 +66,7 @@ export const GenresGrid: React.FC<GenresGridProps> = ({ genres, selectedGenres, 
             {hasMoreGenres && (
                 <div className="flex justify-center w-full">
                     <button type="button" className="btn-primary-light text-xs bg-primary/10 rounded-2xl mt-2" onClick={() => setShowAll(prev => !prev)}>
-                        {showAll ? 'Show less' : `Show all ${genres.length} genres`}
+                        {showAll ? t('ShowLess') : `${t('ShowAll', { count: genres.length })}`}
                         <span className="inline-block transform transition-transform duration-200" style={{ rotate: showAll ? '180deg' : '0deg' }}>
                             ▼
                         </span>
@@ -68,7 +74,9 @@ export const GenresGrid: React.FC<GenresGridProps> = ({ genres, selectedGenres, 
                 </div>
             )}
 
-            <p className="mt-2 text-sm text-gray-500">Select genres you enjoy ({selectedGenres.length} selected)</p>
+            <p className="mt-2 text-sm text-gray-500">
+                {t('SelectGenresInstruction')} ({selectedGenres.length} {t('GenresSelected')})
+            </p>
         </div>
     );
 };

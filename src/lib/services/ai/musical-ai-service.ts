@@ -168,6 +168,31 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
                         : '',
             recommendationsCount: `I would like at least ${userPreferences.recommendationsCount || 5} recommendations`, // Default to 5 if not specified
         };
+        let language = 'en';
+        switch (userPreferences.language) {
+            case 'en':
+                language = 'English';
+                break;
+            case 'fr':
+                language = 'French';
+                break;
+            case 'de':
+                language = 'German';
+                break;
+            case 'es':
+                language = 'Spanish';
+                break;
+            case 'it':
+                language = 'Italian';
+                break;
+            case 'pt':
+                language = 'Portuguese';
+                break;
+            case 'ru':
+                language = 'Russian';
+                break;
+        }
+
         const aiRequest: AIRequest = {
             systemPrompt: `
 You are an expert music recommender. You help users choose an artist from a list of available artists, based on their preferences.
@@ -178,7 +203,7 @@ You are an expert music recommender. You help users choose an artist from a list
 - Provide at least 2 recommendations.
 - If the user preferences are too vague for you to make a decision, then provide at least 1 recommendation based on the available artists.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
-- Respond in English.
+- Generate recommendations in ${language} language.
 
 DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.
 `,
