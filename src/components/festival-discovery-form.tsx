@@ -77,7 +77,6 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
     // Load genres when a festival is selected
     useEffect(() => {
-        onChange?.(selectedFestivalId); // Notify parent of festival change
         if (!selectedFestivalId) {
             setAvailableGenres([]);
             setSelectedGenres([]);
@@ -104,7 +103,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                 setAvailableGenres([]);
             })
             .finally(() => setLoadingGenres(false));
-    }, [selectedFestivalId, onChange]);
+    }, [selectedFestivalId]);
 
     // Get selected festival details
     const selectedFestival = festivals.find(f => f.id === selectedFestivalId);
@@ -154,6 +153,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
         setFestivalSearchTerm(festival ? festival.name : '');
         setShowFestivalDropdown(false);
         setSelectedGenres([]); // reset genres on festival change
+        onChange?.(selectedFestivalId); // Notify parent of festival change
     };
 
     /**
