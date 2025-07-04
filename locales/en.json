@@ -9,7 +9,8 @@
         "ShowAll": "Show all",
         "ShowLess": "Show less",
         "Search": "Search",
-        "Filter": "Filter"
+        "Filter": "Filter",
+        "TBA": "TBA"
     },
     "HomePage": {
         "HeroTitle": "Discover Your Next Favorite Artist",
@@ -119,13 +120,13 @@
         "NotFound": "Festival Not Found",
         "NotFoundDescription": "The festival you're looking for doesn't exist.",
         "FestivalSchedule": "Festival Schedule",
+        "AboutFestival": "About the Festival",
         "TotalDays": "{count} day(s)",
         "TotalArtists": "Artists",
         "LineupFilter": "Filter lineup...",
         "SearchByArtistOrStage": "Search by artist or stage name",
         "ClearFilter": "Clear filter",
-        "ShowingResults": "Showing",
-        "Of": "of",
+        "ShowingResults": "Showing {count} of {total} performances",        
         "Performances": "Performances",
         "VisitWebsite": "Visit Festival Website",
         "WebSearch": "Web Search",

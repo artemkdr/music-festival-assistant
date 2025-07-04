@@ -9,7 +9,8 @@
         "ShowAll": "Tout afficher",
         "ShowLess": "Réduire",
         "Search": "Rechercher",
-        "Filter": "Filtrer"
+        "Filter": "Filtrer",
+        "TBA": "À annoncer"
     },
     "HomePage": {
         "HeroTitle": "Découvrez votre prochain artiste préféré",
@@ -118,13 +119,13 @@
         "NotFound": "Festival introuvable",
         "NotFoundDescription": "Le festival que vous recherchez n'existe pas.",
         "FestivalSchedule": "Programme du festival",
+        "AboutFestival": "À propos du festival",
         "TotalDays": "{count} jour(s)",
         "TotalArtists": "Artistes",
         "LineupFilter": "Filtrer la programmation...",
         "SearchByArtistOrStage": "Rechercher par artiste ou nom de scène",
         "ClearFilter": "Effacer le filtre",
-        "ShowingResults": "Affichage",
-        "Of": "de",
+        "ShowingResults": "Affichage de {count} sur {total} performances",        
         "Performances": "Performances",
         "VisitWebsite": "Voir le site du festival",
         "WebSearch": "Rechercher sur le web",
