@@ -13,7 +13,7 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
-    "postinstall": "prisma generate && npx playwright install --with-deps chromium",
+    "postinstall": "prisma generate && npx playwright install chromium",
     "migrate-to-prisma": "tsx scripts/migrate-to-prisma.ts",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push"
