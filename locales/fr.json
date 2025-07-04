@@ -14,7 +14,7 @@
     "HomePage": {
         "HeroTitle": "Découvrez votre prochain artiste préféré",
         "HeroDescription": [
-            "Choisissez parmi notre sélection de festivals et obtenez des recommandations personnalisées d'artistes selon vos goûts musicaux.", 
+            "Choisissez un festival et obtenez des recommandations d'artistes selon vos goûts musicaux.", 
             "Ne manquez plus jamais de découvrir de la musique incroyable."
         ],
         "EmptyStateTitle": "Prêt à découvrir de la musique incroyable ?",
@@ -104,8 +104,9 @@
     },
     "Layout": {
         "Description": "Découvrez des artistes lors de festivals de musique selon vos préférences",
+        "AboutLink": "À propos du projet",
         "Keywords": "musique, festival, découverte, recommandations, artistes",
-        "Copyright": "© 2025 Assistant Festival Suisse. Découvrez votre prochain artiste préféré.",
+        "Copyright": "© 2025 Swiss Festival Assistant. Découvrez votre prochain artiste préféré.",
         "DataDisclaimer": [
             "Ce site utilise des données publiques provenant des sites de festivals, de Spotify et des informations générées par l'IA.",
             "Veuillez vérifier les détails des artistes sur les pages officielles des festivals ou les plateformes de streaming.",
@@ -133,5 +134,26 @@
         "GetRecommendations": "Obtenir des recommandations",
         "AddToGoogleCalendar": "Ajouter à Google Agenda",
         "DownloadICS": "Télécharger le fichier d'événement"
+    },
+    "AboutPage": {
+        "Title": "À propos du projet",
+        "Welcome": "Bienvenue sur Swiss Festival Assistant ! Cette plateforme est conçue pour vous aider à découvrir de nouveaux artistes lors de festivals de musique selon vos préférences.",
+        "Mission": "Notre mission est de connecter les gens avec les meilleures expériences de festival en fournissant des recommandations personnalisées.",
+        "WhyTitle": "Pourquoi ce projet ?",
+        "WhyText": "Il existe de nombreux festivals, souvent avec d’énormes programmations et des centaines d’artistes. Il est difficile de choisir qui aller voir, et il y a toujours des pépites cachées à découvrir. Si vous n’avez pas le temps d’écouter chaque artiste, ce service peut vous aider ! C’est un projet fun — l’IA ne fournit pas de vérité absolue ni d’informations vérifiées, mais elle aide à réduire la liste, vous encourage à découvrir de nouveaux artistes et vous motive à sortir assister à un concert.",
+        "HowTitle": "Comment l’utiliser",
+        "HowSteps": [
+            "Choisissez un festival dans la liste.",
+            "Générez vos recommandations personnalisées d’artistes.",
+            "Cliquez sur le lien Spotify d’un artiste et écoutez quelques morceaux.",
+            "Si vous aimez ce que vous entendez, ajoutez l’artiste à votre playlist ‘nouveau festival’ et écoutez-la pour mieux le découvrir.",
+            "Ou, ajoutez directement la performance à votre agenda depuis la liste des recommandations.",
+            "Visitez le site officiel du festival pour tous les détails, billets et mises à jour.",
+            "Vérifiez toujours les informations officielles vous-même — l’IA peut se tromper !"
+        ],
+        "ContactTitle": "Contact",
+        "ContactText": "Si vous avez des questions, des suggestions ou souhaitez simplement dire bonjour, n’hésitez pas à nous contacter par <email>email</email>.",
+        "SupportTitle": "Soutenir",
+        "SupportText": "Si vous appréciez ce projet, merci de le soutenir via TWINT. Chaque contribution aide à maintenir le service en ligne !"
     }
 }

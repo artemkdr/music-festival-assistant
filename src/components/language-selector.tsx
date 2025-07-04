@@ -21,10 +21,10 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
     }
 
     return (
-        <select className="ml-4 border rounded px-2 py-1 text-sm bg-white" value={selected} onChange={handleChange} aria-label="Select language">
+        <select className="ml-4 min-w-14 border border-muted/40 rounded px-2 py-1 text-sm bg-white" value={selected} onChange={handleChange} aria-label="Select language">
             {locales.map(loc => (
                 <option key={loc} value={loc}>
-                    {loc.toUpperCase()}
+                    {loc.toLowerCase()}
                 </option>
             ))}
         </select>

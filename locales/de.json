@@ -13,8 +13,8 @@
     },
     "HomePage": {
         "HeroTitle": "Entdecke deinen nächsten Lieblingskünstler",
-        "HeroDescription": [
-            "Wähle aus unserer Festivalauswahl und erhalte personalisierte Künstlerempfehlungen basierend auf deinem Musikgeschmack.", 
+        "HeroDescription": [             
+            "Wähle ein Festival und erhalte Künstlerempfehlungen basierend auf deinen Musikpräferenzen.",
             "Verpasse nie wieder neue Musik."
         ],
         "EmptyStateTitle": "Bereit, neue Musik zu entdecken?",
@@ -104,8 +104,9 @@
     },
     "Layout": {
         "Description": "Entdecke Künstler an Musikfestivals nach deinen Präferenzen",
+        "AboutLink": "Über das Projekt",
         "Keywords": "Musik, Festival, Entdeckung, Empfehlungen, Künstler",
-        "Copyright": "© 2025 Schweizer Festival Assistent. Entdecke deinen nächsten Lieblingskünstler.",
+        "Copyright": "© 2025 Swiss Festival Assistant. Entdecke deinen nächsten Lieblingskünstler.",
         "DataDisclaimer": [
             "Diese Seite verwendet öffentliche Daten von Festival-Webseiten, Spotify und KI-generierte Informationen.",
             "Bitte prüfe Künstlerdetails auf den offiziellen Festival-Seiten oder Streaming-Plattformen.",
@@ -133,5 +134,26 @@
         "GetRecommendations": "Empfehlungen erhalten",
         "AddToGoogleCalendar": "Zu Google Kalender hinzufügen",
         "DownloadICS": "Kalender-Ereignis herunterladen"
+    },
+    "AboutPage": {
+        "Title": "Über das Projekt",
+        "Welcome": "Willkommen beim Swiss Festival Assistant! Diese Plattform hilft dir, neue Künstler auf Musikfestivals entsprechend deiner Präferenzen zu entdecken.",
+        "Mission": "Unsere Mission ist es, Menschen mit den besten Festival-Erlebnissen zu verbinden, indem wir personalisierte Empfehlungen bereitstellen.",
+        "WhyTitle": "Warum dieses Projekt?",
+        "WhyText": "Es gibt viele Festivals, oft mit riesigen Line-ups und Hunderten von Künstlern. Es ist schwer zu entscheiden, wen man sehen soll, und es gibt immer versteckte Perlen zu entdecken. Wenn du nicht die Zeit hast, jeden Künstler anzuhören, kann dir dieser Service helfen! Es ist ein Spaßprojekt — die KI liefert keine absolute Wahrheit oder verifizierte Informationen, aber sie hilft dir, die Auswahl einzugrenzen, neue Künstler zu entdecken und motiviert dich, ein Konzert zu besuchen.",
+        "HowTitle": "Wie funktioniert es?",
+        "HowSteps": [
+            "Wähle ein Festival aus der Liste.",
+            "Generiere deine persönlichen Künstlerempfehlungen.",
+            "Klicke auf den Spotify-Link eines Künstlers und höre dir ein paar Songs an.",
+            "Wenn dir gefällt, was du hörst, füge den Künstler zu deiner ‚Neues Festival‘-Playlist hinzu und höre sie, um ihn besser kennenzulernen.",
+            "Oder füge den Auftritt direkt aus der Empfehlungsliste zu deinem Kalender hinzu.",
+            "Besuche die offizielle Festival-Website für alle Details, Tickets und Updates.",
+            "Überprüfe immer die offiziellen Informationen selbst — die KI kann sich irren!"
+        ],
+        "ContactTitle": "Kontakt",
+        "ContactText": "Wenn du Fragen, Anregungen hast oder einfach nur Hallo sagen möchtest, kontaktiere uns gerne per <email>E-Mail</email>.",
+        "SupportTitle": "Unterstützen",
+        "SupportText": "Wenn dir dieses Projekt gefällt, unterstütze es bitte via TWINT. Jeder Beitrag hilft, den Service online zu halten!"
     }
 }

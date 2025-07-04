@@ -14,7 +14,7 @@
     "HomePage": {
         "HeroTitle": "Discover Your Next Favorite Artist",
         "HeroDescription": [
-            "Choose from our collection of festivals and get personalized artist recommendations based on your music preferences.", 
+            "Choose a festival and get artist recommendations based on your music preferences.", 
             "Never miss out on discovering amazing music again."
         ],
         "EmptyStateTitle": "Ready to Discover Amazing Music?",
@@ -79,6 +79,7 @@
         "AddToGoogleCalendar": "Add to Google Calendar",
         "DownloadICS": "Download event file",
         "SearchArtist": "Search more about",
+        "EditArtist": "Edit artist",
         "ReasonTitle": "Why this recommendation?",
         "RecommendationsTitle": "{count} recommendation(s) found",
         "NoRecommendationsTitle": "No recommendations found",        
@@ -104,6 +105,7 @@
     },
     "Layout": {
         "Description": "Discover artists at music festivals based on your preferences",
+        "AboutLink": "About the project",
         "Keywords": "music, festival, discovery, recommendations, artists",
         "Copyright": "© 2025 Music Festival Assistant. Discover your next favorite artist.",
         "DataDisclaimer": [
@@ -133,5 +135,26 @@
         "GetRecommendations": "Get Recommendations",
         "AddToGoogleCalendar": "Add to Google Calendar",
         "DownloadICS": "Download event file"
+    },
+    "AboutPage": {
+        "Title": "About the project",
+        "Welcome": "Welcome to Swiss Festival Assistant! This platform is designed to help you discover new artists at music festivals based on your preferences.",
+        "Mission": "Our mission is to connect people with the best festival experiences by providing personalized recommendations.",
+        "WhyTitle": "Why this project?",
+        "WhyText": "There are a lot of festivals, often with huge line-ups and hundreds of artists. It’s difficult to choose who to see, and there are always hidden gems waiting to be discovered. If you don’t have time to listen to every artist, this service can help! It’s a fun project—AI doesn’t provide absolute truth or verified info, but it helps narrow down the list, encourages you to discover new music, and motivates you to go out and visit a concert.",
+        "HowTitle": "How to use it",
+        "HowSteps": [
+            "Choose a festival from the list.",
+            "Generate your personalized artist recommendations.",
+            "Click the Spotify link for an artist and listen to a couple of songs.",
+            "If you like what you hear, add the artist to your ‘new festival’ playlist and listen to it to get to know them better.",
+            "Or, add the performance directly to your agenda from the recommendations list.",
+            "Visit the official festival website for all details, tickets, and updates.",
+            "Always verify official info yourself—AI can make mistakes!"
+        ],
+        "ContactTitle": "Contact",
+        "ContactText": "If you have any questions, suggestions, or just want to say hi, feel free to reach out via <email>email</email>.",
+        "SupportTitle": "Support",
+        "SupportText": "If you enjoy using this project, please consider supporting it via TWINT. Every contribution helps keep the service running!"
     }
 }

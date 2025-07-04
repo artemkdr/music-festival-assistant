@@ -59,7 +59,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                                 <div className="flex justify-center mt-4 px-2">
                                     <SupportMeButton />
                                 </div>
-                                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-2">
+                                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-4">
+                                    <div className="text-center">
+                                        <Link href="/about" className="link-neutral underline font-bold">
+                                            {t('Layout.AboutLink')}
+                                        </Link>
+                                    </div>
                                     <div className="text-center text-gray-600">
                                         <p>{t('Layout.Copyright')}</p>
                                     </div>

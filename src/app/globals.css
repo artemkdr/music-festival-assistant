@@ -29,9 +29,9 @@
     --destructive: 0 55% 55%; /* A brighter, more impactful red */
     --destructive-foreground: 0 10% 95%;
 
-    --border: 240 5.9% 80%;
-    --input: 240 5.9% 80%;
-    --ring: 240 5.9% 10%;
+    --border: 210 45% 95%;
+    --input: 210 45% 70%;
+    --ring: 210 45% 60%;
     --radius: 0.5rem;
   }
 

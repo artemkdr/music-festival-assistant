@@ -1,5 +1,7 @@
 'use client';
 
+import { ButtonWithIcon } from '@/components/button-with-icon';
+import { useAuth } from '@/lib/contexts/auth-context';
 import { Festival, Recommendation } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
 import { formatDateString, isValidDate } from '@/lib/utils/date-util';
@@ -9,6 +11,8 @@ import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { FaGoogle, FaSpotify, FaYoutube } from 'react-icons/fa';
 import { LuCalendarArrowDown } from 'react-icons/lu';
+import { MdDateRange, MdLocationOn } from 'react-icons/md';
+import { RiMusicAiFill } from 'react-icons/ri';
 
 interface RecommendationsListProps {
     festival: Festival;
@@ -20,6 +24,7 @@ interface RecommendationsListProps {
  */
 export function RecommendationsList({ festival, recommendations }: RecommendationsListProps): ReactElement {
     const t = useTranslations('Recommendations');
+    const { isAdmin } = useAuth();
 
     const addToGoogleCalendarHandler = (recommendation: Recommendation) => {
         addToGoogleCalendar({
@@ -59,18 +64,30 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
             </div>
             {/* Festival Header */}
             <div className="bg-gradient-to-br from-violet-50 to-white rounded-lg shadow-md p-6">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <h2 className="text-3xl font-bold text-gray-900 ">{festival.name}</h2>
-                        <p className="text-gray-600 ">{festival.description}</p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                            <span>📍 {festival.location}</span>
-                            {festival.lineup && festival.lineup.length > 0 && (
-                                <span>
-                                    📅 {formatDateString(festivalStartDate || DATE_TBA)} - {formatDateString(festivalEndDate || DATE_TBA)}
+                <div className="flex flex-col gap-2">
+                    <h2 className="text-3xl font-bold text-foreground">{festival.name}</h2>
+                    <div className="flex flex-wrap gap-2 text-sm text-foreground/70">
+                        <div className="flex items-center gap-2">
+                            <span className="text-primary">
+                                <MdLocationOn size={24} />
+                            </span>
+                            <span className="text-left">{festival.location}</span>
+                        </div>
+                        {festival.lineup && festival.lineup.length > 0 && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-primary">
+                                    <MdDateRange size={24} />
                                 </span>
-                            )}
-                            <span>🎵 {recommendations.length > 0 ? t('RecommendationsTitle', { count: recommendations.length }) : t('NoRecommendationsTitle')}</span>
+                                <span className="text-left">
+                                    {formatDateString(festivalStartDate || DATE_TBA)} - {formatDateString(festivalEndDate || DATE_TBA)}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                            <span className="text-primary">
+                                <RiMusicAiFill size={24} />
+                            </span>
+                            <span className="text-left">{recommendations.length > 0 ? t('RecommendationsTitle', { count: recommendations.length }) : t('NoRecommendationsTitle')}</span>
                         </div>
                     </div>
                 </div>
@@ -110,6 +127,11 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                             <Link href={getGoogleArtistUrl(recommendation.artist.name, festival.website, festival.name)} target="_blank" rel="noopener noreferrer" className="link-primary underline">
                                 {t('SearchArtist')} <strong>{recommendation.artist.name}</strong>
                             </Link>
+                            {isAdmin && (
+                                <Link href={`/artists/${recommendation.artist.id}/edit`} target="_blank" rel="noopener noreferrer" className="link-primary underline">
+                                    {t('EditArtist')}
+                                </Link>
+                            )}
 
                             {/* Act Info */}
                             <div className="bg-gradient-to-br from-magic/10 to-muted/20 rounded-md p-4 flex flex-col gap-2">
@@ -131,14 +153,18 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                 {/* Show 'Add to calendars button only if the date is valid */}
                                 {isValidDate(new Date(`${recommendation.act.date}T${recommendation.act.time}`)) && (
                                     <div className="flex flex-wrap gap-4 py-2">
-                                        <button onClick={() => downloadICSCalendarHandler(recommendation)} className="link-secondary underline flex items-center gap-2">
-                                            <LuCalendarArrowDown size={20} />
-                                            <span>{t('DownloadICS')}</span>
-                                        </button>
-                                        <button onClick={() => addToGoogleCalendarHandler(recommendation)} className="link-secondary underline flex items-center gap-2">
-                                            <FaGoogle size={20} />
-                                            <span>{t('AddToGoogleCalendar')}</span>
-                                        </button>
+                                        <ButtonWithIcon
+                                            icon={<LuCalendarArrowDown size={20} />}
+                                            onClick={() => downloadICSCalendarHandler(recommendation)}
+                                            label={t('DownloadICS')}
+                                            className="link-secondary underline"
+                                        />
+                                        <ButtonWithIcon
+                                            icon={<FaGoogle size={20} />}
+                                            onClick={() => addToGoogleCalendarHandler(recommendation)}
+                                            label={t('AddToGoogleCalendar')}
+                                            className="link-secondary underline"
+                                        />
                                     </div>
                                 )}
                             </div>

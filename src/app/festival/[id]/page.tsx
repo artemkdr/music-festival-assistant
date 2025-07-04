@@ -256,7 +256,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                     placeholder={t('SearchByArtistOrStage')}
                                     value={searchFilter}
                                     onChange={e => setSearchFilter(e.target.value)}
-                                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                                    className="w-full px-4 py-2 pr-10 border rounded-md"
                                 />
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -296,7 +296,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                         maxLength={500}
                         onChange={e => setUserNotes(e.target.value)}
                         placeholder={t('AdditionalPreferencesPlaceholder')}
-                        className="input w-full min-h-[80px] resize-y border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                        className="input w-full min-h-[80px] resize-y border rounded-md"
                         disabled={isLoading}
                     />
                 </div>

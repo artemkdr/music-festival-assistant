@@ -9,8 +9,8 @@ interface SupportMeButtonProps {
 
 export const SupportMeButton = ({ title, variant }: SupportMeButtonProps) => {
     const t = useTranslations('SupportMe');
-    const buttonClass = 'px-4 py-2 bg-black text-white text-sm flex item-center gap-2 rounded-md';
-    const linkClass = 'text-black hover:text-gray-700 transition-colors flex item-center gap-2 underline';
+    const buttonClass = 'px-4 py-2 bg-black text-white text-sm flex item-center gap-2 rounded-md max-w-80 md:max-w-120 shadow-md';
+    const linkClass = 'text-black hover:text-gray-700 transition-colors flex item-center gap-2 underline max-w-80';
     const variantClass = variant === 'link' ? linkClass : buttonClass;
     return (
         <Link
