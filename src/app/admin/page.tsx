@@ -40,7 +40,6 @@ export default function AdminDashboardPage() {
                 setStats(response.data as typeof stats);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load statistics');
-                console.error('Error loading stats:', err);
             } finally {
                 setIsLoading(false);
             }

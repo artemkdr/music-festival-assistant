@@ -96,7 +96,6 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                 });
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load festival');
-                console.error('Error loading festival:', err);
             } finally {
                 setIsLoading(false);
             }
@@ -238,7 +237,6 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
             router.push(`/admin/festivals/${response.data?.id || id}`);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save festival');
-            console.error('Error saving festival:', err);
         } finally {
             setIsSaving(false);
         }

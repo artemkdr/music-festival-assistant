@@ -40,7 +40,6 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
                 setFestival(festivalResponse.data as Festival);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load festival');
-                console.error('Error loading festival:', err);
             } finally {
                 setIsLoading(false);
             }

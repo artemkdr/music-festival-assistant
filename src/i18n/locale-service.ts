@@ -14,7 +14,6 @@ export async function getUserLocale() {
     }).languages();
     // find the first accepted language that is in the supported locales
     const acceptedLanguage = acceptedLanguages.find(lang => locales.find(x => x === lang)) as Locale | undefined;
-    console.log(`Cookie Locale: ${cookieLocale}, Accept-Language: ${acceptedLanguage}`);
     return cookieLocale || acceptedLanguage || defaultLocale;
 }
 

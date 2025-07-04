@@ -55,12 +55,18 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
                 const actsByName = getActsByArtistName(festival, artist.name);
                 for (const act of actsById) {
                     if (!acts.some(existingAct => existingAct.id === act.id)) {
-                        acts.push(act);
+                        acts.push({
+                            ...act,
+                            festivalId: festival.id,
+                        });
                     }
                 }
                 for (const act of actsByName) {
                     if (!acts.some(existingAct => existingAct.id === act.id)) {
-                        acts.push(act);
+                        acts.push({
+                            ...act,
+                            festivalId: festival.id,
+                        });
                     }
                 }
             }

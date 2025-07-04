@@ -40,6 +40,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
     const [loadingGenres, setLoadingGenres] = useState(false);
     const [discoveryMode, setDiscoveryMode] = useState<'conservative' | 'balanced' | 'adventurous'>('balanced');
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [festivalsCountStatus, setFestivalsCountStatus] = useState('');
     const [userNotes, setUserNotes] = useState('');
     const [recommendationsCount, setRecommendationsCount] = useState(5); // Default to 5 recommendations
     const searchParams = useSearchParams();
@@ -70,16 +71,20 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                         setFestivalSearchTerm('');
                         setShowFestivalDropdown(false);
                     }
+                    if (sortedData.length) {
+                        setFestivalsCountStatus(t('FestivalsCountStatus', { count: sortedData.length }));
+                    } else {
+                        setFestivalsCountStatus(t('NoFestivals'));
+                    }
                 }
-            } catch (error) {
-                // TODO: use logger
-                console.error('Failed to load festivals:', error);
+            } catch {
+                setFestivalsCountStatus(t('ErrorLoadingFestivals'));
             } finally {
                 setLoadingFestivals(false);
             }
         };
         loadFestivals();
-    }, [searchParams]);
+    }, [searchParams, t]);
 
     // Load genres when a festival is selected
     useEffect(() => {
@@ -270,6 +275,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             </div>
                         </div>
                     )}
+                    <div className="text-sm text-foreground/80 mt-2">{festivalsCountStatus}</div>
                 </div>
 
                 {/* Genre Selection */}

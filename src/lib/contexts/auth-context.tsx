@@ -54,8 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 authApi.clearToken();
                 setUser(null);
             }
-        } catch (error) {
-            console.error('Auth check failed:', error);
+        } catch {
             authApi.clearToken();
             setUser(null);
         } finally {
@@ -81,7 +80,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 };
             }
         } catch (error) {
-            console.error('Login error:', error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Login failed',

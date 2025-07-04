@@ -51,7 +51,6 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
                 setFormData(artistData);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load artist');
-                console.error('Error loading artist:', err);
             } finally {
                 setIsLoading(false);
             }
@@ -155,7 +154,6 @@ export default function ArtistEditPage({ params }: ArtistEditPageProps) {
             router.push(`/admin/artists/${artistId}`);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save artist');
-            console.error('Error saving artist:', err);
         } finally {
             setIsSaving(false);
         }

@@ -48,7 +48,6 @@ export default function ArtistDetailPage({ params }: ArtistDetailPageProps) {
                 setActs((actsResponse.data as FestivalAct[]) || []);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load artist');
-                console.error('Error loading artist:', err);
             } finally {
                 setIsLoading(false);
             }

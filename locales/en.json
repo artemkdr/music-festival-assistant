@@ -30,6 +30,9 @@
     "FestivalDiscovery": {
         "SelectFestival": "Select a Festival",
         "FestivalPlaceholder": "Type to search festivals...",
+        "NoFestivals": "No festivals found for the moment, come back in summer",
+        "ErrorLoadingFestivals": "Error loading festivals",
+        "FestivalsCountStatus": "{count} festival(s)",
         "ArtistsCount": "{count}+ artists",
         "NoFestivalsFound": "No festivals found",
         "LoadingGenres": "Loading genres...",

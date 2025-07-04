@@ -47,7 +47,6 @@ export function ArtistLinking({ festivalId, festivalUrl, actId, actName, onSucce
             if (dbResponse.status === 'success') {
                 setDbArtists(dbResponse.data?.artists || []);
             } else {
-                console.error('Database search failed:', dbResponse.errors);
                 setDbArtists([]);
             }
 
@@ -55,11 +54,9 @@ export function ArtistLinking({ festivalId, festivalUrl, actId, actName, onSucce
             if (spotifyResponse.status === 'success') {
                 setSpotifyArtists(spotifyResponse.data?.artists || []);
             } else {
-                console.error('Spotify search failed:', spotifyResponse.errors);
                 setSpotifyArtists([]);
             }
-        } catch (error) {
-            console.error('Search error:', error);
+        } catch {
             setDbArtists([]);
             setSpotifyArtists([]);
         } finally {
@@ -94,8 +91,7 @@ export function ArtistLinking({ festivalId, festivalUrl, actId, actName, onSucce
             } else {
                 alert(`Linking failed: ${response.message}`);
             }
-        } catch (error) {
-            console.error('Linking error:', error);
+        } catch {
             alert('An error occurred while linking the artist');
         } finally {
             setIsLinking(false);

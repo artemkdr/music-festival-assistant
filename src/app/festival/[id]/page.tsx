@@ -92,7 +92,6 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load festival');
-                console.error('Error loading festival:', err);
             } finally {
                 setIsLoading(false);
             }
@@ -356,14 +355,19 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                     .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
                                                     .map((performance, index) => (
                                                         <div key={index} className="flex flex-col gap-4 p-4 bg-primary/6 rounded-lg hover:bg-primary/15 transition-colors">
-                                                            <div className="flex items-center space-x-4">
-                                                                <div className="flex flex-col gap-1.5 items-center text-sm text-gray-600 pt-1">
-                                                                    <TbClock />
-                                                                    {performance.time || tCommon('TBA')}
-                                                                </div>
+                                                            <div className="flex space-x-4">
                                                                 <div className="flex flex-col">
                                                                     <div className="font-semibold text-gray-900">{performance.artistName}</div>
-                                                                    {performance.stage && <div className="text-sm text-gray-600 flex items-center">{performance.stage}</div>}
+                                                                    <div className="flex flex-row gap-1 items-center text-sm text-gray-600">
+                                                                        <TbClock size={12} />
+                                                                        <span>{performance.time || tCommon('TBA')}</span>
+                                                                        {performance.stage && (
+                                                                            <>
+                                                                                <span className="text-foreground/30">|</span>
+                                                                                <span className="text-sm text-gray-600">{performance.stage}</span>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
