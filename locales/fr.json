@@ -143,7 +143,8 @@
         "CallToActionDescription": "Obtenez des recommandations d'artistes basées sur vos goûts musicaux et la programmation de ce festival.",
         "GetRecommendations": "Obtenir des recommandations",
         "AddToGoogleCalendar": "Ajouter à Google Agenda",
-        "DownloadICS": "Télécharger le fichier d'événement"
+        "DownloadICS": "Télécharger le fichier d'événement",
+        "NoResults": "Oups... rien trouvé"
     },
     "AboutPage": {
         "Title": "À propos du projet",

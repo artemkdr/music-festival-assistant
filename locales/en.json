@@ -144,7 +144,8 @@
         "CallToActionDescription": "Get AI-powered artist recommendations based on your music taste and this festival's lineup.",
         "GetRecommendations": "Get Recommendations",
         "AddToGoogleCalendar": "Add to Google Calendar",
-        "DownloadICS": "Download event file"
+        "DownloadICS": "Download event file",
+        "NoResults": "Oups... nothing found"        
     },
     "AboutPage": {
         "Title": "About the project",

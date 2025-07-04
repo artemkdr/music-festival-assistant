@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
-import { MdFestival } from 'react-icons/md';
+import { MdExpandLess, MdFestival } from 'react-icons/md';
 import { BsMusicNoteList } from 'react-icons/bs';
 
 interface FestivalDiscoveryFormProps {
@@ -206,7 +206,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             }}
                             onFocus={() => setShowFestivalDropdown(true)}
                             placeholder={t('FestivalPlaceholder')}
-                            className={`input w-full ${errors.festival ? 'border-red-500' : ''}`}
+                            className={`cursor-pointer input w-full ${errors.festival ? 'border-red-500' : ''}`}
                             disabled={isLoading || loadingFestivals}
                             autoComplete="off"
                             autoCorrect="off"
@@ -214,10 +214,15 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             aria-label={t('SelectFestival')}
                         />
 
+                        {/* down arrow turning up when it's open */}
+                        <div className="absolute right-1 top-1 cursor-pointer z-10" onClick={() => setShowFestivalDropdown(!showFestivalDropdown)}>
+                            <MdExpandLess size={32} className={`text-primary transition-transform ${showFestivalDropdown ? '' : 'transform rotate-180'}`} />
+                        </div>
+
                         {/* Loading indicator */}
                         {loadingFestivals && (
-                            <div className="absolute right-3 top-3">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-magic"></div>
+                            <div className="absolute right-2 top-2">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-magic"></div>
                             </div>
                         )}
 
