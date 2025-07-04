@@ -323,8 +323,6 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                 <div className="bg-white rounded-lg shadow-md">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <h2 className="text-2xl font-bold text-gray-900">{t('FestivalSchedule')}</h2>
-                        <p className="text-gray-600 mt-1">{t('LineupFilter')}</p>
-
                         {/* Search Filter */}
                         <div className="mt-4">
                             <div className="relative">
@@ -446,12 +444,12 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                                 </div>
                                                             )}
 
-                                                            <div className="flex justify-end space-x-2 items-center">
+                                                            <div className="flex flex-wrap justify-end gap-2 items-center">
                                                                 <button
                                                                     onClick={() => handleArtistInfoClick(performance, dayIndex, index)}
                                                                     title={t('ShowArtistInfo')}
                                                                     className={`link-primary bg-primary/15 rounded-full transition-all ${
-                                                                        artistLoading[`${dayIndex}-${index}`] ? 'animate-pulse' : ''
+                                                                        artistLoading[`${dayIndex}-${index}`] ? 'animate-pulse duration-100' : ''
                                                                     } ${artistInfoVisible[`${dayIndex}-${index}`] ? 'p-1' : 'p-2'}`}
                                                                     disabled={artistLoading[`${dayIndex}-${index}`]}
                                                                 >

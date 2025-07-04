@@ -206,7 +206,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             }}
                             onFocus={() => setShowFestivalDropdown(true)}
                             placeholder={t('FestivalPlaceholder')}
-                            className={`cursor-pointer input w-full ${errors.festival ? 'border-red-500' : ''}`}
+                            className={`cursor-pointer pr-8 overflow-ellipsis input w-full ${errors.festival ? 'border-red-500' : ''}`}
                             disabled={isLoading || loadingFestivals}
                             autoComplete="off"
                             autoCorrect="off"

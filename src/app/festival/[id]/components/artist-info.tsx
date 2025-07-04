@@ -34,10 +34,10 @@ export const ArtistInfo = (props: ArtistInfoProps) => {
             >
                 <FaGoogle size={24} />
             </Link>
-            {/* genres, max 4 */}
+            {/* genres, max 5 */}
             {artist.genre && artist.genre.length > 0 && (
-                <div className="max-w-40 md:max-w-100 px-2 text-foreground/70 ">
-                    <span className="text-xs">{artist.genre.slice(0, 4).join(' | ')}</span>
+                <div className="px-2 text-foreground/70 ">
+                    <span className="text-xs">{artist.genre.slice(0, 5).join(' | ')}</span>
                 </div>
             )}
         </>
