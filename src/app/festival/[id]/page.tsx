@@ -4,16 +4,17 @@
  */
 'use client';
 
-import { festivalsApi } from '@/app/lib/api';
+import { ArtistInfo } from '@/app/festival/[id]/components/artist-info';
+import { artistsApi, festivalsApi } from '@/app/lib/api';
 import { ButtonWithIcon } from '@/components/button-with-icon';
-import { Festival } from '@/lib/schemas';
+import { Artist, Festival } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
 import { extractStartTime, formatDateString, isValidDate } from '@/lib/utils/date-util';
-import { getFestivalArtists, getGoogleArtistUrl, getYouTubeSearchArtistUrl, groupFestivalActsByDate } from '@/lib/utils/festival-util';
+import { getFestivalArtists, groupFestivalActsByDate } from '@/lib/utils/festival-util';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { FaGoogle, FaYoutube } from 'react-icons/fa';
+import { FaGoogle, FaInfoCircle } from 'react-icons/fa';
 import { GiLoveSong } from 'react-icons/gi';
 import { LuCalendarArrowDown } from 'react-icons/lu';
 import { MdCalendarToday, MdExpandLess, MdFestival, MdLanguage, MdLocationOn } from 'react-icons/md';
@@ -27,6 +28,7 @@ interface FestivalDay {
     date: string;
     list: {
         artistName: string;
+        artistId?: string;
         stage?: string;
         time?: string;
         date?: string;
@@ -44,6 +46,11 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchFilter, setSearchFilter] = useState<string>('');
+    const [artistMap, setArtistMap] = useState<Record<string, Artist>>({});
+
+    // State for artist info visibility and loading
+    const [artistInfoVisible, setArtistInfoVisible] = useState<Record<string, boolean>>({});
+    const [artistLoading, setArtistLoading] = useState<Record<string, boolean>>({});
 
     const [allDays, setAllDays] = useState<FestivalDay[]>([]);
 
@@ -164,6 +171,43 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
     const filteredLineup = allDays;
 
     const totalFilteredPerformances = filteredLineup.reduce((total, day) => total + day.list.length, 0);
+
+    /**
+     * Handle artist info button click
+     */
+    const handleArtistInfoClick = async (performance: { artistId?: string; artistName: string }, dayIndex: number, performanceIndex: number) => {
+        const key = `${dayIndex}-${performanceIndex}`;
+        const artistId = performance.artistId;
+        // Toggle visibility
+        if (artistInfoVisible[key]) {
+            setArtistInfoVisible(prev => ({ ...prev, [key]: false }));
+            return;
+        }
+
+        // Show artist info
+        setArtistInfoVisible(prev => ({ ...prev, [key]: true }));
+
+        // If no artistId, create a fake artist object
+        if (!artistId) {
+            return;
+        }
+
+        // If artist already loaded, don't load again
+        if (artistMap[artistId]) {
+            return;
+        }
+
+        // Load artist data
+        setArtistLoading(prev => ({ ...prev, [key]: true }));
+        try {
+            const response = await artistsApi.getArtistPublic(artistId);
+            if (response.data) {
+                setArtistMap(prev => ({ ...prev, [artistId]: response.data as Artist }));
+            }
+        } finally {
+            setArtistLoading(prev => ({ ...prev, [key]: false }));
+        }
+    };
 
     const addToGoogleCalendarHandler = (act: { date: string; time: string; artist: string; stage?: string }) => {
         addToGoogleCalendar({
@@ -402,27 +446,27 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                                 </div>
                                                             )}
 
-                                                            {/* spotify link, youtube live serach link, google search link */}
-                                                            <div className="flex justify-end space-x-4">
-                                                                <Link
-                                                                    href={getYouTubeSearchArtistUrl(performance.artistName)}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="link-destructive p-2 rounded-full bg-primary/15"
-                                                                    title={t('WatchOnYouTube')}
+                                                            <div className="flex justify-end space-x-2 items-center">
+                                                                <button
+                                                                    onClick={() => handleArtistInfoClick(performance, dayIndex, index)}
+                                                                    title={t('ShowArtistInfo')}
+                                                                    className={`link-primary bg-primary/15 rounded-full transition-all ${
+                                                                        artistLoading[`${dayIndex}-${index}`] ? 'animate-pulse' : ''
+                                                                    } ${artistInfoVisible[`${dayIndex}-${index}`] ? 'p-1' : 'p-2'}`}
+                                                                    disabled={artistLoading[`${dayIndex}-${index}`]}
                                                                 >
-                                                                    <FaYoutube size={24} />
-                                                                </Link>
-
-                                                                <Link
-                                                                    href={getGoogleArtistUrl(performance.artistName, festival.website, festival.name)}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    title={t('WebSearch')}
-                                                                    className="link-primary p-2 rounded-full bg-primary/15"
-                                                                >
-                                                                    <FaGoogle size={24} />
-                                                                </Link>
+                                                                    <FaInfoCircle size={26} />
+                                                                </button>
+                                                                {artistInfoVisible[`${dayIndex}-${index}`] &&
+                                                                    (() => {
+                                                                        const artist = (performance.artistId && artistMap[performance.artistId]
+                                                                            ? artistMap[performance.artistId]
+                                                                            : artistMap[`${dayIndex}-${index}`]) ?? {
+                                                                            id: '',
+                                                                            name: performance.artistName,
+                                                                        };
+                                                                        return <ArtistInfo festival={festival} artist={artist} />;
+                                                                    })()}
                                                             </div>
                                                         </div>
                                                     ))}

@@ -64,7 +64,7 @@
         "LoadingRecommendations": "Discovering...",
         "ValidationSelectFestival": "Please select a festival on the top of the form",
         "ValidationSelectGenres": "Please select at least one genre or provide additional preferences",
-        "SupportMe": "Support the project"
+        "SupportMe": "Support the project with 5 CHF"
     },
     "GenresGrid": {
         "Sort": "Sort",
@@ -110,7 +110,7 @@
         "PatienceMessage": "Thank you for your patience! We're working hard to find the perfect festivals for you."
     },
     "SupportMe": {
-        "DefaultTitle": "Every AI request is paid, support the project",
+        "DefaultTitle": "Every AI request is paid, support the project with 5 CHF",
         "LinkTitle": "Support me by TWINT payment"
     },
     "Layout": {
@@ -137,6 +137,7 @@
         "ClearFilter": "Clear filter",
         "ShowingResults": "Showing {count} of {total} performances",        
         "Performances": "Performances",
+        "ShowArtistInfo": "Show Artist Info",
         "VisitWebsite": "Visit Festival Website",
         "WebSearch": "Web Search",
         "WatchOnYouTube": "Watch on YouTube",

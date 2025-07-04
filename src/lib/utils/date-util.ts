@@ -118,7 +118,6 @@ export const buildDateTime = (date: Date, time: string): Date => {
 
 export const extractStartTime = (time: string): string => {
     // If time is like "22:00 - 23:00", extract the first part
-    console.log(time);
     if (time.includes('-')) {
         const timeParts = time.split('-');
         if (timeParts.length > 1 && timeParts[0]) {

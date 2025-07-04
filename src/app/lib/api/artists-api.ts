@@ -13,6 +13,10 @@ class ArtistsApi {
         return this.client.request<Artist>(`/admin/artists/${id}`);
     }
 
+    async getArtistPublic(id: string): Promise<ApiResponse<Artist>> {
+        return this.client.request<Artist>(`/discover/artists/${id}`);
+    }
+
     async deleteArtist(id: string): Promise<ApiResponse> {
         return this.client.request(`/admin/artists/${id}`, {
             method: 'DELETE',

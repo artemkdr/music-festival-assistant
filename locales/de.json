@@ -64,7 +64,7 @@
         "LoadingRecommendations": "Empfehlungen werden gesucht...",
         "ValidationSelectFestival": "Bitte wähle oben im Formular ein Festival aus",
         "ValidationSelectGenres": "Bitte wähle mindestens ein Genre oder gib weitere Präferenzen an",
-        "SupportMe": "Unterstütze das Projekt"
+        "SupportMe": "Unterstütze das Projekt mit 5 CHF"
     },
     "GenresGrid": {
         "Sort": "Sortieren",
@@ -109,7 +109,7 @@
         "PatienceMessage": "Danke für deine Geduld! Wir suchen die perfekten Festivals für dich."
     },
     "SupportMe": {
-        "DefaultTitle": "Jede KI-Anfrage kostet, unterstütze bitte das Projekt",
+        "DefaultTitle": "Jede KI-Anfrage kostet, unterstütze bitte das Projekt mit 5 CHF",
         "LinkTitle": "Unterstütze mich per TWINT-Zahlung"
     },
     "Layout": {
@@ -137,6 +137,7 @@
         "ShowingResults": "Angezeigt werden {count} von {total} Auftritten",        
         "Performances": "Auftritte",
         "VisitWebsite": "Festival-Website besuchen",
+        "ShowArtistInfo": "Künstlerinfo anzeigen",
         "WebSearch": "Im Web suchen",
         "WatchOnYouTube": "Auf YouTube ansehen",
         "CallToActionTitle": "Möchten Sie persönliche Empfehlungen?",

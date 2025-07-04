@@ -64,7 +64,7 @@
         "LoadingRecommendations": "Découverte en cours...",
         "ValidationSelectFestival": "Veuillez sélectionner un festival en haut du formulaire",
         "ValidationSelectGenres": "Veuillez sélectionner au moins un genre ou fournir des préférences supplémentaires",
-        "SupportMe": "Soutenez le projet"
+        "SupportMe": "Soutenez le projet avec 5 frs"
     },
     "GenresGrid": {
         "Sort": "Trier",
@@ -109,7 +109,7 @@
         "PatienceMessage": "Merci de votre patience ! Nous travaillons dur pour trouver les festivals parfaits pour vous."
     },
     "SupportMe": {
-        "DefaultTitle": "Chaque requête IA est payante, soutenez le projet",
+        "DefaultTitle": "Chaque requête IA est payante, soutenez le projet avec 5 frs",
         "LinkTitle": "Soutenez-moi par paiement TWINT"
     },
     "Layout": {
@@ -137,6 +137,7 @@
         "ShowingResults": "Affichage de {count} sur {total} performances",        
         "Performances": "Performances",
         "VisitWebsite": "Voir le site du festival",
+        "ShowArtistInfo": "Afficher les informations de l'artiste",
         "WebSearch": "Rechercher sur le web",
         "WatchOnYouTube": "Regarder sur YouTube",
         "CallToActionTitle": "Envie de recommandations personnalisées ?",
