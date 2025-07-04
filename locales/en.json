@@ -64,7 +64,8 @@
         "SortAlphabetical": "A-Z",
         "SelectGenresInstruction": "Select genres you enjoy",
         "GenresSelected": "selected",
-        "ShowAll": "Show all {count} genres"
+        "ShowAll": "Show all {count} genres",
+        "ShowLess": "Show less"
     },
     "Recommendations": {
         "DisclaimerTitle": "Disclaimer:",
