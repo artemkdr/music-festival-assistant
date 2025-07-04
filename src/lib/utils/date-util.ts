@@ -116,6 +116,18 @@ export const buildDateTime = (date: Date, time: string): Date => {
     return newDate;
 };
 
+export const extractStartTime = (time: string): string => {
+    // If time is like "22:00 - 23:00", extract the first part
+    console.log(time);
+    if (time.includes('-')) {
+        const timeParts = time.split('-');
+        if (timeParts.length > 1 && timeParts[0]) {
+            return timeParts[0].trim(); // take the first part before the dash
+        }
+    }
+    return time.trim(); // return the original time if no dash is found
+};
+
 /**
  * Builds a date-time range from a start date and start/end times.
  * If the end time is earlier than the start time, it will pass it to the next day.

@@ -4,7 +4,7 @@ import { ButtonWithIcon } from '@/components/button-with-icon';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { Festival, Recommendation } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
-import { formatDateString, isValidDate } from '@/lib/utils/date-util';
+import { extractStartTime, formatDateString, isValidDate } from '@/lib/utils/date-util';
 import { DATE_TBA, getFestivalDates, getGoogleArtistUrl, getYouTubeSearchArtistUrl } from '@/lib/utils/festival-util';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -151,7 +151,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                     </div>
                                 </div>
                                 {/* Show 'Add to calendars button only if the date is valid */}
-                                {isValidDate(new Date(`${recommendation.act.date}T${recommendation.act.time}`)) && (
+                                {isValidDate(new Date(`${recommendation.act.date}T${extractStartTime(recommendation.act.time || '19:00')}`)) && (
                                     <div className="flex flex-wrap gap-4 py-2">
                                         <ButtonWithIcon
                                             icon={<LuCalendarArrowDown size={20} />}

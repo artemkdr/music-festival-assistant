@@ -3,7 +3,7 @@
  */
 
 import { CalendarEvent } from '@/lib/schemas';
-import { isValidDate } from '@/lib/utils/date-util';
+import { extractStartTime, isValidDate } from '@/lib/utils/date-util';
 
 /**
  * Adds an event to Google Calendar *
@@ -13,13 +13,7 @@ import { isValidDate } from '@/lib/utils/date-util';
 export const addToGoogleCalendar = async (event: { date: string; time: string; festival: string; artist: string; stage: string }) => {
     const { date, time, festival, artist, stage } = event;
     // check if time is like "22:00 - 23:00" and extract the first part
-    let parsedTime = time;
-    if (time.includes('-')) {
-        const timeParts = time.split('-');
-        if (timeParts.length > 1 && timeParts && timeParts[0]) {
-            parsedTime = timeParts[0].trim(); // take the first part before the dash
-        }
-    }
+    const parsedTime = extractStartTime(time);
     const actDateTime = new Date(`${date}T${parsedTime}`);
     let formattedStartDate = '';
     let formattedEndDate = '';
@@ -166,13 +160,7 @@ export const createFestivalEvent = (params: {
 export const downloadICSCalendar = (festival: { name: string; location?: string | undefined; website?: string | undefined }, event: { date: string; time: string; artist: string; stage?: string }) => {
     const { date, time, artist, stage } = event;
 
-    let parsedTime = time;
-    if (time.includes('-')) {
-        const timeParts = time.split('-');
-        if (timeParts.length > 1 && timeParts && timeParts[0]) {
-            parsedTime = timeParts[0].trim(); // take the first part before the dash
-        }
-    }
+    const parsedTime = extractStartTime(time);
 
     const eventParams: Parameters<typeof createFestivalEvent>[0] = {
         artistName: artist,

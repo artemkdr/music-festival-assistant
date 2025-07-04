@@ -8,7 +8,7 @@ import { festivalsApi } from '@/app/lib/api';
 import { ButtonWithIcon } from '@/components/button-with-icon';
 import { Festival } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
-import { formatDateString, isValidDate } from '@/lib/utils/date-util';
+import { extractStartTime, formatDateString, isValidDate } from '@/lib/utils/date-util';
 import { getFestivalArtists, getGoogleArtistUrl, getYouTubeSearchArtistUrl, groupFestivalActsByDate } from '@/lib/utils/festival-util';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -372,7 +372,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                             </div>
 
                                                             {/* Show 'Add to calendars button only if the date is valid */}
-                                                            {isValidDate(new Date(`${dayLineup.date}T${performance.time}`)) && (
+                                                            {isValidDate(new Date(`${dayLineup.date}T${extractStartTime(performance.time || '19:00')}`)) && (
                                                                 <div className="flex flex-wrap gap-4 py-2">
                                                                     <ButtonWithIcon
                                                                         icon={<LuCalendarArrowDown size={20} />}
