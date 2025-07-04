@@ -164,6 +164,8 @@
         "ContactTitle": "Kontakt",
         "ContactText": "Wenn du Fragen, Anregungen hast oder einfach nur Hallo sagen möchtest, kontaktiere uns gerne per <email>E-Mail</email>.",
         "SupportTitle": "Unterstützen",
-        "SupportText": "Wenn dir dieses Projekt gefällt, unterstütze es bitte via TWINT. Jeder Beitrag hilft, den Service online zu halten!"
+        "SupportText": "Wenn dir dieses Projekt gefällt, unterstütze es bitte via TWINT. Jeder Beitrag hilft, den Service online zu halten!",
+        "DataSourceTitle": "Woher stammen die Daten?",
+        "DataSourceText": "Die Zeitplandaten stammen direkt von den Festival-Webseiten, um die Genauigkeit von Daten, Zeiten und Bühnen zu gewährleisten. Die Künstlerinformationen hingegen kommen von der öffentlichen Spotify-API und werden anschließend von einer KI mit Kontext von Spotify und dem Festival angereichert. Das bedeutet, dass Künstlerinformationen ungenau oder unvollständig sein können, insbesondere bei kleineren oder weniger bekannten Künstlern. Um dem entgegenzuwirken, gibt es einen Admin-Modus, in dem Menschen alle Daten manuell überprüfen und anpassen können, um eine bessere Qualität und Genauigkeit sicherzustellen."
     }
 }

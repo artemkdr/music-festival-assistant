@@ -164,6 +164,8 @@
         "ContactTitle": "Contact",
         "ContactText": "Si vous avez des questions, des suggestions ou souhaitez simplement dire bonjour, n’hésitez pas à nous contacter par <email>email</email>.",
         "SupportTitle": "Soutenir",
-        "SupportText": "Si vous appréciez ce projet, merci de le soutenir via TWINT. Chaque contribution aide à maintenir le service en ligne !"
+        "SupportText": "Si vous appréciez ce projet, merci de le soutenir via TWINT. Chaque contribution aide à maintenir le service en ligne !",
+        "DataSourceTitle": "D'où viennent les données ?",
+        "DataSourceText": "Les données de programmation proviennent directement des sites web des festivals afin de garantir l'exactitude des dates, horaires et scènes. Cependant, les informations sur les artistes proviennent de l'API publique de Spotify et sont ensuite enrichies par l'IA en utilisant à la fois le contexte de Spotify et celui du festival. Cela signifie que les données sur les artistes peuvent être inexactes ou incomplètes, en particulier pour les artistes moins connus ou émergents. Pour y remédier, le service inclut un mode administrateur permettant à des humains de vérifier et de modifier manuellement toutes les données afin d'assurer une meilleure qualité et précision."
     }
 }

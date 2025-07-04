@@ -23,6 +23,11 @@ export default function AboutPage() {
             </section>
 
             <section className="mt-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('DataSourceTitle')}</h2>
+                <p className="text-gray-700">{t('DataSourceText')}</p>
+            </section>
+
+            <section className="mt-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('ContactTitle')}</h2>
                 <p className="text-gray-700 mb-4">
                     {t.rich('ContactText', {
