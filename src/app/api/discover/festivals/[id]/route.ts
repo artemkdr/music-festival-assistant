@@ -23,7 +23,6 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing festival ID in route parameters',
             },
             { status: 400 }
@@ -39,7 +38,6 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         if (!festival) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Festival not found: ${id}`,
                 },
                 { status: 404 }
@@ -75,8 +73,7 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         logger.error('Failed to get public festival', error instanceof Error ? error : new Error(String(error)));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve festival',
+                message: 'Failed to retrieve festival',
             },
             { status: 500 }
         );

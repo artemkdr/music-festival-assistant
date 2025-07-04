@@ -4,6 +4,7 @@
  */
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/utils/auth-utils';
+import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const GET = requireAdmin(async (request: NextRequest): Promise<Response> => {
@@ -16,7 +17,6 @@ export const GET = requireAdmin(async (request: NextRequest): Promise<Response> 
         if (!query) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Missing query parameter "q"',
                 },
                 { status: 400 }
@@ -35,11 +35,10 @@ export const GET = requireAdmin(async (request: NextRequest): Promise<Response> 
             data: { artists: limitedResults },
         });
     } catch (error) {
-        logger.error('Database artist search failed', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Database artist search failed', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Artist search failed',
+                message: 'Artist search failed',
             },
             { status: 500 }
         );

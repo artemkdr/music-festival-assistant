@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/utils/auth-utils';
 import { User } from '@/lib/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { toError } from '@/lib/utils/error-handler';
 
 const LinkActRequestSchema = z.object({
     actId: z.string().min(1),
@@ -39,7 +40,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing festival ID in dynamic route parameters',
             },
             { status: 400 }
@@ -56,7 +56,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         if (!festival) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Festival not found: ${id}`,
                 },
                 { status: 404 }
@@ -68,7 +67,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         if (!act) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Act not found: ${validated.actId}`,
                 },
                 { status: 404 }
@@ -83,7 +81,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
             if (!existingArtist) {
                 return NextResponse.json(
                     {
-                        status: 'error',
                         message: `Artist not found: ${validated.artistId}`,
                     },
                     { status: 404 }
@@ -96,7 +93,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
             if (!validated.spotifyData) {
                 return NextResponse.json(
                     {
-                        status: 'error',
                         message: 'spotifyData is required for Spotify artist creation',
                     },
                     { status: 400 }
@@ -135,11 +131,10 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
             },
         });
     } catch (error) {
-        logger.error('Admin act linking failed', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Admin act linking failed', toError(error));
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid request data',
                     errors: error.errors.map(err => ({
                         field: err.path.join('.'),
@@ -151,8 +146,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         }
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Act linking failed',
+                message: 'Act linking failed',
             },
             { status: 500 }
         );

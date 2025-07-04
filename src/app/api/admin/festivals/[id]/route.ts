@@ -10,6 +10,7 @@ import { User } from '@/lib/services/auth';
 import { generateFestivalId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
+import { toError } from '@/lib/utils/error-handler';
 
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
@@ -24,7 +25,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing festival ID in dynamic route parameters',
             },
             { status: 400 }
@@ -40,7 +40,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         if (!festival) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Festival not found: ${id}`,
                 },
                 { status: 404 }
@@ -98,11 +97,10 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
             data: festival,
         });
     } catch (error) {
-        logger.error('Failed to get festival', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to get festival', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve festival',
+                message: 'Failed to retrieve festival',
             },
             { status: 500 }
         );
@@ -118,7 +116,6 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing festival ID in dynamic route parameters',
             },
             { status: 400 }
@@ -163,7 +160,6 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         if (error instanceof ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid festival data',
                     errors: error.errors,
                 },
@@ -171,11 +167,10 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
             );
         }
 
-        logger.error('Failed to update festival', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to update festival', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to update festival',
+                message: 'Failed to update festival',
             },
             { status: 500 }
         );

@@ -54,7 +54,15 @@ export class ApiClient {
                 throw new Error('Unauthorized access - please log in again.');
             }
             const errorText = await response.text();
-            throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
+            return {
+                status: 'error' as const,
+                message: `API request failed: ${response.status} ${response.statusText} - ${errorText}`,
+                error: {
+                    status: response.status,
+                    statusText: response.statusText,
+                    details: errorText,
+                },
+            };
         }
         // Check response content type, parse as JSON if it's application/json
         const contentType = response.headers.get('Content-Type');

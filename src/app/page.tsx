@@ -1,11 +1,13 @@
 'use client';
 
+import { ApiResponse } from '@/app/lib/api';
 import { discoverApi, FestivalDiscoveryResponse } from '@/app/lib/api/discover-api';
 import { FestivalDiscoveryForm } from '@/components/festival-discovery-form';
 import { Logo } from '@/components/logo';
 import { RecommendationsList } from '@/components/recommendations-list';
 import { RecommendationsLoadingSpinner } from '@/components/recommendations-loading-spinner';
 import { UserPreferences } from '@/lib/schemas';
+import { toError } from '@/lib/utils/error-handler';
 import { useTranslations } from 'next-intl';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
@@ -18,6 +20,35 @@ export default function HomePage(): ReactElement {
     const [isLoading, setIsLoading] = useState(false);
     const [discoveryResponse, setDiscoveryResponse] = useState<FestivalDiscoveryResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    /**
+     * handler API error response
+     */
+    const handleApiError = (apiResponse: ApiResponse) => {
+        if (apiResponse.status !== 'success') {
+            switch (apiResponse.error?.status) {
+                case 400:
+                    setError(t('HomePage.ErrorBadRequest'));
+                    break;
+                case 401:
+                    setError(t('HomePage.ErrorUnauthorized'));
+                    break;
+                case 404:
+                    setError(t('HomePage.ErrorNotFound'));
+                    break;
+                case 429:
+                    setError(t('HomePage.ErrorTooManyRequests'));
+                    break;
+                case 500:
+                    setError(t('HomePage.ErrorServer'));
+                    break;
+                default:
+                    setError(t('HomePage.ErrorOccurred'));
+            }
+        } else {
+            setError(null);
+        }
+    };
 
     /**
      * Handle festival discovery request
@@ -38,10 +69,19 @@ export default function HomePage(): ReactElement {
             if (response.status === 'success' && response.data) {
                 setDiscoveryResponse(response.data);
             } else {
-                throw new Error(t('HomePage.ErrorOccurred'));
+                // Handle error response
+                handleApiError(response);
             }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : t('HomePage.ErrorOccurred'));
+        } catch (err: unknown) {
+            handleApiError({
+                status: 'error',
+                message: toError(err).message,
+                error: {
+                    status: 500,
+                    statusText: 'Internal Server Error',
+                    details: toError(err).message,
+                },
+            });
         } finally {
             setIsLoading(false);
         }

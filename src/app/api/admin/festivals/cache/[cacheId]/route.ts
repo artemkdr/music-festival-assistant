@@ -6,6 +6,7 @@ import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/utils/auth-utils';
 import type { User } from '@/lib/services/auth/interfaces';
 import { NextRequest, NextResponse } from 'next/server';
+import { toError } from '@/lib/utils/error-handler';
 
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
@@ -24,7 +25,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
     if (!cacheId) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Cache ID is required in dynamic route parameters',
             },
             { status: 400 }
@@ -43,7 +43,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         if (!cachedFestival) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Cached festival not found or expired',
                 },
                 { status: 404 }
@@ -59,11 +58,10 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
             },
         });
     } catch (error) {
-        logger.error('Failed to get cached festival', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to get cached festival', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve cached festival',
+                message: 'Failed to retrieve cached festival',
             },
             { status: 500 }
         );

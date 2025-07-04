@@ -10,6 +10,7 @@ import { Artist } from '@/lib/schemas';
 import { User } from '@/lib/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
+import { toError } from '@/lib/utils/error-handler';
 
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
@@ -25,7 +26,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing artist ID in dynamic route parameters',
             },
             { status: 400 }
@@ -40,7 +40,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         if (!artist) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Artist not found: ${id}`,
                 },
                 { status: 404 }
@@ -53,11 +52,10 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
             data: artist,
         });
     } catch (error) {
-        logger.error('Failed to get artist', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to get artist', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve artist',
+                message: 'Failed to retrieve artist',
             },
             { status: 500 }
         );
@@ -73,7 +71,6 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing artist ID in dynamic route parameters',
             },
             { status: 400 }
@@ -92,7 +89,6 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         if (!existingArtist) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Artist not found: ${id}`,
                 },
                 { status: 404 }
@@ -121,7 +117,6 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         if (error instanceof ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid artist data',
                     errors: error.errors,
                 },
@@ -129,11 +124,10 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
             );
         }
 
-        logger.error('Failed to update artist', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to update artist', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to update artist',
+                message: 'Failed to update artist',
             },
             { status: 500 }
         );
@@ -149,7 +143,6 @@ export const DELETE = requireAdmin(async (request: NextRequest, user: User, cont
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing artist ID in dynamic route parameters',
             },
             { status: 400 }
@@ -164,7 +157,6 @@ export const DELETE = requireAdmin(async (request: NextRequest, user: User, cont
         if (!existingArtist) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Artist not found: ${id}`,
                 },
                 { status: 404 }
@@ -179,11 +171,10 @@ export const DELETE = requireAdmin(async (request: NextRequest, user: User, cont
             message: 'Artist deleted successfully',
         });
     } catch (error) {
-        logger.error('Failed to delete artist', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to delete artist', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to delete artist',
+                message: 'Failed to delete artist',
             },
             { status: 500 }
         );

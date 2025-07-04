@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/utils/auth-utils';
 import { Festival } from '@/lib/schemas';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { toError } from '@/lib/utils/error-handler';
 
 const CrawlArtistsRequestSchema = z.object({
     festivalId: z.string().optional(),
@@ -32,7 +33,6 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
             if (!festival) {
                 return NextResponse.json(
                     {
-                        status: 'error',
                         message: `Festival not found: ${validated.festivalId}`,
                     },
                     { status: 404 }
@@ -44,7 +44,6 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         } else {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Must provide festivalId or artistNames',
                 },
                 { status: 400 }
@@ -84,8 +83,8 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                 }
                 results.push({ name, status: 'crawled' });
             } catch (err) {
-                logger.error('Artist crawl failed', err instanceof Error ? err : new Error(String(err)));
-                results.push({ name, status: 'error', error: err instanceof Error ? err.message : String(err) });
+                logger.error('Artist crawl failed', toError(err));
+                results.push({ name, status: 'error', error: toError(err)?.message });
             }
         }
 
@@ -95,11 +94,10 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
             data: { results },
         });
     } catch (error) {
-        logger.error('Admin artist crawl failed', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Admin artist crawl failed', toError(error));
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid request data',
                     errors: error.errors.map(err => ({
                         field: err.path.join('.'),
@@ -111,8 +109,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         }
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Artist crawl failed',
+                message: 'Artist crawl failed',
             },
             { status: 500 }
         );

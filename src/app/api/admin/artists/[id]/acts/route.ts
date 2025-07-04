@@ -24,7 +24,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
     if (!id) {
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Missing artist ID in dynamic route parameters',
             },
             { status: 400 }
@@ -38,7 +37,6 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         if (!artist) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: `Artist not found: ${id}`,
                 },
                 { status: 404 }
@@ -81,8 +79,7 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         logger.error('Failed to get artist acts', error instanceof Error ? error : new Error(String(error)));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve artist acts',
+                message: 'Failed to retrieve artist acts',
             },
             { status: 500 }
         );

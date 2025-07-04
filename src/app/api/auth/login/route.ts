@@ -40,8 +40,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
             return NextResponse.json(
                 {
-                    status: 'error',
-                    message: result.error || 'Login failed',
+                    message: 'Login failed',
                 },
                 { status: 401 }
             );
@@ -52,7 +51,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid request data',
                     errors: error.errors.map(err => ({
                         field: err.path.join('.'),
@@ -65,7 +63,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         return NextResponse.json(
             {
-                status: 'error',
                 message: 'Internal server error',
             },
             { status: 500 }

@@ -40,8 +40,7 @@ export const UpdateFestivalSchema = FestivalSchema.extend({
 
 // Festival discovery request schema
 export const FestivalDiscoveryRequestSchema = z.object({
-    festivalUrl: z.string().url().optional(),
-    festivalId: z.string().optional(),
+    festivalId: z.string().min(1),
     userPreferences: UserPreferencesSchema,
 });
 

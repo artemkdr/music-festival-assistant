@@ -15,17 +15,22 @@
     "HomePage": {
         "HeroTitle": "Découvrez votre prochain artiste préféré",
         "HeroDescription": [
-            "Choisissez un festival et obtenez des recommandations d'artistes selon vos goûts musicaux.", 
+            "Choisissez un festival et obtenez des recommandations d'artistes selon vos goûts musicaux.",
             "Ne manquez plus jamais de découvrir de la musique incroyable."
         ],
         "EmptyStateTitle": "Prêt à découvrir de la musique incroyable ?",
-        "EmptyStateDescription": "Sélectionnez un festival ci-dessus et vos préférences pour génerer des recommandations personnalisées.",
+        "EmptyStateDescription": "Sélectionnez un festival ci-dessus et vos préférences pour générer des recommandations personnalisées.",
         "EmptyStateDisclaimer": [
             "Les recommandations sont générées par l'IA selon vos préférences et la programmation du festival.",
             "Les recommandations peuvent ne pas être totalement exactes.",
             "Mais elles sont un excellent moyen de découvrir de nouveaux artistes que vous pourriez aimer !"
         ],
-        "ErrorOccurred": "Une erreur inattendue s'est produite"
+        "ErrorOccurred": "Une erreur inattendue s'est produite",
+        "ErrorUnauthorized": "Désolé, vous n'êtes pas autorisé à accéder à cette ressource. Veuillez vous connecter ou vérifier vos autorisations.",
+        "ErrorBadRequest": "Désolé, la requête est invalide. Veuillez vérifier que tous les champs obligatoires sont correctement remplis.",
+        "ErrorNotFound": "Désolé, une erreur s'est produite lors du traitement de votre demande. Veuillez réessayer plus tard.",
+        "ErrorTooManyRequests": "Désolé, vous avez atteint la limite de requêtes autorisées. Veuillez réessayer plus tard.",
+        "ErrorServer": "Désolé, une erreur serveur s'est produite. Veuillez réessayer plus tard."
     },
     "FestivalDiscovery": {
         "SelectFestival": "Sélectionnez un festival",

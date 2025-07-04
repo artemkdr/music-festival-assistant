@@ -25,7 +25,12 @@
             "Die Empfehlungen sind möglicherweise nicht vollständig korrekt.",
             "Aber sie sind eine tolle Möglichkeit, neue Künstler zu entdecken, die dir gefallen könnten!"
         ],
-        "ErrorOccurred": "Ein unerwarteter Fehler ist aufgetreten"
+        "ErrorOccurred": "Ein unerwarteter Fehler ist aufgetreten",
+        "ErrorUnauthorized": "Entschuldigung, du bist nicht berechtigt, auf diese Ressource zuzugreifen. Bitte melde dich an oder überprüfe deine Berechtigungen.",
+        "ErrorBadRequest": "Entschuldigung, die Anfrage ist ungültig. Bitte überprüfe, ob alle Pflichtfelder korrekt ausgefüllt sind.",
+        "ErrorNotFound": "Entschuldigung, bei der Verarbeitung deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
+        "ErrorTooManyRequests": "Entschuldigung, du hast das Anfrage-Limit erreicht. Bitte versuche es später erneut.",
+        "ErrorServer": "Entschuldigung, es ist ein Serverfehler aufgetreten. Bitte versuche es später erneut."
     },
     "FestivalDiscovery": {
         "SelectFestival": "Festival auswählen",

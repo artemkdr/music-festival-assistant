@@ -3,6 +3,7 @@
  */
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/utils/auth-utils';
+import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -34,7 +35,6 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
             if (!existing) {
                 return NextResponse.json(
                     {
-                        status: 'error',
                         message: `Artist not found: ${validated.id}`,
                     },
                     { status: 404 }
@@ -44,7 +44,6 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         } else if (!artistName) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Missing artist name or ID in request body',
                 },
                 { status: 400 }
@@ -63,11 +62,10 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
             data: result,
         });
     } catch (error) {
-        logger.error('Admin artist crawl failed', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Admin artist crawl failed', toError(error));
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid request data',
                     errors: error.errors.map(err => ({
                         field: err.path.join('.'),
@@ -79,8 +77,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         }
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Artist crawl failed',
+                message: 'Artist crawl failed',
             },
             { status: 500 }
         );

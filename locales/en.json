@@ -25,7 +25,12 @@
             "The recommendations may not be fully accurate.",
             "But they are a great way to discover new artists you might love!"
         ],
-        "ErrorOccurred": "An unexpected error occurred"
+        "ErrorOccurred": "Sorry, an unexpected error occurred, please try again later",
+        "ErrorUnauthorized": "Sorry, you are not authorized to access this resource. Please log in or check your permissions.",
+        "ErrorBadRequest": "Sorry, but the request was invalid somehow, please check that all required fields are filled in correctly.",
+        "ErrorNotFound": "Sorry, an error occurred while processing your request. Please try again later.",
+        "ErrorTooManyRequests": "Sorry, but there is a limit on the number of requests you can make. Please try again later.",
+        "ErrorServer": "Sorry, a server error occurred, please try again later"
     },
     "FestivalDiscovery": {
         "SelectFestival": "Select a Festival",

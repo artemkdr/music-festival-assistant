@@ -30,11 +30,10 @@ export const GET = requireAdmin(async (): Promise<Response> => {
             data: festivals,
         });
     } catch (error) {
-        logger.error('Failed to get festivals', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to get festivals', toError(error));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve festivals',
+                message: 'Failed to retrieve festivals',
             },
             { status: 500 }
         );
@@ -84,7 +83,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid festival data',
                     errors: error.errors.map(err => ({
                         field: err.path.join('.'),
@@ -97,8 +95,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
 
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Festival creation failed',
+                message: 'Festival creation failed',
             },
             { status: 500 }
         );

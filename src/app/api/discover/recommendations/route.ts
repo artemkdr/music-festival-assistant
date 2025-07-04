@@ -4,6 +4,7 @@
 import { container } from '@/lib/di-container';
 import type { UserPreferences } from '@/lib/schemas';
 import { FestivalDiscoveryRequestSchema } from '@/lib/schemas';
+import { toError } from '@/lib/utils/error-handler';
 import { getFestivalArtists } from '@/lib/utils/festival-util';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -21,9 +22,7 @@ export async function POST(request: NextRequest) {
         if (validatedData.userPreferences.genres?.length === 0 && !validatedData.userPreferences.comment?.trim()) {
             return NextResponse.json(
                 {
-                    status: 'error' as const,
                     message: 'At least one genre or additional preferences must be provided',
-                    errors: ['Please select at least one genre or provide additional preferences'],
                 },
                 { status: 400 }
             );
@@ -31,62 +30,46 @@ export async function POST(request: NextRequest) {
 
         logger.info('AI-enhanced festival discovery requested', {
             festivalId: validatedData.festivalId,
-            festivalUrl: validatedData.festivalUrl,
             userGenres: validatedData.userPreferences.genres,
         });
 
-        let response;
+        // Get festival data
+        const festivalService = container().getFestivalService();
+        const festival = await festivalService.getFestivalById(validatedData.festivalId);
 
-        if (validatedData.festivalId) {
-            // Get festival data
-            const festivalService = container().getFestivalService();
-            const festival = await festivalService.getFestivalById(validatedData.festivalId);
-
-            if (!festival) {
-                return NextResponse.json(
-                    {
-                        status: 'error' as const,
-                        message: 'Festival not found',
-                        errors: [`Festival with ID ${validatedData.festivalId} not found`],
-                    },
-                    { status: 404 }
-                );
-            } // Generate AI-enhanced recommendations
-            const aiRecommendations = await recommendationService.generateAIEnhancedRecommendations(festival, validatedData.userPreferences as UserPreferences);
-
-            response = {
-                status: 'success' as const,
-                message: 'AI-enhanced festival discovery completed',
-                data: {
-                    festival,
-                    recommendations: aiRecommendations,
-                    totalArtists: getFestivalArtists(festival).length,
-                    totalRecommendations: aiRecommendations.length,
-                    aiEnhanced: true,
-                    enhancedCount: aiRecommendations.filter(r => r.aiEnhanced).length,
-                },
-            };
-        } else {
+        if (!festival) {
             return NextResponse.json(
                 {
-                    status: 'error' as const,
-                    message: 'Either festivalId or festivalUrl must be provided',
-                    errors: ['Missing required parameter: festivalId or festivalUrl'],
+                    message: `Festival with ID ${validatedData.festivalId} not found`,
                 },
-                { status: 400 }
+                { status: 404 }
             );
         }
+
+        // Generate AI-enhanced recommendations
+        const aiRecommendations = await recommendationService.generateAIEnhancedRecommendations(festival, validatedData.userPreferences as UserPreferences);
+
+        const response = {
+            status: 'success' as const,
+            message: 'AI-enhanced festival discovery completed',
+            data: {
+                festival,
+                recommendations: aiRecommendations,
+                totalArtists: getFestivalArtists(festival).length,
+                totalRecommendations: aiRecommendations.length,
+                aiEnhanced: true,
+                enhancedCount: aiRecommendations.filter(r => r.aiEnhanced).length,
+            },
+        };
 
         return NextResponse.json(response);
     } catch (error) {
         const logger = container().getLogger();
-        logger.error('AI-enhanced festival discovery failed', error instanceof Error ? error : new Error(String(error)));
+        logger.error('AI-enhanced festival discovery failed', toError(error));
 
         return NextResponse.json(
             {
-                status: 'error' as const,
                 message: 'AI-enhanced festival discovery failed',
-                errors: [error instanceof Error ? error.message : 'Unknown error'],
             },
             { status: 500 }
         );

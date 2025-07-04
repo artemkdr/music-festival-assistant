@@ -30,8 +30,7 @@ export async function GET(): Promise<Response> {
         logger.error('Failed to get festivals', error instanceof Error ? error : new Error(String(error)));
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Failed to retrieve festivals',
+                message: 'Failed to retrieve festivals',
             },
             { status: 500 }
         );

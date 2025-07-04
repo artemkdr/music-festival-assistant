@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/utils/auth-utils';
 import type { User } from '@/lib/services/auth/interfaces';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { toError } from '@/lib/utils/error-handler';
 
 /**
  * Request schema for festival crawling
@@ -69,12 +70,11 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
             },
         });
     } catch (error) {
-        logger.error('Admin festival crawl failed', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Admin festival crawl failed', toError(error));
 
         if (error instanceof z.ZodError) {
             return NextResponse.json(
                 {
-                    status: 'error',
                     message: 'Invalid request data',
                     errors: error.errors.map(err => ({
                         field: err.path.join('.'),
@@ -87,8 +87,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
 
         return NextResponse.json(
             {
-                status: 'error',
-                message: error instanceof Error ? error.message : 'Festival crawl failed',
+                message: 'Festival crawl failed',
             },
             { status: 500 }
         );
