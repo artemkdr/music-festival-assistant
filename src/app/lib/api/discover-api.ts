@@ -9,6 +9,7 @@ export interface FestivalInfo {
     startDate: string;
     endDate: string;
     artistsCount: number;
+    dates: string[];
 }
 
 export interface FestivalDiscoveryResponse {
@@ -52,13 +53,13 @@ class DiscoverApi {
      * @param {string} festivalId
      * @returns {Promise<{status: string, data: { name: string, count: number }[]}>}
      */
-    async getFestivalGenres(festivalId: string) {
+    async getFestivalGenres(festivalId: string, date?: string | undefined) {
         return apiClient.request<
             {
                 name: string;
                 count: number;
             }[]
-        >(`/discover/festivals/${festivalId}/genres`);
+        >(`/discover/festivals/${festivalId}/genres${date ? `?date=${date}` : ''}`);
     }
 }
 

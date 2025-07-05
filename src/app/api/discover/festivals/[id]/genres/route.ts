@@ -43,7 +43,8 @@ export async function GET(request: NextRequest, context: RouteParams): Promise<R
         }
         // Count genres in lineup
         const genreCount: Record<string, number> = {};
-        const artists = getFestivalArtists(festival);
+        const specificDate = request.nextUrl.searchParams.get('date')?.trim();
+        const artists = getFestivalArtists(festival, specificDate);
         const ids = artists.map(artist => artist.id).filter(id => id !== undefined);
         const artistsById = await artistService.getArtistsByIds(ids);
 

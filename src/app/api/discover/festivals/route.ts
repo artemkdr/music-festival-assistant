@@ -1,6 +1,6 @@
 import { DIContainer } from '@/lib/di-container';
 import { Festival } from '@/lib/schemas';
-import { getFestivalArtists, getFestivalDates, isFestivalFinished } from '@/lib/utils/festival-util';
+import { getFestivalArtists, getFestivalDates, groupFestivalActsByDate, isFestivalFinished } from '@/lib/utils/festival-util';
 import { NextResponse } from 'next/server';
 
 /**
@@ -24,6 +24,7 @@ export async function GET(): Promise<Response> {
                 startDate: getFestivalDates(festival).startDate,
                 endDate: getFestivalDates(festival).endDate,
                 artistsCount: getFestivalArtists(festival).length,
+                dates: groupFestivalActsByDate(festival).map(dateActs => dateActs.date), // Get unique dates from acts
             })),
         });
     } catch (error) {

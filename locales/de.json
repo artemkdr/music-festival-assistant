@@ -64,7 +64,9 @@
         "LoadingRecommendations": "Empfehlungen werden gesucht...",
         "ValidationSelectFestival": "Bitte wähle oben im Formular ein Festival aus",
         "ValidationSelectGenres": "Bitte wähle mindestens ein Genre oder gib weitere Präferenzen an",
-        "SupportMe": "Unterstütze das Projekt mit 5 CHF"
+        "SupportMe": "Unterstütze das Projekt mit 5 CHF",
+        "SpecificDate": "Spezifisches Datum? (optional)",
+        "AllDates": "Alle Daten"
     },
     "GenresGrid": {
         "Sort": "Sortieren",

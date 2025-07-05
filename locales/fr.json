@@ -64,7 +64,9 @@
         "LoadingRecommendations": "Découverte en cours...",
         "ValidationSelectFestival": "Veuillez sélectionner un festival en haut du formulaire",
         "ValidationSelectGenres": "Veuillez sélectionner au moins un genre ou fournir des préférences supplémentaires",
-        "SupportMe": "Soutenez le projet avec 5 frs"
+        "SupportMe": "Soutenez le projet avec 5 frs",
+        "SpecificDate": "Date spécifique ? (optionnel)",
+        "AllDates": "Toutes les dates"
     },
     "GenresGrid": {
         "Sort": "Trier",

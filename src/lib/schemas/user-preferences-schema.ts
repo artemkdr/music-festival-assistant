@@ -9,6 +9,7 @@ export const UserPreferencesSchema = z.object({
     dislikedArtists: z.array(z.string()).optional(),
     recommendationStyle: z.enum(['conservative', 'balanced', 'adventurous']),
     recommendationsCount: z.number().min(1).max(10),
+    date: z.string().optional(), // ISO 8601 date string
 });
 
 /**

@@ -30,6 +30,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
     const [festivalSearchTerm, setFestivalSearchTerm] = useState('');
     const [showFestivalDropdown, setShowFestivalDropdown] = useState(false);
     const [loadingFestivals, setLoadingFestivals] = useState(false);
+    const [specificDate, setSpecificDate] = useState<string>('');
     const [availableGenres, setAvailableGenres] = useState<
         {
             name: string;
@@ -47,6 +48,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
     // Load festivals on component mount
     useEffect(() => {
+        setSpecificDate(''); // Reset specific date on mount
         const loadFestivals = async () => {
             setLoadingFestivals(true);
             try {
@@ -88,6 +90,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
 
     // Load genres when a festival is selected
     useEffect(() => {
+        setSpecificDate(''); // Reset specific date on mount
         if (!selectedFestivalId) {
             setAvailableGenres([]);
             setSelectedGenres([]);
@@ -135,7 +138,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
             newErrors.festival = t('ValidationSelectFestival');
         }
 
-        if (selectedGenres.length === 0 && !userNotes.trim()) {
+        if (selectedFestivalId && selectedGenres.length === 0 && !userNotes.trim()) {
             newErrors.genres = t('ValidationSelectGenres');
         }
 
@@ -152,6 +155,9 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
             comment: userNotes.trim().substring(0, 500) ?? undefined,
             recommendationsCount,
         };
+        if (specificDate) {
+            userPreferences.date = specificDate; // Add specific date if selected
+        }
 
         await onSubmit(selectedFestivalId, userPreferences);
     };
@@ -181,6 +187,38 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
      */
     const handleDiscoveryModeChange = (mode: 'conservative' | 'balanced' | 'adventurous'): void => {
         setDiscoveryMode(mode);
+    };
+
+    /**
+     * Handle specific date change
+     */
+    const handleSpecificDateChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+        const date = e.target.value;
+        setSpecificDate(date);
+        // reload genres based on specific date
+        if (selectedFestivalId) {
+            setLoadingGenres(true);
+            discoverApi
+                .getFestivalGenres(selectedFestivalId, date)
+                .then(response => {
+                    if (response.status === 'success' && response.data) {
+                        setAvailableGenres(
+                            response.data as {
+                                name: string;
+                                count: number;
+                            }[]
+                        );
+                    } else {
+                        setAvailableGenres([]);
+                    }
+                })
+                .catch(() => {
+                    setAvailableGenres([]);
+                })
+                .finally(() => {
+                    setLoadingGenres(false);
+                });
+        }
     };
 
     return (
@@ -283,99 +321,117 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                     <div className="text-sm text-foreground/80 mt-2">{festivalsCountStatus}</div>
                 </div>
 
-                {/* Genre Selection */}
-                <div>
-                    <label className={`block font-bold text-base mb-3 ${errors.genres ? 'text-red-500' : ''}`}>{t('GenrePreferences')}</label>
-                    {loadingGenres ? (
-                        <div className="text-magic text-sm flex gap-2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-magic"></div>
-                            <span>{t('LoadingGenres')}</span>
+                {/* Show filters only if a festival is selected */}
+                {selectedFestival && (
+                    <>
+                        {/* Specific Date Selection */}
+                        <div>
+                            <label htmlFor="specific-date" className="block font-bold text-base mb-3">
+                                {t('SpecificDate')}
+                            </label>
+                            <select id="specific-date" onChange={handleSpecificDateChange} value={specificDate} className="input w-full" disabled={isLoading}>
+                                <option value="">{t('AllDates')}</option>
+                                {selectedFestival?.dates.map(date => (
+                                    <option key={date} value={date}>
+                                        {formatDateString(date)}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                    ) : (
-                        <GenresGrid genres={availableGenres} selectedGenres={selectedGenres} onGenreToggle={handleGenreToggle} isLoading={isLoading} />
-                    )}
-                </div>
-
-                {/* Additional Preferences (Free Text) */}
-                <div>
-                    <label htmlFor="user-notes" className="block font-bold text-base mb-3">
-                        {t('AdditionalPreferences')}
-                    </label>
-                    <textarea
-                        id="user-notes"
-                        value={userNotes}
-                        maxLength={500}
-                        onChange={e => setUserNotes(e.target.value)}
-                        placeholder={t('AdditionalPreferencesPlaceholder')}
-                        className="input w-full min-h-[80px] resize-y border rounded-md"
-                        disabled={isLoading}
-                    />
-                </div>
-
-                {/* Discovery Mode */}
-                <div>
-                    <label className="block font-bold text-base mb-3">{t('DiscoveryMode')}</label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {[
-                            {
-                                value: 'conservative' as const,
-                                title: t('Conservative'),
-                                description: t('ConservativeDesc'),
-                            },
-                            {
-                                value: 'balanced' as const,
-                                title: t('Balanced'),
-                                description: t('BalancedDesc'),
-                            },
-                            {
-                                value: 'adventurous' as const,
-                                title: t('Adventurous'),
-                                description: t('AdventurousDesc'),
-                            },
-                        ].map(mode => (
-                            <div
-                                key={mode.value}
-                                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                                    discoveryMode === mode.value ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-gray-400'
-                                }`}
-                                onClick={() => handleDiscoveryModeChange(mode.value)}
-                            >
-                                <div className="flex items-center mb-2">
-                                    <input
-                                        type="radio"
-                                        name="discovery-mode"
-                                        value={mode.value}
-                                        checked={discoveryMode === mode.value}
-                                        onChange={() => handleDiscoveryModeChange(mode.value)}
-                                        className="mr-2"
-                                        disabled={isLoading}
-                                    />
-                                    <h3 className="font-medium text-gray-900">{mode.title}</h3>
+                        {/* Genre Selection */}
+                        <div>
+                            <label className={`block font-bold text-base mb-3 ${errors.genres ? 'text-red-500' : ''}`}>{t('GenrePreferences')}</label>
+                            {loadingGenres ? (
+                                <div className="text-magic text-sm flex gap-2">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-magic"></div>
+                                    <span>{t('LoadingGenres')}</span>
                                 </div>
-                                <p className="text-sm text-gray-600">{mode.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                            ) : (
+                                <GenresGrid genres={availableGenres} selectedGenres={selectedGenres} onGenreToggle={handleGenreToggle} isLoading={isLoading} />
+                            )}
+                        </div>
 
-                {/* Recommendations count */}
-                <div>
-                    <label className="block font-bold text-base mb-3">{t('RecommendationsCount')}</label>
-                    <div className="flex items-center space-x-4">
-                        <input
-                            type="range"
-                            min={1}
-                            max={10}
-                            value={recommendationsCount}
-                            className="input w-30 max-w-99/100 text-center"
-                            disabled={isLoading}
-                            onChange={e => setRecommendationsCount(Number(e.target.value))}
-                        />
-                        <span className="text-sm text-gray-500">
-                            {t('GetRecommendationsOf', { count: recommendationsCount })} {/* Updated to use new translation key */}
-                        </span>
-                    </div>
-                </div>
+                        {/* Additional Preferences (Free Text) */}
+                        <div>
+                            <label htmlFor="user-notes" className="block font-bold text-base mb-3">
+                                {t('AdditionalPreferences')}
+                            </label>
+                            <textarea
+                                id="user-notes"
+                                value={userNotes}
+                                maxLength={500}
+                                onChange={e => setUserNotes(e.target.value)}
+                                placeholder={t('AdditionalPreferencesPlaceholder')}
+                                className="input w-full min-h-[80px] resize-y border rounded-md"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        {/* Discovery Mode */}
+                        <div>
+                            <label className="block font-bold text-base mb-3">{t('DiscoveryMode')}</label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {[
+                                    {
+                                        value: 'conservative' as const,
+                                        title: t('Conservative'),
+                                        description: t('ConservativeDesc'),
+                                    },
+                                    {
+                                        value: 'balanced' as const,
+                                        title: t('Balanced'),
+                                        description: t('BalancedDesc'),
+                                    },
+                                    {
+                                        value: 'adventurous' as const,
+                                        title: t('Adventurous'),
+                                        description: t('AdventurousDesc'),
+                                    },
+                                ].map(mode => (
+                                    <div
+                                        key={mode.value}
+                                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                                            discoveryMode === mode.value ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-gray-400'
+                                        }`}
+                                        onClick={() => handleDiscoveryModeChange(mode.value)}
+                                    >
+                                        <div className="flex items-center mb-2">
+                                            <input
+                                                type="radio"
+                                                name="discovery-mode"
+                                                value={mode.value}
+                                                checked={discoveryMode === mode.value}
+                                                onChange={() => handleDiscoveryModeChange(mode.value)}
+                                                className="mr-2"
+                                                disabled={isLoading}
+                                            />
+                                            <h3 className="font-medium text-gray-900">{mode.title}</h3>
+                                        </div>
+                                        <p className="text-sm text-gray-600">{mode.description}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Recommendations count */}
+                        <div>
+                            <label className="block font-bold text-base mb-3">{t('RecommendationsCount')}</label>
+                            <div className="flex items-center space-x-4">
+                                <input
+                                    type="range"
+                                    min={1}
+                                    max={10}
+                                    value={recommendationsCount}
+                                    className="input w-30 max-w-99/100 text-center"
+                                    disabled={isLoading}
+                                    onChange={e => setRecommendationsCount(Number(e.target.value))}
+                                />
+                                <span className="text-sm text-gray-500">
+                                    {t('GetRecommendationsOf', { count: recommendationsCount })} {/* Updated to use new translation key */}
+                                </span>
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 {errors.festival && <p className="mt-1 text-sm text-red-600">{errors.festival}</p>}
                 {errors.genres && <p className="mt-2 text-sm text-red-600">{errors.genres}</p>}

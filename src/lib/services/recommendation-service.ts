@@ -33,7 +33,11 @@ export class RecommendationService implements IRecommendationService {
 
         try {
             // Prepare data for AI processing
-            const festivalArtists = getFestivalArtists(festival);
+            const festivalArtists = getFestivalArtists(festival, userPreferences.date);
+            if (userPreferences.date && festivalArtists.length === 0) {
+                this.logger.error('No artists found for the specified date');
+                throw new Error(`No artists found for the specified date: ${userPreferences.date}`);
+            }
             const artistsMap: Record<string, Artist> = {};
             const artistInfos = await Promise.all(
                 festivalArtists.map(async artist => {

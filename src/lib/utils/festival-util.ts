@@ -4,13 +4,18 @@ import { Festival } from '@/lib/schemas';
  * Extracts artist names from a festival's lineup.
  */
 export const getFestivalArtists = (
-    festival: Festival
+    festival: Festival,
+    date?: string | undefined
 ): {
     name: string;
     id: string | undefined;
 }[] => {
     const artists = [] as { name: string; id: string | undefined }[];
     festival.lineup.forEach(act => {
+        // If date is provided, filter acts by that date
+        if (date && act.date && act.date !== date) {
+            return;
+        }
         const artistId = act.artistId;
         const artistName = act.artistName;
         // check if the artist with defined id is already in the list,
