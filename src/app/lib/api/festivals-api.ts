@@ -1,28 +1,31 @@
 import { Festival } from '@/lib/schemas';
+import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
 import { apiClient, ApiClient } from './api-client';
 import type { ApiResponse } from './types';
-import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
 
 class FestivalsApi {
     constructor(private client: ApiClient) {}
 
     async getFestivals(): Promise<ApiResponse<Festival[]>> {
-        return this.client.request('/admin/festivals');
+        return this.client.request('/admin/festivals', {
+            cache: 'force-cache', // Force cache for this request
+            next: {
+                tags: ['festivals'], // Tag for cache invalidation
+            },
+        });
     }
 
     async getFestival(id: string): Promise<ApiResponse<Festival>> {
-        return this.client.request(`/admin/festivals/${id}`);
-    }
-
-    /**
-     * Public: Get festival by ID (public endpoint, no admin required)
-     */
-    async getPublicFestival(id: string): Promise<ApiResponse<Festival>> {
-        return this.client.request(`/discover/festivals/${id}`);
+        return this.client.request(`/admin/festivals/${id}`, {
+            cache: 'force-cache', // Force cache for this request
+            next: {
+                tags: ['festivals'], // Tag for cache invalidation
+            },
+        });
     }
 
     async updateFestival(id: string, festivalData: Partial<Festival>): Promise<ApiResponse<Festival>> {
-        return this.client.request(`/admin/festivals/${id}`, {
+        return this.client.request<Festival>(`/admin/festivals/${id}`, {
             method: 'PUT',
             body: JSON.stringify(festivalData),
         });
@@ -61,16 +64,6 @@ class FestivalsApi {
     }
 
     /**
-     * Get festival recommendations
-     */
-    async getFestivalRecommendations(preferences: unknown): Promise<ApiResponse> {
-        return this.client.request('/festivals/discover', {
-            method: 'POST',
-            body: JSON.stringify(preferences),
-        });
-    }
-
-    /**
      * Admin: Link festival act with artist
      */
     async linkArtistToAct(
@@ -82,7 +75,11 @@ class FestivalsApi {
             spotifyData?: SpotifyArtist;
         }
     ): Promise<ApiResponse<{ actId: string; artistId: string; linkType: string }>> {
-        return this.client.request(`/admin/festivals/${festivalId}/link-artist-to-act`, {
+        return this.client.request<{
+            actId: string;
+            artistId: string;
+            linkType: string;
+        }>(`/admin/festivals/${festivalId}/link-artist-to-act`, {
             method: 'POST',
             body: JSON.stringify(data),
         });

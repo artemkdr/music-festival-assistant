@@ -128,7 +128,7 @@ export function RecommendationsList({ festival, recommendations }: Recommendatio
                                 {t('SearchArtist')} <strong>{recommendation.artist.name}</strong>
                             </Link>
                             {isAdmin && (
-                                <Link href={`/artists/${recommendation.artist.id}/edit`} target="_blank" rel="noopener noreferrer" className="link-primary underline">
+                                <Link href={`/admin/artists/${recommendation.artist.id}/edit`} target="_blank" rel="noopener noreferrer" className="link-primary underline">
                                     {t('EditArtist')}
                                 </Link>
                             )}

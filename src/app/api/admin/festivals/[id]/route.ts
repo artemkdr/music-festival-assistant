@@ -11,6 +11,7 @@ import { generateFestivalId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { toError } from '@/lib/utils/error-handler';
+import { revalidateTag } from 'next/cache';
 
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
@@ -148,6 +149,9 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         };
 
         await festivalService.saveFestival(updatedFestival);
+
+        // invalidate cache for this festival
+        revalidateTag('festivals');
 
         return NextResponse.json({
             status: 'success',

@@ -5,7 +5,8 @@
 'use client';
 
 import { ArtistInfo } from '@/app/festival/[id]/components/artist-info';
-import { artistsApi, festivalsApi } from '@/app/lib/api';
+import { artistsApi } from '@/app/lib/api';
+import { discoverApi } from '@/app/lib/api/discover-api';
 import { ButtonWithIcon } from '@/components/button-with-icon';
 import { Artist, Festival } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
@@ -91,7 +92,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                 const resolvedParams = await params;
 
                 // Fetch festival details from public API
-                const response = await festivalsApi.getPublicFestival(resolvedParams.id);
+                const response = await discoverApi.getPublicFestival(resolvedParams.id);
                 if (response.data) {
                     setFestival(response.data as Festival);
                 } else {

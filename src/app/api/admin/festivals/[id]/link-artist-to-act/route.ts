@@ -8,6 +8,7 @@ import { User } from '@/lib/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { toError } from '@/lib/utils/error-handler';
+import { revalidateTag } from 'next/cache';
 
 const LinkActRequestSchema = z.object({
     actId: z.string().min(1),
@@ -121,6 +122,9 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         await festivalService.updateFestivalAct(id, validated.actId, {
             artistId: artistId,
         });
+
+        // invalidate cache for this festival
+        revalidateTag('festivals');
 
         return NextResponse.json({
             status: 'success',

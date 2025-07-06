@@ -10,6 +10,7 @@ import type { User } from '@/lib/services/auth/interfaces';
 import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { revalidateTag } from 'next/cache';
 
 /**
  * GET /api/admin/festivals
@@ -63,6 +64,9 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
 
         // Save the festival data
         const festivalId = await festivalService.saveFestival(validatedFestival);
+
+        // Invalidate cache for festivals
+        revalidateTag('festivals');
 
         logger.info('Festival saved successfully', {
             festivalId: validatedFestival.id,

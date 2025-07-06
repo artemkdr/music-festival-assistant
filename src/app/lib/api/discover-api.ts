@@ -45,7 +45,12 @@ class DiscoverApi {
      * @returns {Promise<{status: string, data: FestivalInfo[]}>}
      */
     async getFestivals() {
-        return apiClient.request<FestivalInfo[]>('/discover/festivals');
+        return apiClient.request<FestivalInfo[]>('/discover/festivals', {
+            cache: 'force-cache', // Force cache for this request
+            next: {
+                tags: ['festivals'], // Tag for cache invalidation
+            },
+        });
     }
 
     /**
@@ -59,7 +64,24 @@ class DiscoverApi {
                 name: string;
                 count: number;
             }[]
-        >(`/discover/festivals/${festivalId}/genres${date ? `?date=${date}` : ''}`);
+        >(`/discover/festivals/${festivalId}/genres${date ? `?date=${date}` : ''}`, {
+            cache: 'force-cache', // Force cache for this request
+            next: {
+                tags: ['festivals'], // Tag for cache invalidation
+            },
+        });
+    }
+
+    /**
+     * Public: Get festival by ID (public endpoint, no admin required)
+     */
+    async getPublicFestival(id: string): Promise<ApiResponse<Festival>> {
+        return this.client.request<Festival>(`/discover/festivals/${id}`, {
+            cache: 'force-cache', // Force cache for this request
+            next: {
+                tags: ['festivals'], // Tag for cache invalidation
+            },
+        });
     }
 }
 

@@ -333,7 +333,13 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                                 <option value="">{t('AllDates')}</option>
                                 {selectedFestival?.dates.map(date => (
                                     <option key={date} value={date}>
-                                        {formatDateString(date)}
+                                        {formatDateString(date, {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })}
+                                        {/* if it's today then add '(today)' in the label */}
+                                        {new Date().toDateString() === new Date(date).toDateString() ? ` (${t('Today')})` : ''}
                                     </option>
                                 ))}
                             </select>
