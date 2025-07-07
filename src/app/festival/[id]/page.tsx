@@ -445,17 +445,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                                 </div>
                                                             )}
 
-                                                            <div className="flex flex-wrap justify-end gap-2 items-center">
-                                                                <button
-                                                                    onClick={() => handleArtistInfoClick(performance, dayIndex, index)}
-                                                                    title={t('ShowArtistInfo')}
-                                                                    className={`link-primary bg-primary/15 rounded-full transition-all ${
-                                                                        artistLoading[`${dayIndex}-${index}`] ? 'animate-pulse duration-100' : ''
-                                                                    } ${artistInfoVisible[`${dayIndex}-${index}`] ? 'p-1' : 'p-2'}`}
-                                                                    disabled={artistLoading[`${dayIndex}-${index}`]}
-                                                                >
-                                                                    <FaInfoCircle size={26} />
-                                                                </button>
+                                                            <div className="flex flex-wrap justify-end gap-2 items-center">                                                                
                                                                 {artistInfoVisible[`${dayIndex}-${index}`] &&
                                                                     (() => {
                                                                         const artist = (performance.artistId && artistMap[performance.artistId]
@@ -466,6 +456,16 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                                         };
                                                                         return <ArtistInfo festival={festival} artist={artist} />;
                                                                     })()}
+                                                                <button
+                                                                    onClick={() => handleArtistInfoClick(performance, dayIndex, index)}
+                                                                    title={t('ShowArtistInfo')}
+                                                                    className={`link-primary bg-primary/15 rounded-full transition-all p-2 ${
+                                                                        artistLoading[`${dayIndex}-${index}`] ? 'animate-bounce [animation-duration:_.4s]' : ''
+                                                                    }`}
+                                                                    disabled={artistLoading[`${dayIndex}-${index}`]}
+                                                                >
+                                                                    <FaInfoCircle size={26} />
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     ))}
