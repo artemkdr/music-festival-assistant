@@ -37,9 +37,9 @@ class DiscoverApi {
             headers: {
                 'Content-Type': 'application/json',
             },
-            cache: 'force-cache',
+            cache: 'force-cache', // IMPORTANT: this cache is a client only cache, not a server cache
             next: {
-                tags: [`recommendations:${festivalId}`], // Tag for cache invalidation for this festival
+                revalidate: 3 * 24 * 60, // Revalidate every 3 days
             },
         });
     }
@@ -50,9 +50,9 @@ class DiscoverApi {
      */
     async getFestivals() {
         return apiClient.request<FestivalInfo[]>('/discover/festivals', {
-            cache: 'force-cache', // Force cache for this request
+            cache: 'force-cache', // IMPORTANT: this cache is a client only cache, not a server cache
             next: {
-                tags: ['festivals'], // Tag for cache invalidation
+                revalidate: 3 * 24 * 60, // Revalidate every 3 days
             },
         });
     }
@@ -69,9 +69,9 @@ class DiscoverApi {
                 count: number;
             }[]
         >(`/discover/festivals/${festivalId}/genres${date ? `?date=${date}` : ''}`, {
-            cache: 'force-cache', // Force cache for this request
+            cache: 'force-cache', // IMPORTANT: this cache is a client only cache, not a server cache
             next: {
-                tags: ['festivals'], // Tag for cache invalidation
+                revalidate: 3 * 24 * 60, // Revalidate every 3 days
             },
         });
     }
@@ -81,9 +81,9 @@ class DiscoverApi {
      */
     async getPublicFestival(id: string): Promise<ApiResponse<Festival>> {
         return this.client.request<Festival>(`/discover/festivals/${id}`, {
-            cache: 'force-cache', // Force cache for this request
+            cache: 'force-cache', // IMPORTANT: this cache is a client only cache, not a server cache
             next: {
-                tags: ['festivals'], // Tag for cache invalidation
+                revalidate: 3 * 24 * 60, // Revalidate every 3 days
             },
         });
     }
