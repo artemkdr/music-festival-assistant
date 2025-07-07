@@ -4,14 +4,13 @@
  * PUT /api/admin/festivals/[id] - Update festival by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/utils/auth-utils';
 import { Festival, UpdateFestivalSchema } from '@/lib/schemas';
 import { User } from '@/lib/services/auth';
+import { requireAdmin } from '@/lib/utils/auth-utils';
+import { toError } from '@/lib/utils/error-handler';
 import { generateFestivalId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { toError } from '@/lib/utils/error-handler';
-import { revalidateTag } from 'next/cache';
 
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
@@ -150,8 +149,9 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
 
         await festivalService.saveFestival(updatedFestival);
 
-        // invalidate cache for this festival
-        revalidateTag('festivals');
+        // invalidate cache
+        // do not await this call, it will be handled by the cache service in the background
+        DIContainer.getInstance().getNextCacheService().festivalUpdated(id);
 
         return NextResponse.json({
             status: 'success',

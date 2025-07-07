@@ -74,12 +74,19 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                             : undefined,
                     });
                     await artistService.saveArtist(populatedArtist);
+
+                    // Invalidate cache for this artist
+                    // do not await this call, it will be handled by the cache service in the background
+                    container.getNextCacheService().artistUpdated(artistId);
                 } else {
                     // crawls the artist by name
                     await artistService.createArtist({
                         name,
                         ...(festival ? { festivalName: festival.name, festivalUrl: festival.website } : {}),
                     });
+
+                    // do nothing here with the cache
+                    // as the artist is not linked to any festival yet
                 }
                 results.push({ name, status: 'crawled' });
             } catch (err) {

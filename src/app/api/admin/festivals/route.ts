@@ -4,13 +4,12 @@
  * POST /api/admin/festivals - Create/save a new festival
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/utils/auth-utils';
 import { FestivalSchema } from '@/lib/schemas';
 import type { User } from '@/lib/services/auth/interfaces';
+import { requireAdmin } from '@/lib/utils/auth-utils';
 import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { revalidateTag } from 'next/cache';
 
 /**
  * GET /api/admin/festivals
@@ -66,7 +65,8 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
         const festivalId = await festivalService.saveFestival(validatedFestival);
 
         // Invalidate cache for festivals
-        revalidateTag('festivals');
+        // do not await this call, it will be handled by the cache service in the background
+        DIContainer.getInstance().getNextCacheService().festivalCreated();
 
         logger.info('Festival saved successfully', {
             festivalId: validatedFestival.id,

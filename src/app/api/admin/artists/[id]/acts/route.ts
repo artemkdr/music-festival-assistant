@@ -1,7 +1,8 @@
 /**
  * Artist acts API endpoint
- * GET /api/admin/artists/[id]/acts - Get festivals where this artist performs
+ * GET /api/admin/artists/[id]/acts - Get festivals acts where this artist performs
  */
+
 import { DIContainer } from '@/lib/di-container';
 import { requireAdmin } from '@/lib/utils/auth-utils';
 import { FestivalAct } from '@/lib/schemas';

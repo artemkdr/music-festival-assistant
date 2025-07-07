@@ -3,12 +3,11 @@
  * Handles both linking to existing artists and creating new artists from Spotify data
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/utils/auth-utils';
 import { User } from '@/lib/services/auth';
+import { requireAdmin } from '@/lib/utils/auth-utils';
+import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { toError } from '@/lib/utils/error-handler';
-import { revalidateTag } from 'next/cache';
 
 const LinkActRequestSchema = z.object({
     actId: z.string().min(1),
@@ -124,7 +123,8 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         });
 
         // invalidate cache for this festival
-        revalidateTag('festivals');
+        // do not await this call, it will be handled by the cache service in the background
+        DIContainer.getInstance().getNextCacheService().festivalUpdated(id);
 
         return NextResponse.json({
             status: 'success',

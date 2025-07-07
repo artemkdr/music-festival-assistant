@@ -37,6 +37,10 @@ class DiscoverApi {
             headers: {
                 'Content-Type': 'application/json',
             },
+            cache: 'force-cache',
+            next: {
+                tags: [`recommendations:${festivalId}`], // Tag for cache invalidation for this festival
+            },
         });
     }
 

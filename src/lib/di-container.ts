@@ -18,6 +18,7 @@ import { FestivalCrawlerService } from '@/lib/services/crawler/festival-crawler-
 import type { IArtistCrawlerService, IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
 import { FestivalService, IFestivalService } from '@/lib/services/festival-service';
 import type { IRecommendationService } from '@/lib/services/interfaces';
+import { INextCacheService, NextCacheService } from '@/lib/services/next-cache-service';
 import { RecommendationService } from '@/lib/services/recommendation-service';
 import { SpotifyService } from '@/lib/services/spotify/spotify-service';
 import type { ILogger } from '@/lib/types/logger';
@@ -43,6 +44,7 @@ export class DIContainer {
     private _recommendationService: IRecommendationService | null = null;
     private _artistCrawlerService: ArtistCrawlerService | null = null;
     private _authService: IAuthService | null = null;
+    private _nextCacheService: INextCacheService | null = null;
 
     /**
      * Get singleton instance
@@ -271,6 +273,18 @@ export class DIContainer {
     }
 
     /**
+     * Get Next.js cache service
+     */
+    public getNextCacheService(): INextCacheService {
+        if (!this._nextCacheService) {
+            const festivalService = this.getFestivalService();
+            this._nextCacheService = new NextCacheService(festivalService, this.getLogger());
+            this.getLogger().info('Next.js cache service initialized');
+        }
+        return this._nextCacheService;
+    }
+
+    /**
      * Reset all singletons (useful for testing)
      */
     public reset(): void {
@@ -282,6 +296,12 @@ export class DIContainer {
         this._recommendationService = null;
         this._artistCrawlerService = null;
         this._authService = null;
+        this._festivalService = null;
+        this._festivalCrawlerService = null;
+        this._artistService = null;
+        this._aiSimpleService = null;
+        this._musicalAIService = null;
+        this._nextCacheService = null;
     }
 }
 

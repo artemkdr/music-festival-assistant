@@ -108,6 +108,10 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
 
         const savedArtist = await artistService.saveArtist(updatedArtist);
 
+        // Invalidate cache for this artist
+        // do not await this call, it will be handled by the cache service in the background
+        DIContainer.getInstance().getNextCacheService().artistUpdated(id);
+
         return NextResponse.json({
             status: 'success',
             message: 'Artist updated successfully',
@@ -162,6 +166,9 @@ export const DELETE = requireAdmin(async (request: NextRequest, user: User, cont
                 { status: 404 }
             );
         }
+
+        // Invalidate cache for this artist before deletion
+        await DIContainer.getInstance().getNextCacheService().artistWillBeDeleted(id);
 
         // Delete artist
         await artistService.deleteArtist(id);
