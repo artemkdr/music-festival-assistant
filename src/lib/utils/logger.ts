@@ -5,7 +5,7 @@ import type { ILogger } from '@/lib/types/logger';
 /**
  * Map string log level to tslog numeric level.
  */
-const logLevelMap = {
+export const logLevelMap = {
     silly: 0,
     trace: 1,
     debug: 2,

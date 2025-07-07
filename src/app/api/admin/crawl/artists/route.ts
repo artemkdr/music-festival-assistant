@@ -77,7 +77,9 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
 
                     // Invalidate cache for this artist
                     // do not await this call, it will be handled by the cache service in the background
-                    container.getNextCacheService().artistUpdated(artistId);
+                    container.getCacheService().invalidatePattern(`artist:${artistId}`);
+
+                    continue;
                 } else {
                     // crawls the artist by name
                     await artistService.createArtist({

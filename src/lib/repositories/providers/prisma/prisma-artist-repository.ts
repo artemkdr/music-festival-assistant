@@ -1,18 +1,15 @@
 import { IArtistRepository } from '@/lib/repositories/interfaces';
 import { BasePrismaRepository } from '@/lib/repositories/providers/prisma/base-prisma-repository';
 import { Artist } from '@/lib/schemas';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 
 /**
  * Prisma artist repository implementation
  */
 export class PrismaArtistRepository extends BasePrismaRepository implements IArtistRepository {
-    constructor(logger: ILogger) {
-        super(logger, 'artists', {
-            defaultTtl: 30 * 24 * 60 * 60 * 1000, // 1 month for artists
-            maxSize: 2000,
-            enabled: true,
-        });
+    constructor(logger: ILogger, cacheService?: ICacheService) {
+        super(logger, 'artists', cacheService);
 
         // Initialize repository on construction
         this.initialize().catch(error => {

@@ -1,4 +1,5 @@
 import { AIProviderConfig, AIRequest, AIResponse, IAIService, SchemaAIRequest } from '@/lib/services/ai/interfaces';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { createVertex } from '@ai-sdk/google-vertex/edge';
 import { groq } from '@ai-sdk/groq';
@@ -12,10 +13,15 @@ export class AIService implements IAIService {
     private readonly maxRetries: number = 3; // Default retry count
     private readonly temperature: number;
     private readonly model: LanguageModelV1;
-    private readonly cache = new Map<string, unknown>();
+
+    /**
+     * Default cache TTL in seconds
+     */
+    private readonly DEFAULT_CACHE_TTL = 3 * 24 * 60 * 60; // 3 days
 
     constructor(
         private readonly config: AIProviderConfig,
+        private readonly cache: ICacheService,
         private readonly logger: ILogger
     ) {
         switch (config.provider) {
@@ -58,7 +64,7 @@ export class AIService implements IAIService {
      * Generate a deterministic cache key for a given request
      */
     private static generateCacheKey(input: AIRequest): string {
-        return hash(input);
+        return `aiservice-${hash(input)}`;
     }
 
     /**
@@ -67,9 +73,14 @@ export class AIService implements IAIService {
     async generateCompletion(request: AIRequest): Promise<AIResponse> {
         try {
             const cacheKey = AIService.generateCacheKey(request);
-            if (request.useStorageCache === true && this.cache.has(cacheKey)) {
+            if (request.useStorageCache === true && (await this.cache.has(cacheKey))) {
                 this.logger.debug(`Cache hit for request ${cacheKey}`);
-                return this.cache.get(cacheKey) as AIResponse;
+                const cacheResponse = await this.cache.get<AIResponse>(cacheKey);
+                if (cacheResponse) {
+                    return cacheResponse;
+                } else {
+                    this.logger.warn(`Cache hit for request ${cacheKey} but no data found`);
+                }
             }
             const response = await generateText({
                 model: this.model,
@@ -101,7 +112,7 @@ export class AIService implements IAIService {
                     totalTokens: response.usage?.totalTokens || 0,
                 },
             };
-            this.cache.set(cacheKey, result);
+            this.cache.set(cacheKey, result, this.DEFAULT_CACHE_TTL);
             return result;
         } catch (error) {
             this.logger.error('AI text generation failed', error instanceof Error ? error : new Error(String(error)));
@@ -115,9 +126,14 @@ export class AIService implements IAIService {
     async generateObject<T>(request: SchemaAIRequest<T>): Promise<T> {
         try {
             const cacheKey = AIService.generateCacheKey(request);
-            if (request.useStorageCache === true && this.cache.has(cacheKey)) {
+            if (request.useStorageCache === true && (await this.cache.has(cacheKey))) {
                 this.logger.debug(`Cache hit for request ${cacheKey}`);
-                return this.cache.get(cacheKey) as T;
+                const cacheResponse = (await this.cache.get(cacheKey)) as T;
+                if (cacheResponse) {
+                    return cacheResponse;
+                } else {
+                    this.logger.warn(`Cache hit for request ${cacheKey} but no data found`);
+                }
             }
             const result = await generateObject<T>({
                 model: this.model,
@@ -151,7 +167,7 @@ export class AIService implements IAIService {
                 maxRetries: this.maxRetries,
             });
             if (!!result.object) {
-                this.cache.set(cacheKey, result.object as T);
+                this.cache.set(cacheKey, result.object as T, this.DEFAULT_CACHE_TTL);
             }
             return result.object as T;
         } catch (error) {
@@ -166,9 +182,14 @@ export class AIService implements IAIService {
     async generateStreamObject<T>(request: SchemaAIRequest<T>): Promise<T> {
         try {
             const cacheKey = AIService.generateCacheKey(request);
-            if (request.useStorageCache === true && this.cache.has(cacheKey)) {
+            if (request.useStorageCache === true && (await this.cache.has(cacheKey))) {
                 this.logger.info(`Cache hit for request ${cacheKey}`);
-                return this.cache.get(cacheKey) as T;
+                const cacheResponse = this.cache.get(cacheKey) as T;
+                if (cacheResponse) {
+                    return cacheResponse;
+                } else {
+                    this.logger.warn(`Cache hit for request ${cacheKey} but no data found`);
+                }
             }
             const result = streamObject<T>({
                 model: this.model,
@@ -216,7 +237,7 @@ export class AIService implements IAIService {
             this.logger.info(`Streamed ${chunkCount} chunks with total size ${chunkSize} bytes for request ${cacheKey}`);
             const finalResult = (await result.object) as T;
             if (!!finalResult) {
-                this.cache.set(cacheKey, finalResult);
+                this.cache.set(cacheKey, finalResult, this.DEFAULT_CACHE_TTL);
             }
             return finalResult;
         } catch (error) {

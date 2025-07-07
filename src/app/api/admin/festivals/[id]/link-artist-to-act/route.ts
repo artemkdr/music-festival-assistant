@@ -124,7 +124,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
 
         // invalidate cache for this festival
         // do not await this call, it will be handled by the cache service in the background
-        DIContainer.getInstance().getNextCacheService().festivalUpdated(id);
+        DIContainer.getInstance().getCacheService().invalidatePattern(`festivals`);
 
         return NextResponse.json({
             status: 'success',

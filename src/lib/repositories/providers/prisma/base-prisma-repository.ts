@@ -1,24 +1,7 @@
 import { prisma } from '@/lib/repositories/providers/prisma/client';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { PrismaClient } from '@prisma/client';
-
-/**
- * Cache entry interface
- */
-interface CacheEntry<T> {
-    data: T;
-    timestamp: number;
-    ttl: number; // time to live in milliseconds
-}
-
-/**
- * Cache configuration options
- */
-interface CacheConfig {
-    defaultTtl: number; // default TTL in milliseconds
-    maxSize: number; // maximum number of cache entries
-    enabled: boolean; // whether caching is enabled
-}
 
 /**
  * Base Prisma repository class
@@ -28,22 +11,15 @@ export abstract class BasePrismaRepository {
     protected readonly prisma: PrismaClient;
     protected readonly logger: ILogger;
     protected readonly context: string;
-    private readonly cache: Map<string, CacheEntry<unknown>>;
-    private readonly cacheConfig: CacheConfig;
 
-    constructor(logger: ILogger, context: string, cacheConfig?: Partial<CacheConfig>) {
+    constructor(
+        logger: ILogger,
+        context: string,
+        private readonly cacheService?: ICacheService
+    ) {
         this.prisma = prisma;
         this.logger = logger;
         this.context = context;
-        this.cache = new Map();
-
-        // Default cache configuration
-        this.cacheConfig = {
-            defaultTtl: 5 * 60 * 1000, // 5 minutes
-            maxSize: 1000, // 1000 entries
-            enabled: true,
-            ...cacheConfig,
-        };
     }
 
     /**
@@ -56,7 +32,7 @@ export abstract class BasePrismaRepository {
     protected async executeOperation<T>(operation: () => Promise<T>, operationName: string, cacheKey?: string, cacheTtl?: number): Promise<T> {
         // Try to get from cache first
         if (cacheKey) {
-            const cachedResult = this.getFromCache<T>(cacheKey);
+            const cachedResult = await this.getFromCache<T>(cacheKey);
             if (cachedResult) {
                 this.logger.debug(`Using cached result for ${this.context} operation: ${operationName}`);
                 return cachedResult;
@@ -129,25 +105,18 @@ export abstract class BasePrismaRepository {
      * @param cacheKey Cache key
      * @returns Cached data or null if not found/expired
      */
-    private getFromCache<T>(cacheKey: string): T | null {
-        if (!this.cacheConfig.enabled) {
+    private async getFromCache<T>(cacheKey: string): Promise<T | null> {
+        if (!this.cacheService) {
+            return null; // No cache service available
+        }
+        if ((await this.cacheService.has(cacheKey)) === false) {
             return null;
         }
-
-        const entry = this.cache.get(cacheKey) as CacheEntry<T> | undefined;
+        const entry = await this.cacheService.get<T>(cacheKey);
         if (!entry) {
             return null;
         }
-
-        const now = Date.now();
-        if (now - entry.timestamp > entry.ttl) {
-            this.cache.delete(cacheKey);
-            this.logger.debug(`Cache entry expired for ${this.context}`, { cacheKey });
-            return null;
-        }
-
-        this.logger.debug(`Cache hit for ${this.context}`, { cacheKey });
-        return entry.data;
+        return entry;
     }
 
     /**
@@ -156,82 +125,23 @@ export abstract class BasePrismaRepository {
      * @param data Data to cache
      * @param ttl Time to live in milliseconds (optional, uses default if not provided)
      */
-    private setCache<T>(cacheKey: string, data: T, ttl?: number): void {
-        if (!this.cacheConfig.enabled) {
-            return;
+    private setCache<T>(cacheKey: string, data: T, ttl: number = 7 * 24 * 60): void {
+        if (!this.cacheService) {
+            return; // No cache service available
         }
-
-        // Clean up cache if it's getting too large
-        if (this.cache.size >= this.cacheConfig.maxSize) {
-            this.cleanupExpiredEntries();
-
-            // If still too large after cleanup, remove oldest entries
-            if (this.cache.size >= this.cacheConfig.maxSize) {
-                const entriesToRemove = Math.floor(this.cacheConfig.maxSize * 0.2); // Remove 20%
-                const keys = Array.from(this.cache.keys());
-                for (let i = 0; i < entriesToRemove && i < keys.length; i++) {
-                    const key = keys[i];
-                    if (key) {
-                        this.cache.delete(key);
-                    }
-                }
-                this.logger.debug(`Cache cleanup: removed ${entriesToRemove} entries for ${this.context}`);
-            }
-        }
-
-        const entry: CacheEntry<T> = {
-            data,
-            timestamp: Date.now(),
-            ttl: ttl ?? this.cacheConfig.defaultTtl,
-        };
-
-        this.cache.set(cacheKey, entry);
-        this.logger.debug(`Cache set for ${this.context}`, { cacheKey, ttl: entry.ttl });
-    }
-
-    /**
-     * Remove expired entries from cache
-     */
-    private cleanupExpiredEntries(): void {
-        const now = Date.now();
-        let removedCount = 0;
-
-        for (const [key, entry] of this.cache.entries()) {
-            if (now - entry.timestamp > entry.ttl) {
-                this.cache.delete(key);
-                removedCount++;
-            }
-        }
-
-        if (removedCount > 0) {
-            this.logger.debug(`Cache cleanup: removed ${removedCount} expired entries for ${this.context}`);
-        }
-    }
-
-    /**
-     * Clear all cache entries for this repository
-     */
-    protected clearCache(): void {
-        const size = this.cache.size;
-        this.cache.clear();
-        this.logger.info(`Cache cleared for ${this.context}`, { entriesRemoved: size });
+        this.cacheService.set(cacheKey, data, ttl);
+        this.logger.debug(`Cache set for ${this.context}`, { cacheKey, ttl: ttl });
     }
 
     /**
      * Invalidate cache entries matching a pattern
      * @param pattern String pattern to match in cache keys
      */
-    protected invalidateCachePattern(pattern: string): void {
-        let removedCount = 0;
-        for (const key of this.cache.keys()) {
-            if (key.includes(pattern)) {
-                this.cache.delete(key);
-                removedCount++;
-            }
+    protected async invalidateCachePattern(pattern: string): Promise<void> {
+        if (!this.cacheService) {
+            return; // No cache service available
         }
-        if (removedCount > 0) {
-            this.logger.debug(`Cache invalidation for ${this.context}`, { pattern, entriesRemoved: removedCount });
-        }
+        await this.cacheService.invalidatePattern(pattern);
     }
 
     /**

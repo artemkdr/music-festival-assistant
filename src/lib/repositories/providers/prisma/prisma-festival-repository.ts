@@ -1,17 +1,14 @@
 import { IFestivalRepository } from '@/lib/repositories/interfaces';
 import { BasePrismaRepository } from '@/lib/repositories/providers/prisma/base-prisma-repository';
 import { Festival } from '@/lib/schemas';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 /**
  * Prisma festival repository implementation
  */
 export class PrismaFestivalRepository extends BasePrismaRepository implements IFestivalRepository {
-    constructor(logger: ILogger) {
-        super(logger, 'festivals', {
-            defaultTtl: 30 * 24 * 60 * 60 * 1000, // 1 month for festivals
-            maxSize: 500,
-            enabled: true,
-        });
+    constructor(logger: ILogger, cacheService?: ICacheService) {
+        super(logger, 'festivals', cacheService);
 
         // Initialize repository on construction
         this.initialize().catch(error => {

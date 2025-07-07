@@ -4,6 +4,7 @@
 
 import { RecommendationShortSchema } from '@/lib/schemas';
 import { Artist, Festival, UserPreferences } from '@/lib/schemas';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 import { z, ZodSchema } from 'zod';
 
 /**
@@ -127,7 +128,7 @@ export type AIProvider = 'openai' | 'anthropic' | 'google' | 'vertex' | 'azure' 
  * AI service factory interface
  */
 export interface IAIServiceFactory {
-    createAIService(provider: AIProvider, config: AIProviderConfig): IAIService;
+    createAIService(provider: AIProvider, cacheService: ICacheService, config: AIProviderConfig): IAIService;
     getSupportedProviders(): AIProvider[];
 }
 

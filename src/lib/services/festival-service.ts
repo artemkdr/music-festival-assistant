@@ -1,28 +1,20 @@
 import { IFestivalRepository } from '@/lib/repositories/interfaces';
 import { Festival } from '@/lib/schemas';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 import { IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
 import { GrabFestivalData, IFestivalService } from '@/lib/services/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { generateFestivalActId, generateFestivalId } from '@/lib/utils/id-generator';
 
-interface CachedData {
-    festival: Festival;
-    createdAt: Date;
-    expiresAt: Date;
-}
-
 export class FestivalService implements IFestivalService {
-    private dataCache = new Map<string, CachedData>();
     private readonly CACHE_TTL_HOURS = 24; // Cache expires after 24 hours
 
     constructor(
         private festivalRepository: IFestivalRepository,
         private festivalCrawlerService: IFestivalCrawlerService,
+        private cacheService: ICacheService,
         private logger: ILogger
-    ) {
-        // Set up periodic cache cleanup every hour
-        setInterval(() => this.clearExpiredCache(), 60 * 60 * 1000);
-    }
+    ) {}
 
     async getFestivalById(id: string): Promise<Festival | null> {
         this.logger.info(`Fetching festival with ID: ${id}`);
@@ -67,19 +59,11 @@ export class FestivalService implements IFestivalService {
 
         // Generate cache ID and store in cache
         const cacheId = this.generateCacheId();
-        const now = new Date();
-        const expiresAt = new Date(now.getTime() + this.CACHE_TTL_HOURS * 60 * 60 * 1000);
 
-        this.dataCache.set(cacheId, {
-            festival: newFestival,
-            createdAt: now,
-            expiresAt: expiresAt,
-        });
+        await this.cacheService.set(cacheId, newFestival, this.CACHE_TTL_HOURS * 60 * 60); // Store in cache for 24 hours
 
         this.logger.info(`Festival data parsed and cached with ID: ${cacheId}`, {
             festivalName: newFestival.name,
-            cacheId,
-            expiresAt,
         });
 
         return { cacheId, festival: newFestival };
@@ -88,37 +72,14 @@ export class FestivalService implements IFestivalService {
     async getCachedData(cacheId: string): Promise<Festival | null> {
         this.logger.info(`Retrieving cached festival with ID: ${cacheId}`);
 
-        const cachedData = this.dataCache.get(cacheId);
+        const cachedData = await this.cacheService.get<Festival>(cacheId);
         if (!cachedData) {
             this.logger.warn(`No cached festival found with ID: ${cacheId}`);
             return null;
         }
 
-        // Check if cache has expired
-        if (new Date() > cachedData.expiresAt) {
-            this.logger.info(`Cached festival expired, removing from cache: ${cacheId}`);
-            this.dataCache.delete(cacheId);
-            return null;
-        }
-
-        this.logger.info(`Retrieved cached festival: ${cachedData.festival.name}`);
-        return cachedData.festival;
-    }
-
-    clearExpiredCache(): void {
-        const now = new Date();
-        let expiredCount = 0;
-
-        for (const [cacheId, cachedData] of this.dataCache.entries()) {
-            if (now > cachedData.expiresAt) {
-                this.dataCache.delete(cacheId);
-                expiredCount++;
-            }
-        }
-
-        if (expiredCount > 0) {
-            this.logger.info(`Cleared ${expiredCount} expired cached festivals`);
-        }
+        this.logger.info(`Retrieved cached festival: ${cachedData.name}`);
+        return cachedData;
     }
 
     async saveFestival(festival: Festival): Promise<void> {
@@ -177,6 +138,6 @@ export class FestivalService implements IFestivalService {
     }
 
     private generateCacheId(): string {
-        return `cache_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+        return `festival-service-cache_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     }
 }

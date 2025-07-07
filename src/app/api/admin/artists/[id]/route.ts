@@ -4,13 +4,12 @@
  * PUT /api/admin/artists/[id] - Update artist by ID
  */
 import { DIContainer } from '@/lib/di-container';
-import { requireAdmin } from '@/lib/utils/auth-utils';
-import { UpdateArtistSchema } from '@/lib/schemas';
-import { Artist } from '@/lib/schemas';
+import { Artist, UpdateArtistSchema } from '@/lib/schemas';
 import { User } from '@/lib/services/auth';
+import { requireAdmin } from '@/lib/utils/auth-utils';
+import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { toError } from '@/lib/utils/error-handler';
 
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
@@ -110,7 +109,7 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
 
         // Invalidate cache for this artist
         // do not await this call, it will be handled by the cache service in the background
-        DIContainer.getInstance().getNextCacheService().artistUpdated(id);
+        DIContainer.getInstance().getCacheService().invalidatePattern(`artist:${id}`);
 
         return NextResponse.json({
             status: 'success',
@@ -166,9 +165,6 @@ export const DELETE = requireAdmin(async (request: NextRequest, user: User, cont
                 { status: 404 }
             );
         }
-
-        // Invalidate cache for this artist before deletion
-        await DIContainer.getInstance().getNextCacheService().artistWillBeDeleted(id);
 
         // Delete artist
         await artistService.deleteArtist(id);

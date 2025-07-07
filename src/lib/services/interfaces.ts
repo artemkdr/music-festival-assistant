@@ -63,7 +63,6 @@ export interface GrabFestivalData {
 export interface IFestivalService {
     grabFestivalData(data: GrabFestivalData): Promise<{ cacheId: string; festival: Festival }>;
     getCachedData(cacheId: string): Promise<Festival | null>;
-    clearExpiredCache(): void;
     getFestivalById(id: string): Promise<Festival | null>;
     createFestival(festival: Festival): Promise<string>;
     saveFestival(festival: Festival): Promise<void>;
@@ -110,17 +109,4 @@ export interface ICalendarService {
      * @returns Google Calendar creation URL
      */
     generateGoogleCalendarUrl(event: CalendarEvent): string;
-}
-
-/**
- * Next.js cache service interface
- * Provides methods for managing cache invalidation for festivals and artists
- */
-export interface INextCacheService {
-    festivalCreated(): Promise<void>;
-    festivalUpdated(festivalId: string): Promise<void>;
-    festivalDeleted(festivalId: string): Promise<void>;
-    artistCreated(artistId: string): Promise<void>;
-    artistUpdated(artistId: string): Promise<void>;
-    artistWillBeDeleted(artistId: string): Promise<void>;
 }

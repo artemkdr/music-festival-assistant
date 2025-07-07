@@ -4,6 +4,7 @@
 import { AIService } from '@/lib/services/ai/ai-service';
 import type { ILogger } from '@/lib/types/logger';
 import type { AIProvider, AIProviderConfig, IAIService, IAIServiceFactory } from './interfaces';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 
 /**
  * AI service factory implementation
@@ -14,10 +15,10 @@ export class AIServiceFactory implements IAIServiceFactory {
     /**
      * Create an AI service instance based on provider type
      */
-    createAIService(provider: AIProvider, config: AIProviderConfig): IAIService {
+    createAIService(provider: AIProvider, cacheService: ICacheService, config: AIProviderConfig): IAIService {
         this.logger.info('Creating AI service', { provider, model: config.model });
 
-        return new AIService(config, this.logger);
+        return new AIService(config, cacheService, this.logger);
     }
 
     /**

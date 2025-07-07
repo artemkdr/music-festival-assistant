@@ -13,17 +13,18 @@ import { ArtistService } from '@/lib/services/artist-service';
 import { AuthService } from '@/lib/services/auth/auth-service';
 import { DummyAuthProvider } from '@/lib/services/auth/dummy-auth-provider';
 import type { IAuthService } from '@/lib/services/auth/interfaces';
+import { CacheFactory } from '@/lib/services/cache/cache-factory';
+import { ICacheService } from '@/lib/services/cache/interfaces';
 import { ArtistCrawlerService } from '@/lib/services/crawler/artist-crawler-service';
 import { FestivalCrawlerService } from '@/lib/services/crawler/festival-crawler-service';
 import type { IArtistCrawlerService, IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
 import { FestivalService } from '@/lib/services/festival-service';
-import type { IArtistService, IFestivalService, INextCacheService, IRecommendationService } from '@/lib/services/interfaces';
-import { NextCacheService } from '@/lib/services/next-cache-service';
+import type { IArtistService, IFestivalService, IRecommendationService } from '@/lib/services/interfaces';
 import { RecommendationService } from '@/lib/services/recommendation-service';
 import { SpotifyService } from '@/lib/services/spotify/spotify-service';
 import type { ILogger } from '@/lib/types/logger';
 import { ErrorHandler, IErrorHandler, IRetryHandler, RetryHandler } from '@/lib/utils/error-handler';
-import { createAppLogger } from '@/lib/utils/logger';
+import { createAppLogger, logLevelMap } from '@/lib/utils/logger';
 
 /**
  * Dependency injection container class
@@ -44,7 +45,7 @@ export class DIContainer {
     private _recommendationService: IRecommendationService | null = null;
     private _artistCrawlerService: ArtistCrawlerService | null = null;
     private _authService: IAuthService | null = null;
-    private _nextCacheService: INextCacheService | null = null;
+    private _cacheService: ICacheService | null = null;
 
     /**
      * Get singleton instance
@@ -63,7 +64,7 @@ export class DIContainer {
         if (!this._logger) {
             this._logger = createAppLogger({
                 name: 'Music-Festival-Assistant',
-                level: 'info' as const,
+                level: (process.env['LOG_LEVEL'] as keyof typeof logLevelMap) || 'debug',
             });
             if (!this._logger) {
                 this._logger = {
@@ -101,7 +102,7 @@ export class DIContainer {
             const logger = this.getLogger();
             const festivalRepository = this.getFestivalRepository();
             const festivalCrawlerService = this.getFestivalCrawlerService();
-            this._festivalService = new FestivalService(festivalRepository, festivalCrawlerService, logger);
+            this._festivalService = new FestivalService(festivalRepository, festivalCrawlerService, this.getCacheService(), logger);
             logger.info('Festival service initialized');
         }
         return this._festivalService;
@@ -116,7 +117,7 @@ export class DIContainer {
                 const aiConfig = getAIConfig((process.env['AI_PROVIDER'] as AIProvider) || 'vertex', 'default' as const);
                 validateAIConfig(aiConfig);
                 const factory = new AIServiceFactory(this.getLogger());
-                this._aiDefaultService = factory.createAIService(aiConfig.provider, aiConfig.config);
+                this._aiDefaultService = factory.createAIService(aiConfig.provider, this.getCacheService(), aiConfig.config);
                 this.getLogger().info('AI service initialized', { provider: aiConfig.provider, model: aiConfig.config.model });
             } catch (error) {
                 this.getLogger().error('Failed to initialize AI service', error instanceof Error ? error : new Error(String(error)));
@@ -135,7 +136,7 @@ export class DIContainer {
                 const aiConfig = getAIConfig((process.env['AI_SIMPLE_PROVIDER'] as AIProvider) || 'openai', 'simple' as const);
                 validateAIConfig(aiConfig);
                 const factory = new AIServiceFactory(this.getLogger());
-                this._aiSimpleService = factory.createAIService(aiConfig.provider, aiConfig.config);
+                this._aiSimpleService = factory.createAIService(aiConfig.provider, this.getCacheService(), aiConfig.config);
                 this.getLogger().info('AI service initialized', { provider: aiConfig.provider, model: aiConfig.config.model });
             } catch (error) {
                 this.getLogger().error('Failed to initialize AI service', error instanceof Error ? error : new Error(String(error)));
@@ -199,7 +200,7 @@ export class DIContainer {
      */
     public getFestivalRepository(): IFestivalRepository {
         if (!this._festivalRepository) {
-            this._festivalRepository = new PrismaFestivalRepository(this.getLogger());
+            this._festivalRepository = new PrismaFestivalRepository(this.getLogger(), this.getCacheService());
             this.getLogger().info('Festival repository initialized');
         }
         return this._festivalRepository;
@@ -210,7 +211,7 @@ export class DIContainer {
      */
     public getArtistRepository(): IArtistRepository {
         if (!this._artistRepository) {
-            this._artistRepository = new PrismaArtistRepository(this.getLogger());
+            this._artistRepository = new PrismaArtistRepository(this.getLogger(), this.getCacheService());
             this.getLogger().info('Artist repository initialized');
         }
         return this._artistRepository;
@@ -273,15 +274,17 @@ export class DIContainer {
     }
 
     /**
-     * Get Next.js cache service
+     * Get cache service
+     * This is a generic cache service that can be used for various caching needs
      */
-    public getNextCacheService(): INextCacheService {
-        if (!this._nextCacheService) {
-            const festivalService = this.getFestivalService();
-            this._nextCacheService = new NextCacheService(festivalService, this.getLogger());
-            this.getLogger().info('Next.js cache service initialized');
+    public getCacheService(): ICacheService {
+        if (!this._cacheService) {
+            // You can implement a RedisCacheService or any other cache service here
+            // For now, we'll just return a dummy implementation
+            this._cacheService = CacheFactory.createCacheService(this.getLogger());
+            this.getLogger().info('Cache service initialized');
         }
-        return this._nextCacheService;
+        return this._cacheService;
     }
 
     /**
@@ -301,7 +304,7 @@ export class DIContainer {
         this._artistService = null;
         this._aiSimpleService = null;
         this._musicalAIService = null;
-        this._nextCacheService = null;
+        this._cacheService = null;
     }
 }
 
