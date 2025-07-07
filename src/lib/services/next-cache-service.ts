@@ -1,15 +1,6 @@
-import { IFestivalService } from '@/lib/services/festival-service';
+import { IFestivalService, INextCacheService } from '@/lib/services/interfaces';
 import { ILogger } from '@/lib/types/logger';
 import { revalidateTag } from 'next/cache';
-
-export interface INextCacheService {
-    festivalCreated(): Promise<void>;
-    festivalUpdated(festivalId: string): Promise<void>;
-    festivalDeleted(festivalId: string): Promise<void>;
-    artistCreated(artistId: string): Promise<void>;
-    artistUpdated(artistId: string): Promise<void>;
-    artistWillBeDeleted(artistId: string): Promise<void>;
-}
 
 /**
  * Service for managing Next.js cache for festival and artist data

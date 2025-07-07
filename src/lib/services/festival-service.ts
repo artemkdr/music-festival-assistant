@@ -1,37 +1,14 @@
 import { IFestivalRepository } from '@/lib/repositories/interfaces';
 import { Festival } from '@/lib/schemas';
 import { IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
+import { GrabFestivalData, IFestivalService } from '@/lib/services/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { generateFestivalActId, generateFestivalId } from '@/lib/utils/id-generator';
-
-interface GrabFestivalData {
-    urls: string[];
-    name?: string | undefined; // Optional name, can be used if the crawler does not provide it
-    files?:
-        | {
-              name: string;
-              type: string;
-              base64: string;
-          }[]
-        | undefined; // Optional files, can be used for additional data
-}
 
 interface CachedData {
     festival: Festival;
     createdAt: Date;
     expiresAt: Date;
-}
-
-export interface IFestivalService {
-    grabFestivalData(data: GrabFestivalData): Promise<{ cacheId: string; festival: Festival }>;
-    getCachedData(cacheId: string): Promise<Festival | null>;
-    clearExpiredCache(): void;
-    getFestivalById(id: string): Promise<Festival | null>;
-    createFestival(festival: Festival): Promise<string>;
-    saveFestival(festival: Festival): Promise<void>;
-    deleteFestival(id: string): Promise<void>;
-    getAllFestivals(): Promise<Festival[]>;
-    updateFestivalAct(festivalId: string, actId: string, updates: { artistId?: string }): Promise<void>;
 }
 
 export class FestivalService implements IFestivalService {

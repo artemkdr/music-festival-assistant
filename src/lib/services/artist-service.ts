@@ -1,37 +1,9 @@
 import { IArtistRepository } from '@/lib/repositories/interfaces';
 import { Artist } from '@/lib/schemas';
 import { IArtistCrawlerService } from '@/lib/services/crawler/interfaces';
+import { CreateArtistData, IArtistService } from '@/lib/services/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { generateArtistId } from '@/lib/utils/id-generator';
-
-interface CreateArtistData {
-    name: string;
-    genre?: string[] | undefined;
-    description?: string | undefined;
-    imageUrl?: string | undefined;
-    mappingIds?: Record<string, string> | undefined;
-    festivalName?: string | undefined;
-    festivalUrl?: string | undefined;
-}
-
-export interface IArtistService {
-    getArtistById(id: string): Promise<Artist | null>;
-    getArtistsByIds(ids: string[]): Promise<Artist[]>;
-    searchArtistByName(name: string): Promise<Artist | null>;
-    searchArtistsByName(name: string): Promise<Artist[]>;
-    saveArtist(artist: Artist): Promise<void>;
-    createArtist(artistData: CreateArtistData): Promise<Artist>;
-    crawlArtistDetails(
-        id?: string,
-        data?: {
-            name?: string;
-            context?: string | undefined;
-            spotifyId?: string | undefined;
-        }
-    ): Promise<Artist>;
-    deleteArtist(id: string): Promise<void>;
-    getAllArtists(): Promise<Artist[]>;
-}
 
 export class ArtistService implements IArtistService {
     constructor(

@@ -2,7 +2,75 @@
  * Service interfaces for business logic layer
  * Following clean architecture principles with dependency injection
  */
-import type { CalendarEvent, Festival, Recommendation, UserPreferences } from '@/lib/schemas';
+import type { Artist, CalendarEvent, Festival, Recommendation, UserPreferences } from '@/lib/schemas';
+
+/**
+ * Data structure for creating a new artist
+ */
+export interface CreateArtistData {
+    name: string;
+    genre?: string[] | undefined;
+    description?: string | undefined;
+    imageUrl?: string | undefined;
+    mappingIds?: Record<string, string> | undefined;
+    festivalName?: string | undefined;
+    festivalUrl?: string | undefined;
+}
+
+/**
+ * Artist service interface
+ * Provides methods for managing artists, including CRUD operations and AI-enhanced data enrichment
+ */
+export interface IArtistService {
+    getArtistById(id: string): Promise<Artist | null>;
+    getArtistsByIds(ids: string[]): Promise<Artist[]>;
+    searchArtistByName(name: string): Promise<Artist | null>;
+    searchArtistsByName(name: string): Promise<Artist[]>;
+    saveArtist(artist: Artist): Promise<void>;
+    createArtist(artistData: CreateArtistData): Promise<Artist>;
+    crawlArtistDetails(
+        id?: string,
+        data?: {
+            name?: string;
+            context?: string | undefined;
+            spotifyId?: string | undefined;
+        }
+    ): Promise<Artist>;
+    deleteArtist(id: string): Promise<void>;
+    getAllArtists(): Promise<Artist[]>;
+}
+
+/**
+ * Data structure for grabbing festival data
+ * Used by the crawler to provide URLs and optional additional data
+ */
+export interface GrabFestivalData {
+    urls: string[];
+    name?: string | undefined; // Optional name, can be used if the crawler does not provide it
+    files?:
+        | {
+              name: string;
+              type: string;
+              base64: string;
+          }[]
+        | undefined; // Optional files, can be used for additional data
+}
+
+/**
+ * Festival service interface
+ * Provides methods for managing festivals, including data retrieval, caching, and CRUD operations
+ */
+export interface IFestivalService {
+    grabFestivalData(data: GrabFestivalData): Promise<{ cacheId: string; festival: Festival }>;
+    getCachedData(cacheId: string): Promise<Festival | null>;
+    clearExpiredCache(): void;
+    getFestivalById(id: string): Promise<Festival | null>;
+    createFestival(festival: Festival): Promise<string>;
+    saveFestival(festival: Festival): Promise<void>;
+    deleteFestival(id: string): Promise<void>;
+    getAllFestivals(): Promise<Festival[]>;
+    updateFestivalAct(festivalId: string, actId: string, updates: { artistId?: string }): Promise<void>;
+}
 
 /**
  * Recommendation engine service interface
@@ -42,4 +110,17 @@ export interface ICalendarService {
      * @returns Google Calendar creation URL
      */
     generateGoogleCalendarUrl(event: CalendarEvent): string;
+}
+
+/**
+ * Next.js cache service interface
+ * Provides methods for managing cache invalidation for festivals and artists
+ */
+export interface INextCacheService {
+    festivalCreated(): Promise<void>;
+    festivalUpdated(festivalId: string): Promise<void>;
+    festivalDeleted(festivalId: string): Promise<void>;
+    artistCreated(artistId: string): Promise<void>;
+    artistUpdated(artistId: string): Promise<void>;
+    artistWillBeDeleted(artistId: string): Promise<void>;
 }
