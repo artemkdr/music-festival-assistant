@@ -331,7 +331,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             </label>
                             <select id="specific-date" onChange={handleSpecificDateChange} value={specificDate} className="input w-full" disabled={isLoading}>
                                 <option value="">{t('AllDates')}</option>
-                                {selectedFestival?.dates.map(date => (
+                                {selectedFestival?.dates?.map(date => (
                                     <option key={date} value={date}>
                                         {formatDateString(date, {
                                             year: 'numeric',
