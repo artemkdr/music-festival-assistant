@@ -26,7 +26,13 @@ export const ArtistInfo = (props: ArtistInfoProps) => {
                 </Link>
             )}
             {artist.id && (
-                <Link href={getYouTubeSearchArtistUrl(artist.name)} target="_blank" rel="noopener noreferrer" className="link-destructive p-2 rounded-full bg-primary/15 animate-fade-in" title={t('WatchOnYouTube')}>
+                <Link
+                    href={getYouTubeSearchArtistUrl(artist.name)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link-destructive p-2 rounded-full bg-primary/15 animate-fade-in"
+                    title={t('WatchOnYouTube')}
+                >
                     <FaYoutube size={24} />
                 </Link>
             )}
@@ -39,7 +45,7 @@ export const ArtistInfo = (props: ArtistInfoProps) => {
                 className="link-primary p-2 rounded-full bg-primary/15 animate-fade-in"
             >
                 <FaGoogle size={24} />
-            </Link>            
+            </Link>
         </>
     );
 };

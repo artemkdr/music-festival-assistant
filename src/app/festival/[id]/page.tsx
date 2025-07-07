@@ -445,7 +445,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                                                                 </div>
                                                             )}
 
-                                                            <div className="flex flex-wrap justify-end gap-2 items-center">                                                                
+                                                            <div className="flex flex-wrap justify-end gap-2 items-center">
                                                                 {artistInfoVisible[`${dayIndex}-${index}`] &&
                                                                     (() => {
                                                                         const artist = (performance.artistId && artistMap[performance.artistId]
