@@ -79,13 +79,28 @@ export class RecommendationService implements IRecommendationService {
                 const artist = artistsMap[rec.artistName.toLowerCase()];
                 const artistName = artist?.name ?? rec.artistName;
                 const acts = artist?.id ? getActsByArtistId(festival, artist.id) : getActsByArtistName(festival, artistName);
-                if (acts && acts.length > 0 && acts[0]) {
+                // find the best matching act based on the date
+                let act = acts.length > 0 ? acts[0] : null;
+                if (userPreferences.date) {
+                    if (acts.length > 0) {
+                        act = acts.find(a => a.date === userPreferences.date);
+                    }
+                } else if (acts.length > 0) {
+                    // If no date is specified, check at least if there is a date in future
+                    const futureActs = acts.filter(a => a.date && new Date(a.date) >= new Date());
+                    if (futureActs.length > 0) {
+                        act = futureActs[0]; // Take the first future act
+                    } else {
+                        act = acts[0]; // Fallback to the first act if no future acts are found
+                    }
+                }
+                if (act) {
                     recommendations.push({
                         artist: artist || {
                             id: '', // Fallback if artist not found
                             name: artistName,
                         },
-                        act: acts[0],
+                        act,
                         score: rec.score,
                         reasons: rec.reasons,
                         aiEnhanced: true,
