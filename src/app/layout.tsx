@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     title: 'Swiss Music Festival Assistant',
     description: 'Discover artists at music festivals based on your preferences',
     keywords: ['music', 'festival', 'discovery', 'recommendations', 'artists'],
-    authors: [{ name: 'Artem Kudryavtsev' }],
+    authors: [{ name: 'Artem Kudryavtsev, https://github.com/artemkdr' }],
 };
 
 export const viewport: Viewport = {

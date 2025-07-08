@@ -17,3 +17,15 @@ export const normalizeName = (name: string) => {
         .trim()
         .replace(/\s+/g, '-'); // Replace spaces with hyphens
 };
+
+/**
+ *
+ */
+export const normalizeForSearch = (value: string) => {
+    return value
+        .normalize('NFD') // Normalize to decompose diacritics
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
+        .toLowerCase()
+        .trim();
+};

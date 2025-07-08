@@ -163,7 +163,11 @@
 
   input[type=checkbox],
   input[type=radio] {
-    @apply h-4 w-4 rounded border border-input bg-background text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply accent-primary h-4 w-4 rounded border border-input bg-background text-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  input[type=range] {
+    @apply accent-primary cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 
   label {

@@ -16,7 +16,7 @@ export const ArtistInfo = (props: ArtistInfoProps) => {
         <>
             {/* genres, max 5 */}
             {artist.genre && artist.genre.length > 0 && (
-                <div className="px-2 text-foreground/70 animate-fade-in">
+                <div className="px-2 text-foreground/70 animate-fade-in w-full sm:w-auto text-right">
                     <span className="text-xs">{artist.genre.slice(0, 5).join(' | ')}</span>
                 </div>
             )}

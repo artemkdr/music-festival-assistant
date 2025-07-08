@@ -12,6 +12,7 @@ import { Artist, Festival } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
 import { extractStartTime, formatDateString, isValidDate } from '@/lib/utils/date-util';
 import { getFestivalArtists, groupFestivalActsByDate } from '@/lib/utils/festival-util';
+import { normalizeForSearch } from '@/lib/utils/normalize-name';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
@@ -65,8 +66,8 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                               ...dayLineup,
                               list: dayLineup.list.filter(
                                   performance =>
-                                      performance.artistName.toLowerCase().includes(searchFilter.toLowerCase()) ||
-                                      (performance.stage && performance.stage.toLowerCase().includes(searchFilter.toLowerCase()))
+                                      normalizeForSearch(performance.artistName)?.includes(normalizeForSearch(searchFilter)) ||
+                                      (performance.stage && normalizeForSearch(performance.stage)?.includes(normalizeForSearch(searchFilter)))
                               ),
                           }))
                           .filter(dayLineup => dayLineup.list.length > 0)
@@ -111,7 +112,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
     // Loading state
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen">
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex justify-center py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-magic"></div>
@@ -124,7 +125,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
     // Error state
     if (error) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen">
                 <div className="container mx-auto px-4 py-8">
                     <div className="bg-red-50 border border-red-200 rounded-md p-4">
                         <div className="flex">
@@ -150,7 +151,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
     // Festival not found
     if (!festival) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen">
                 <div className="container mx-auto px-4 py-8">
                     <div className="text-center py-12">
                         <h2 className="text-2xl font-bold text-gray-900">{t('NotFound')}</h2>
@@ -237,7 +238,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="mb-8">

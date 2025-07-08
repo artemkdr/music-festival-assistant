@@ -318,7 +318,7 @@ export function FestivalDiscoveryForm({ onSubmit, isLoading, onChange }: Festiva
                             </div>
                         </div>
                     )}
-                    <div className="text-sm text-foreground/80 mt-2">{festivalsCountStatus}</div>
+                    <div className="text-sm font-medium text-foreground mt-2">{festivalsCountStatus}</div>
                 </div>
 
                 {/* Show filters only if a festival is selected */}
