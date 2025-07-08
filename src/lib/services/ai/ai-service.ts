@@ -1,6 +1,7 @@
 import { AIProviderConfig, AIRequest, AIResponse, IAIService, SchemaAIRequest } from '@/lib/services/ai/interfaces';
 import { ICacheService } from '@/lib/services/cache/interfaces';
 import type { ILogger } from '@/lib/types/logger';
+import { toError } from '@/lib/utils/error-handler';
 import { createVertex } from '@ai-sdk/google-vertex/edge';
 import { groq } from '@ai-sdk/groq';
 import { openai } from '@ai-sdk/openai';
@@ -115,8 +116,8 @@ export class AIService implements IAIService {
             this.cache.set(cacheKey, result, this.DEFAULT_CACHE_TTL);
             return result;
         } catch (error) {
-            this.logger.error('AI text generation failed', error instanceof Error ? error : new Error(String(error)));
-            throw new Error(`AI text generation failed: ${error instanceof Error ? error.message : String(error)}`);
+            this.logger.error('AI text generation failed', toError(error));
+            throw new Error(`AI text generation failed: ${toError(error).message}`);
         }
     }
 
@@ -241,8 +242,8 @@ export class AIService implements IAIService {
             }
             return finalResult;
         } catch (error) {
-            this.logger.error('AI object generation failed', error instanceof Error ? error : new Error(String(error)));
-            throw new Error(`AI object generation failed: ${error instanceof Error ? error.message : String(error)}`);
+            this.logger.error('AI object generation failed', toError(error));
+            throw new Error(`AI object generation failed: ${toError(error).message}`);
         }
     }
 
