@@ -30,7 +30,7 @@ Modern, modular TypeScript/Next.js app for discovering artists and planning your
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 19+ 
 - npm or yarn package manager
 
 ### Installation
