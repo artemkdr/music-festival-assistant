@@ -1,0 +1,42 @@
+# Git and version control
+.git
+.gitignore
+
+# Docker specific files
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Dependencies and lock files
+node_modules
+npm-debug.log
+yarn.lock
+pnpm-lock.yaml
+package-lock.json
+
+# Build and development artifacts
+.next
+out
+build
+dist
+.swc
+
+# Local environment variables
+.env*.local
+.env
+
+# Test files and configurations
+cypress
+jest.config.js
+playwright.config.ts
+*.test.js
+*.spec.js
+
+# IDE and editor configurations
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# Miscellaneous
+README.md
