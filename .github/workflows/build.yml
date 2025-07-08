@@ -1,0 +1,23 @@
+name: Build
+
+on:
+    workflow_dispatch:
+    workflow_call:
+
+jobs:
+    build:
+        runs-on: [ubuntu-latest]
+        steps:
+            - uses: actions/checkout@v4 # Check out the repository code
+            - uses: actions/setup-node@v4 # Set up Node.js environment
+              with:
+                  node-version: '18' # Specify Node.js version
+                  cache: 'npm' # Cache npm dependencies for speed
+            - name: Cache dependencies
+              uses: actions/cache@v4
+              with:
+                  path: '**/node_modules'
+                  key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+            - run: npm ci # Install dependencies
+            - run: npm run build # Build the React app
+            - run: npm run test # Test React app

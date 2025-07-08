@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server';
  * Middleware function that runs on matching routes
  */
 export default function middleware() {
+    // there is nothing for now
+    // we can migrate authentication logic here in the future
     return NextResponse.next();
 }
 
