@@ -49,7 +49,7 @@ export class ApiClient {
             if (response.status === 401) {
                 this.clearToken();
                 if (typeof window !== 'undefined') {
-                    window.location.href = '/admin/login'; // Redirect to login page
+                    window.location.href = '/login'; // Redirect to login page
                 }
                 throw new Error('Unauthorized access - please log in again.');
             }

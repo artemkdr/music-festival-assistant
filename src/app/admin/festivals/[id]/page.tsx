@@ -4,10 +4,8 @@
  */
 'use client';
 
-import { festivalsApi } from '@/app/lib/api';
-import { AdminLayout } from '@/app/admin/admin-layout';
 import { ArtistLinking } from '@/app/admin/festivals/components/artist-linking';
-import { ProtectedRoute } from '@/app/lib/components/protected-route';
+import { festivalsApi } from '@/app/lib/api';
 import { Festival } from '@/lib/schemas';
 import { DATE_TBA, getFestivalArtists, groupFestivalActsByDate } from '@/lib/utils/festival-util';
 import Link from 'next/link';
@@ -87,178 +85,174 @@ export default function FestivalDetailPage({ params }: FestivalDetailPageProps) 
     };
 
     return (
-        <ProtectedRoute requireAdmin>
-            <AdminLayout>
-                <div className="space-y-6">
-                    {/* Header */}
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <div className="flex items-center space-x-3 mb-2">
-                                <Link href="/admin/festivals" className="link-neutral">
-                                    ← Back to Festivals
-                                </Link>
-                            </div>
-                            <h1 className="text-3xl font-bold text-foreground">{isLoading ? 'Loading...' : festival?.name || 'Festival Not Found'}</h1>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex justify-between items-start">
+                <div>
+                    <div className="flex items-center space-x-3 mb-2">
+                        <Link href="/admin/festivals" className="link-neutral">
+                            ← Back to Festivals
+                        </Link>
+                    </div>
+                    <h1 className="text-3xl font-bold text-foreground">{isLoading ? 'Loading...' : festival?.name || 'Festival Not Found'}</h1>
+                </div>
+                {festival && (
+                    <div className="flex space-x-3">
+                        <Link href={`/admin/festivals/${festival.id}/edit`} className="btn-primary">
+                            Edit Festival
+                        </Link>
+                    </div>
+                )}
+            </div>
+
+            {/* Loading State */}
+            {isLoading && (
+                <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-magic"></div>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <span className="text-red-400">⚠️</span>
                         </div>
-                        {festival && (
-                            <div className="flex space-x-3">
-                                <Link href={`/admin/festivals/${festival.id}/edit`} className="btn-primary">
-                                    Edit Festival
-                                </Link>
+                        <div className="ml-3">
+                            <h3 className="text-sm font-medium text-red-800">Error</h3>
+                            <p className="mt-1 text-sm text-red-700">{error}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Festival Details */}
+            {festival && !isLoading && (
+                <div className="space-y-6">
+                    {/* Overview Card */}
+                    <div className="bg-white shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h2 className="text-lg font-medium text-foreground mb-4">Festival Overview</h2>
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                <div>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center">
+                                            <span className="mr-3 text-lg">📍</span>
+                                            <div>
+                                                <div className="text-sm font-medium text-muted-foreground">Location</div>
+                                                <div className="text-sm text-foreground">{festival.location}</div>
+                                            </div>
+                                        </div>
+                                        {festival.website && (
+                                            <div className="flex items-center">
+                                                <span className="mr-3 text-lg">🌐</span>
+                                                <div>
+                                                    <div className="text-sm font-medium text-muted-foreground">Website</div>
+                                                    <Link href={festival.website} target="_blank" rel="noopener noreferrer" className="link-primary text-sm">
+                                                        {festival.website}
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center">
+                                            <span className="mr-3 text-lg">🎤</span>
+                                            <div>
+                                                <div className="text-sm font-medium text-muted-foreground">Total Artists</div>
+                                                <div className="text-sm text-foreground">{getFestivalArtists(festival).length}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <span className="mr-3 text-lg">🎭</span>
+                                            <div>
+                                                <div className="text-sm font-medium text-muted-foreground">Festival Days</div>
+                                                <div className="text-sm text-foreground">{groupFestivalActsByDate(festival).length}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {festival.description && (
+                                        <div className="mt-4">
+                                            <div className="text-sm font-medium text-muted-foreground mb-1">Description</div>
+                                            <p className="text-sm text-foreground">{festival.description}</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
+                        </div>
                     </div>
 
-                    {/* Loading State */}
-                    {isLoading && (
-                        <div className="flex justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-magic"></div>
-                        </div>
-                    )}
-
-                    {/* Error State */}
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <span className="text-red-400">⚠️</span>
-                                </div>
-                                <div className="ml-3">
-                                    <h3 className="text-sm font-medium text-red-800">Error</h3>
-                                    <p className="mt-1 text-sm text-red-700">{error}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Festival Details */}
-                    {festival && !isLoading && (
-                        <div className="space-y-6">
-                            {/* Overview Card */}
-                            <div className="bg-white shadow rounded-lg">
-                                <div className="px-4 py-5 sm:p-6">
-                                    <h2 className="text-lg font-medium text-foreground mb-4">Festival Overview</h2>
-                                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                        <div>
-                                            <div className="space-y-3">
-                                                <div className="flex items-center">
-                                                    <span className="mr-3 text-lg">📍</span>
-                                                    <div>
-                                                        <div className="text-sm font-medium text-muted-foreground">Location</div>
-                                                        <div className="text-sm text-foreground">{festival.location}</div>
-                                                    </div>
-                                                </div>
-                                                {festival.website && (
-                                                    <div className="flex items-center">
-                                                        <span className="mr-3 text-lg">🌐</span>
-                                                        <div>
-                                                            <div className="text-sm font-medium text-muted-foreground">Website</div>
-                                                            <Link href={festival.website} target="_blank" rel="noopener noreferrer" className="link-primary text-sm">
-                                                                {festival.website}
-                                                            </Link>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="space-y-3">
-                                                <div className="flex items-center">
-                                                    <span className="mr-3 text-lg">🎤</span>
-                                                    <div>
-                                                        <div className="text-sm font-medium text-muted-foreground">Total Artists</div>
-                                                        <div className="text-sm text-foreground">{getFestivalArtists(festival).length}</div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center">
-                                                    <span className="mr-3 text-lg">🎭</span>
-                                                    <div>
-                                                        <div className="text-sm font-medium text-muted-foreground">Festival Days</div>
-                                                        <div className="text-sm text-foreground">{groupFestivalActsByDate(festival).length}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {festival.description && (
-                                                <div className="mt-4">
-                                                    <div className="text-sm font-medium text-muted-foreground mb-1">Description</div>
-                                                    <p className="text-sm text-foreground">{festival.description}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Schedule by Date */}
-                            <div className="bg-white shadow rounded-lg">
-                                <div className="px-4 py-5 sm:p-6">
-                                    <h2 className="text-lg font-medium text-foreground mb-4">Festival Schedule</h2>
-                                    <div className="space-y-6">
-                                        {groupFestivalActsByDate(festival).map((dayLineup, dayIndex) => (
-                                            <div key={dayIndex}>
-                                                <h3 className="text-md font-medium text-foreground mb-3">{formatDate(dayLineup.date)}</h3>
-                                                <div className="space-y-2">
-                                                    {' '}
-                                                    {dayLineup.list
-                                                        .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
-                                                        .map((artist, index) => (
-                                                            <React.Fragment key={index}>
-                                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                                    <div className="flex items-center space-x-4">
-                                                                        <div className="text-sm font-medium text-foreground">{artist.time ?? 'TBA'}</div>
-                                                                        <div>
-                                                                            {artist.artistId ? (
-                                                                                <Link href={`/admin/artists/${artist.artistId}`} className="link-primary font-medium">
-                                                                                    {artist.artistName}
-                                                                                </Link>
-                                                                            ) : (
-                                                                                <span className="font-medium text-foreground">{artist.artistName}</span>
-                                                                            )}
-                                                                        </div>
-                                                                        {artist.stage && <div className="text-sm text-muted-foreground">@ {artist.stage}</div>}
-                                                                    </div>
-                                                                    <div className="flex space-x-2">
-                                                                        {artist.artistId ? (
-                                                                            <Link href={`/admin/artists/${artist.artistId}`} className="btn-primary-light bg-primary/10 px-3 py-2 rounded-3xl text-sm">
-                                                                                View Artist
-                                                                            </Link>
-                                                                        ) : (
-                                                                            <>
-                                                                                <span className="text-sm text-destructive px-3 py-2">No Artist Profile</span>
-                                                                                <button
-                                                                                    onClick={() => setLinkingActIds(prev => new Set(prev ? [...prev, artist.id] : [artist.id]))}
-                                                                                    disabled={linkingActIds?.has(artist.id)}
-                                                                                    className="btn-primary-light bg-primary/10 px-3 py-2 text-sm disabled:opacity-50"
-                                                                                >
-                                                                                    Link Artist Profile
-                                                                                </button>
-                                                                            </>
-                                                                        )}
-                                                                    </div>
+                    {/* Schedule by Date */}
+                    <div className="bg-white shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h2 className="text-lg font-medium text-foreground mb-4">Festival Schedule</h2>
+                            <div className="space-y-6">
+                                {groupFestivalActsByDate(festival).map((dayLineup, dayIndex) => (
+                                    <div key={dayIndex}>
+                                        <h3 className="text-md font-medium text-foreground mb-3">{formatDate(dayLineup.date)}</h3>
+                                        <div className="space-y-2">
+                                            {' '}
+                                            {dayLineup.list
+                                                .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+                                                .map((artist, index) => (
+                                                    <React.Fragment key={index}>
+                                                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                            <div className="flex items-center space-x-4">
+                                                                <div className="text-sm font-medium text-foreground">{artist.time ?? 'TBA'}</div>
+                                                                <div>
+                                                                    {artist.artistId ? (
+                                                                        <Link href={`/admin/artists/${artist.artistId}`} className="link-primary font-medium">
+                                                                            {artist.artistName}
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <span className="font-medium text-foreground">{artist.artistName}</span>
+                                                                    )}
                                                                 </div>
-                                                                {/* Artist Linking Component */}
-                                                                {linkingActIds?.has(artist.id) && festival && (
-                                                                    <ArtistLinking
-                                                                        festivalId={festival.id}
-                                                                        festivalUrl={festival.website ? new URL(festival.website).hostname : undefined}
-                                                                        actId={artist.id}
-                                                                        actName={artist.artistName}
-                                                                        onSuccess={() => handleLinkingSuccess(artist.id)}
-                                                                        onCancel={() => handleLinkingCancel(artist.id)}
-                                                                    />
+                                                                {artist.stage && <div className="text-sm text-muted-foreground">@ {artist.stage}</div>}
+                                                            </div>
+                                                            <div className="flex space-x-2">
+                                                                {artist.artistId ? (
+                                                                    <Link href={`/admin/artists/${artist.artistId}`} className="btn-primary-light bg-primary/10 px-3 py-2 rounded-3xl text-sm">
+                                                                        View Artist
+                                                                    </Link>
+                                                                ) : (
+                                                                    <>
+                                                                        <span className="text-sm text-destructive px-3 py-2">No Artist Profile</span>
+                                                                        <button
+                                                                            onClick={() => setLinkingActIds(prev => new Set(prev ? [...prev, artist.id] : [artist.id]))}
+                                                                            disabled={linkingActIds?.has(artist.id)}
+                                                                            className="btn-primary-light bg-primary/10 px-3 py-2 text-sm disabled:opacity-50"
+                                                                        >
+                                                                            Link Artist Profile
+                                                                        </button>
+                                                                    </>
                                                                 )}
-                                                            </React.Fragment>
-                                                        ))}
-                                                </div>
-                                            </div>
-                                        ))}
+                                                            </div>
+                                                        </div>
+                                                        {/* Artist Linking Component */}
+                                                        {linkingActIds?.has(artist.id) && festival && (
+                                                            <ArtistLinking
+                                                                festivalId={festival.id}
+                                                                festivalUrl={festival.website ? new URL(festival.website).hostname : undefined}
+                                                                actId={artist.id}
+                                                                actName={artist.artistName}
+                                                                onSuccess={() => handleLinkingSuccess(artist.id)}
+                                                                onCancel={() => handleLinkingCancel(artist.id)}
+                                                            />
+                                                        )}
+                                                    </React.Fragment>
+                                                ))}
+                                        </div>
                                     </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
-            </AdminLayout>
-        </ProtectedRoute>
+            )}
+        </div>
     );
 }

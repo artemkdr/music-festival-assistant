@@ -13,7 +13,7 @@ interface ProtectedRouteProps {
     fallbackPath?: string;
 }
 
-export function ProtectedRoute({ children, requireAdmin = false, fallbackPath = '/admin/login' }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requireAdmin = false, fallbackPath = '/login' }: ProtectedRouteProps) {
     const { isAuthenticated, isAdmin, isLoading } = useAuth();
 
     useEffect(() => {

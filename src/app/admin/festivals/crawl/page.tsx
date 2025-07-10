@@ -5,8 +5,6 @@
 'use client';
 
 import { festivalsApi } from '@/app/lib/api';
-import { AdminLayout } from '@/app/admin/admin-layout';
-import { ProtectedRoute } from '@/app/lib/components/protected-route';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
 
@@ -112,171 +110,167 @@ export default function FestivalCrawlPage() {
     };
 
     return (
-        <ProtectedRoute requireAdmin>
-            <AdminLayout>
-                <div className="max-w-4xl mx-auto space-y-6">
-                    {/* Header */}
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Crawl Festival</h1>
-                        <p className="mt-2 text-gray-600">Add a new festival by providing its website URL. Our AI will parse the lineup and schedule.</p>
-                    </div>
+        <div className="max-w-4xl mx-auto space-y-6">
+            {/* Header */}
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900">Crawl Festival</h1>
+                <p className="mt-2 text-gray-600">Add a new festival by providing its website URL. Our AI will parse the lineup and schedule.</p>
+            </div>
 
-                    {/* Form */}
-                    <div className="bg-white shadow rounded-lg">
-                        <div className="px-4 py-5 sm:p-6">
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div>
-                                    <label>
-                                        Festival Website URLs ({urls.length}/{10})
-                                    </label>
+            {/* Form */}
+            <div className="bg-white shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label>
+                                Festival Website URLs ({urls.length}/{10})
+                            </label>
 
-                                    <div className="space-y-3">
-                                        {urls.map((url, index) => (
-                                            <div key={index} className="flex items-center space-x-3">
-                                                <div className="flex-1">
-                                                    <input
-                                                        type="url"
-                                                        required={index === 0}
-                                                        value={url}
-                                                        onChange={e => handleUrlChange(index, e.target.value)}
-                                                        placeholder={`https://festival-${index + 1}.com`}
-                                                        disabled={isLoading}
-                                                    />
-                                                </div>
+                            <div className="space-y-3">
+                                {urls.map((url, index) => (
+                                    <div key={index} className="flex items-center space-x-3">
+                                        <div className="flex-1">
+                                            <input
+                                                type="url"
+                                                required={index === 0}
+                                                value={url}
+                                                onChange={e => handleUrlChange(index, e.target.value)}
+                                                placeholder={`https://festival-${index + 1}.com`}
+                                                disabled={isLoading}
+                                            />
+                                        </div>
 
-                                                <div className="flex space-x-2">
-                                                    {urls.length > 1 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleRemoveUrl(index)}
-                                                            className="inline-flex items-center btn-destructive-light border-1 border-destructive"
-                                                            disabled={isLoading}
-                                                            title="Remove URL"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                                />
-                                                            </svg>
-                                                        </button>
-                                                    )}
+                                        <div className="flex space-x-2">
+                                            {urls.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveUrl(index)}
+                                                    className="inline-flex items-center btn-destructive-light border-1 border-destructive"
+                                                    disabled={isLoading}
+                                                    title="Remove URL"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            )}
 
-                                                    {index === urls.length - 1 && urls.length < 10 && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={handleAddUrl}
-                                                            className="inline-flex items-center btn-primary-light border-1 border-primary"
-                                                            disabled={isLoading}
-                                                            title="Add another URL"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                            </svg>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
+                                            {index === urls.length - 1 && urls.length < 10 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleAddUrl}
+                                                    className="inline-flex items-center btn-primary-light border-1 border-primary"
+                                                    disabled={isLoading}
+                                                    title="Add another URL"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
 
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Add up to 10 festival website URLs. You can crawl multiple festivals at once or provide multiple sources for better data accuracy.
-                                    </p>
-                                </div>
+                            <p className="mt-2 text-sm text-gray-500">
+                                Add up to 10 festival website URLs. You can crawl multiple festivals at once or provide multiple sources for better data accuracy.
+                            </p>
+                        </div>
 
-                                {/* File Upload Input */}
-                                <div>
-                                    <label htmlFor="fileUpload">Attach Files (PDF or Images, optional)</label>
-                                    <input id="fileUpload" type="file" accept=".pdf,image/*" multiple className="mt-1" onChange={handleFileChange} disabled={isLoading} />
-                                    {files.length > 0 && (
-                                        <ul className="mt-2 text-xs text-gray-600 list-disc ml-5">
-                                            {files.map(f => (
-                                                <li key={f.name}>
-                                                    {f.name} ({f.type})
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                    <p className="mt-2 text-sm text-gray-500">You can attach PDF or image files to help the AI extract lineup/schedule data.</p>
-                                </div>
+                        {/* File Upload Input */}
+                        <div>
+                            <label htmlFor="fileUpload">Attach Files (PDF or Images, optional)</label>
+                            <input id="fileUpload" type="file" accept=".pdf,image/*" multiple className="mt-1" onChange={handleFileChange} disabled={isLoading} />
+                            {files.length > 0 && (
+                                <ul className="mt-2 text-xs text-gray-600 list-disc ml-5">
+                                    {files.map(f => (
+                                        <li key={f.name}>
+                                            {f.name} ({f.type})
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                            <p className="mt-2 text-sm text-gray-500">You can attach PDF or image files to help the AI extract lineup/schedule data.</p>
+                        </div>
 
-                                {/* Forced Festival Name Input */}
-                                <div>
-                                    <label htmlFor="forcedName">Forced Festival Name (optional)</label>
-                                    <input
-                                        id="forcedName"
-                                        type="text"
-                                        className="mt-1 w-full"
-                                        placeholder="Override detected festival name"
-                                        value={forcedName}
-                                        onChange={e => setForcedName(e.target.value)}
-                                        disabled={isLoading}
-                                    />
-                                    <p className="mt-2 text-sm text-gray-500">If provided, this name will override the name detected from the website(s).</p>
-                                </div>
+                        {/* Forced Festival Name Input */}
+                        <div>
+                            <label htmlFor="forcedName">Forced Festival Name (optional)</label>
+                            <input
+                                id="forcedName"
+                                type="text"
+                                className="mt-1 w-full"
+                                placeholder="Override detected festival name"
+                                value={forcedName}
+                                onChange={e => setForcedName(e.target.value)}
+                                disabled={isLoading}
+                            />
+                            <p className="mt-2 text-sm text-gray-500">If provided, this name will override the name detected from the website(s).</p>
+                        </div>
 
-                                <div className="flex justify-end space-x-3">
-                                    <button type="button" onClick={handleReset} className="btn-neutral" disabled={isLoading}>
-                                        Reset
-                                    </button>
-                                    <button type="submit" disabled={isLoading || urls.filter(u => u.trim()).length === 0} className="btn-primary">
-                                        {isLoading ? (
-                                            <>
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
-                                                Crawling...
-                                            </>
-                                        ) : (
-                                            `🎪 Crawl Festival${urls.filter(u => u.trim()).length > 1 ? 's' : ''}`
-                                        )}
-                                    </button>
-                                </div>
-                            </form>
+                        <div className="flex justify-end space-x-3">
+                            <button type="button" onClick={handleReset} className="btn-neutral" disabled={isLoading}>
+                                Reset
+                            </button>
+                            <button type="submit" disabled={isLoading || urls.filter(u => u.trim()).length === 0} className="btn-primary">
+                                {isLoading ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                                        Crawling...
+                                    </>
+                                ) : (
+                                    `🎪 Crawl Festival${urls.filter(u => u.trim()).length > 1 ? 's' : ''}`
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {/* Error Display */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <span className="text-red-400">⚠️</span>
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-sm font-medium text-red-800">Crawl Failed</h3>
+                            <p className="mt-1 text-sm text-red-700">{error}</p>
                         </div>
                     </div>
+                </div>
+            )}
 
-                    {/* Error Display */}
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <span className="text-red-400">⚠️</span>
-                                </div>
-                                <div className="ml-3">
-                                    <h3 className="text-sm font-medium text-red-800">Crawl Failed</h3>
-                                    <p className="mt-1 text-sm text-red-700">{error}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Instructions */}
-                    <div className="bg-primary/10 border border-primary/20 rounded-md p-4">
-                        <div className="flex">
-                            <div className="flex-shrink-0">
-                                <span className="text-primary">ℹ️</span>
-                            </div>
-                            <div className="ml-3">
-                                <h3 className="text-sm font-medium text-primary">How it works</h3>
-                                <div className="mt-2 text-sm text-primary">
-                                    <ol className="list-decimal list-inside space-y-1">
-                                        <li>Enter one or more festival website URLs (up to 10)</li>
-                                        <li>Our AI crawls and analyzes each website content</li>
-                                        <li>Festival lineup and schedule data is extracted and merged</li>
-                                        <li>The festival(s) are added to your database</li>
-                                        <li>You can then crawl artist data separately</li>
-                                    </ol>
-                                    <div className="mt-3 p-2 bg-primary/15 rounded text-xs">
-                                        <strong>Pro tip:</strong> Use multiple URLs to get more complete data - different sources might have different details about the same festival!
-                                    </div>
-                                </div>
+            {/* Instructions */}
+            <div className="bg-primary/10 border border-primary/20 rounded-md p-4">
+                <div className="flex">
+                    <div className="flex-shrink-0">
+                        <span className="text-primary">ℹ️</span>
+                    </div>
+                    <div className="ml-3">
+                        <h3 className="text-sm font-medium text-primary">How it works</h3>
+                        <div className="mt-2 text-sm text-primary">
+                            <ol className="list-decimal list-inside space-y-1">
+                                <li>Enter one or more festival website URLs (up to 10)</li>
+                                <li>Our AI crawls and analyzes each website content</li>
+                                <li>Festival lineup and schedule data is extracted and merged</li>
+                                <li>The festival(s) are added to your database</li>
+                                <li>You can then crawl artist data separately</li>
+                            </ol>
+                            <div className="mt-3 p-2 bg-primary/15 rounded text-xs">
+                                <strong>Pro tip:</strong> Use multiple URLs to get more complete data - different sources might have different details about the same festival!
                             </div>
                         </div>
                     </div>
                 </div>
-            </AdminLayout>
-        </ProtectedRoute>
+            </div>
+        </div>
     );
 }

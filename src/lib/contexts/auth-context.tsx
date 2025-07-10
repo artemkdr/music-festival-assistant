@@ -41,6 +41,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             if (!token) {
                 setUser(null);
+                setIsLoading(false);
                 return;
             }
 
@@ -100,11 +101,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Check auth on mount if it's a protected route
     useEffect(() => {
         // Only check auth if we have a token
-        authApi.getToken().then(token => {
-            if (token) {
-                checkAuth();
-            }
-        });
+        authApi
+            .getToken()
+            .then(token => {
+                if (token) {
+                    checkAuth();
+                } else {
+                    setUser(null);
+                    setIsLoading(false);
+                }
+            })
+            .catch(() => {
+                setUser(null);
+                setIsLoading(false);
+            });
     }, []);
 
     const value: AuthContextType = {

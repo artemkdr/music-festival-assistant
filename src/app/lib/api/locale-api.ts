@@ -5,7 +5,7 @@ class LocaleApi {
     constructor(private client: ApiClient) {}
 
     async setLocale(locale: string): Promise<ApiResponse<string>> {
-        return this.client.request<string>('set-locale', {
+        return this.client.request<string>('/set-locale', {
             method: 'POST',
             body: JSON.stringify({ locale }),
         });
