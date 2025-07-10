@@ -19,6 +19,7 @@ export const formatDateString = (
         year: 'numeric' | '2-digit';
         month: 'numeric' | '2-digit' | 'short' | 'long';
         day: 'numeric' | '2-digit';
+        weekday?: 'narrow' | 'short' | 'long';
     } = {
         year: 'numeric' as const,
         month: 'short' as const,

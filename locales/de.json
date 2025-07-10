@@ -149,7 +149,8 @@
         "GetRecommendations": "Empfehlungen erhalten",
         "AddToGoogleCalendar": "Zu Google Kalender hinzufügen",
         "DownloadICS": "Kalender-Ereignis herunterladen",
-        "NoResults": "Ups... nichts gefunden"
+        "NoResults": "Ups... nichts gefunden",
+        "GoToToday": "Gehe zu heute"
     },
     "AboutPage": {
         "Title": "Über das Projekt",

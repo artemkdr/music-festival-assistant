@@ -149,7 +149,8 @@
         "GetRecommendations": "Get Recommendations",
         "AddToGoogleCalendar": "Add to Google Calendar",
         "DownloadICS": "Download event file",
-        "NoResults": "Oups... nothing found"        
+        "NoResults": "Oups... nothing found" ,
+        "GoToToday": "Go to today"
     },
     "AboutPage": {
         "Title": "About the project",

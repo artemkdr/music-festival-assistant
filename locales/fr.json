@@ -149,7 +149,8 @@
         "GetRecommendations": "Obtenir des recommandations",
         "AddToGoogleCalendar": "Ajouter à Google Agenda",
         "DownloadICS": "Télécharger le fichier d'événement",
-        "NoResults": "Oups... rien trouvé"
+        "NoResults": "Oups... rien trouvé",
+        "GoToToday": "Aller à aujourd'hui"
     },
     "AboutPage": {
         "Title": "À propos du projet",
