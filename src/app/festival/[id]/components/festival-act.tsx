@@ -5,7 +5,7 @@
 'use client';
 
 import { ArtistInfo } from '@/app/festival/[id]/components/artist-info';
-import { ButtonWithIcon } from '@/components/button-with-icon';
+import { ButtonWithIcon } from '@/app/lib/components/button-with-icon';
 import { Artist, Festival } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';
 import { extractStartTime, isValidDate } from '@/lib/utils/date-util';

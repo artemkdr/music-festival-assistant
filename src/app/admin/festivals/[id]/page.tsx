@@ -5,9 +5,9 @@
 'use client';
 
 import { festivalsApi } from '@/app/lib/api';
-import { AdminLayout } from '@/components/admin/admin-layout';
-import { ArtistLinking } from '@/components/admin/artist-linking';
-import { ProtectedRoute } from '@/components/protected-route';
+import { AdminLayout } from '@/app/admin/admin-layout';
+import { ArtistLinking } from '@/app/admin/festivals/components/artist-linking';
+import { ProtectedRoute } from '@/app/lib/components/protected-route';
 import { Festival } from '@/lib/schemas';
 import { DATE_TBA, getFestivalArtists, groupFestivalActsByDate } from '@/lib/utils/festival-util';
 import Link from 'next/link';

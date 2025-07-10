@@ -4,8 +4,8 @@
  */
 'use client';
 
-import { AdminLayout } from '@/components/admin/admin-layout';
-import { ProtectedRoute } from '@/components/protected-route';
+import { AdminLayout } from '@/app/admin/admin-layout';
+import { ProtectedRoute } from '@/app/lib/components/protected-route';
 import { artistsApi, festivalsApi, spotifyApi, SpotifySearchResult } from '@/app/lib/api';
 import Image from 'next/image';
 import Link from 'next/link';

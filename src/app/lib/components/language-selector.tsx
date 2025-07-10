@@ -1,4 +1,5 @@
 'use client';
+import { localeApi } from '@/app/lib/api/locale-api';
 import { locales } from '@/i18n/config';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -11,11 +12,11 @@ export function LanguageSelector({ currentLocale }: { currentLocale: string }) {
         const locale = e.target.value;
         setSelected(locale);
         // Call API route to set cookie
-        await fetch('/api/set-locale', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ locale }),
-        });
+        try {
+            await localeApi.setLocale(locale);
+        } catch {
+            // do nothing
+        }
         // Reload page to apply new locale
         router.refresh();
     }

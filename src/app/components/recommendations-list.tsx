@@ -1,6 +1,6 @@
 'use client';
 
-import { ButtonWithIcon } from '@/components/button-with-icon';
+import { ButtonWithIcon } from '@/app/lib/components/button-with-icon';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { Festival, Recommendation } from '@/lib/schemas';
 import { addToGoogleCalendar, downloadICSCalendar } from '@/lib/utils/agenda-util';

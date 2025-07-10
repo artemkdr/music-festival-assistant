@@ -1,5 +1,5 @@
-import { Logo } from '@/components/logo';
-import { SupportMeButton } from '@/components/support-me-button';
+import { Logo } from '@/app/components/logos/logo';
+import { SupportMeButton } from '@/app/components/support-me-button';
 import { AuthProvider } from '@/lib/contexts/auth-context';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata, Viewport } from 'next';
@@ -8,7 +8,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import { Suspense, type ReactNode } from 'react';
-import { LanguageSelector } from '@/components/language-selector';
+import { LanguageSelector } from '@/app/lib/components/language-selector';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });

@@ -1,8 +1,8 @@
 'use client';
 
 import { discoverApi, FestivalInfo } from '@/app/lib/api/discover-api';
-import { GenresGrid } from '@/components/genres-grid';
-import { SupportMeButton } from '@/components/support-me-button';
+import { GenresGrid } from '@/app/components/genres-grid';
+import { SupportMeButton } from '@/app/components/support-me-button';
 import { UserPreferences } from '@/lib/schemas';
 import { formatDateString } from '@/lib/utils/date-util';
 import { useLocale, useTranslations } from 'next-intl';

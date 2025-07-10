@@ -1,4 +1,4 @@
-import { TwintLogo } from '@/components/twint-logo';
+import { TwintLogo } from '@/app/components/logos/twint-logo';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 

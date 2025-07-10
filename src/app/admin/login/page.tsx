@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { Logo } from '@/components/logo';
+import { Logo } from '@/app/components/logos/logo';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { useEffect, useState } from 'react';
 
