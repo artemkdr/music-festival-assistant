@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { festivalsApi } from '@/app/lib/api';
+import { festivalsApi } from '@/app/lib/api-client/festivals-api';
 import { Festival } from '@/lib/schemas';
 import { getFestivalDates } from '@/lib/utils/festival-util';
 import Link from 'next/link';

@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { festivalsApi } from '@/app/lib/api';
+import { festivalsApi } from '@/app/lib/api-client/festivals-api';
 import { useRouter } from 'next/navigation';
 import { ChangeEvent, useState } from 'react';
 

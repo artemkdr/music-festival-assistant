@@ -1,8 +1,8 @@
 'use client';
 
-import { discoverApi, FestivalInfo } from '@/app/lib/api/discover-api';
-import { GenresGrid } from '@/app/components/genres-grid';
 import { SupportMeButton } from '@/app/components/support-me-button';
+import { discoverApi, FestivalInfo } from '@/app/discover/api-client/discover-api';
+import { GenresGrid } from '@/app/discover/components/genres-grid';
 import { UserPreferences } from '@/lib/schemas';
 import { formatDateString } from '@/lib/utils/date-util';
 import { useLocale, useTranslations } from 'next-intl';
@@ -10,8 +10,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
-import { MdExpandLess, MdFestival } from 'react-icons/md';
 import { BsMusicNoteList } from 'react-icons/bs';
+import { MdExpandLess, MdFestival } from 'react-icons/md';
 
 interface FestivalDiscoveryFormProps {
     onSubmit: (festivalId: string, userPreferences: UserPreferences) => Promise<void>;

@@ -1,9 +1,8 @@
 import { Artist, FestivalAct } from '@/lib/schemas';
-import { ApiClient, apiClient } from './api-client';
-import type { ApiResponse } from './types';
+import { apiClient, type ApiResponse } from './client';
 
 class ArtistsApi {
-    constructor(private client: ApiClient) {}
+    constructor(private client = apiClient) {}
 
     async getArtists(): Promise<ApiResponse<Artist[]>> {
         return this.client.request<Artist[]>('/admin/artists');
@@ -64,4 +63,4 @@ class ArtistsApi {
     }
 }
 
-export const artistsApi = new ArtistsApi(apiClient);
+export const artistsApi = new ArtistsApi();

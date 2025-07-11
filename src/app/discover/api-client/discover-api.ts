@@ -1,6 +1,6 @@
-import { Festival, Recommendation, UserPreferences } from '@/lib/schemas';
-import { apiClient } from './api-client';
-import { ApiResponse } from '@/app/lib/api/types';
+import { apiClient } from '@/app/lib/api-client/client';
+import { type ApiResponse } from '@/app/lib/api-client/client';
+import type { Festival, Recommendation, UserPreferences } from '@/lib/schemas';
 
 export interface FestivalInfo {
     id: string;
@@ -69,18 +69,6 @@ class DiscoverApi {
                 count: number;
             }[]
         >(`/discover/festivals/${festivalId}/genres${date ? `?date=${date}` : ''}`, {
-            cache: 'force-cache', // IMPORTANT: this cache is a client only cache, not a server cache
-            next: {
-                revalidate: 3 * 24 * 60, // Revalidate every 3 days
-            },
-        });
-    }
-
-    /**
-     * Public: Get festival by ID (public endpoint, no admin required)
-     */
-    async getPublicFestival(id: string): Promise<ApiResponse<Festival>> {
-        return this.client.request<Festival>(`/discover/festivals/${id}`, {
             cache: 'force-cache', // IMPORTANT: this cache is a client only cache, not a server cache
             next: {
                 revalidate: 3 * 24 * 60, // Revalidate every 3 days

@@ -5,7 +5,7 @@
 'use client';
 
 import { useAuth } from '@/lib/contexts/auth-context';
-import { statsApi } from '@/app/lib/api/stats-api';
+import { statsApi } from '@/app/admin/api-client/stats-api';
 import { useEffect, useState } from 'react';
 import { FaSpotify, FaEdit } from 'react-icons/fa';
 import { MdFestival } from 'react-icons/md';

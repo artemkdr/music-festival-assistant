@@ -1,8 +1,8 @@
-import { apiClient, ApiClient } from '@/app/lib/api/api-client';
-import { ApiResponse } from '@/app/lib/api/types';
+import { apiClient } from '@/app/lib/api-client/client';
+import { type ApiResponse } from '@/app/lib/api-client/client';
 
 class LocaleApi {
-    constructor(private client: ApiClient) {}
+    constructor(private client = apiClient) {}
 
     async setLocale(locale: string): Promise<ApiResponse<string>> {
         return this.client.request<string>('/set-locale', {
@@ -12,4 +12,4 @@ class LocaleApi {
     }
 }
 
-export const localeApi = new LocaleApi(apiClient);
+export const localeApi = new LocaleApi();

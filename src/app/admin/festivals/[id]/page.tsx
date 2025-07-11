@@ -5,7 +5,7 @@
 'use client';
 
 import { ArtistLinking } from '@/app/admin/festivals/components/artist-linking';
-import { festivalsApi } from '@/app/lib/api';
+import { festivalsApi } from '@/app/lib/api-client/festivals-api';
 import { Festival } from '@/lib/schemas';
 import { DATE_TBA, getFestivalArtists, groupFestivalActsByDate } from '@/lib/utils/festival-util';
 import Link from 'next/link';

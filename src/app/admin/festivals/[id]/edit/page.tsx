@@ -4,8 +4,11 @@
  */
 'use client';
 
-import { artistsApi, festivalsApi, spotifyApi, SpotifySearchResult } from '@/app/lib/api';
-import { Artist, Festival, FestivalAct } from '@/lib/schemas';
+import { artistsApi } from '@/app/lib/api-client/artists-api';
+import { festivalsApi } from '@/app/lib/api-client/festivals-api';
+import { spotifyApi } from '@/app/lib/api-client/spotify-api';
+import type { Artist, Festival, FestivalAct } from '@/lib/schemas';
+import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -56,7 +59,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
     });
 
     // --- Spotify Search State and Logic ---
-    const [spotifySearchResults, setSpotifySearchResults] = useState<SpotifySearchResult[]>([]);
+    const [spotifySearchResults, setSpotifySearchResults] = useState<SpotifyArtist[]>([]);
     const [isSpotifySearching, setIsSpotifySearching] = useState(false);
     const [spotifySearchError, setSpotifySearchError] = useState<string | null>(null);
 
@@ -255,7 +258,7 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
         }
     };
 
-    const handleSelectSpotifyArtist = (artist: SpotifySearchResult) => {
+    const handleSelectSpotifyArtist = (artist: SpotifyArtist) => {
         setActFormData(prev => ({
             ...prev,
             artistName: artist.name,
@@ -417,9 +420,9 @@ export default function FestivalEditPage({ params }: FestivalEditPageProps) {
                                             <div className="mt-2 bg-white border rounded shadow p-2 max-h-48 overflow-y-auto">
                                                 <div className="text-xs text-muted-foreground mb-1">Select from Spotify results:</div>
                                                 <ul>
-                                                    {spotifySearchResults.map((artist: SpotifySearchResult) => (
+                                                    {spotifySearchResults.map(artist => (
                                                         <li key={artist.id} className="py-1 flex items-center border-b last:border-b-0">
-                                                            {artist.images && artist.images[0] && <Image src={artist.images[0].url} alt={artist.name} className="w-8 h-8 rounded mr-2" />}
+                                                            {artist.imageUrl && <Image src={artist.imageUrl} alt={artist.name} className="w-8 h-8 rounded mr-2" />}
                                                             <button type="button" className="text-left flex-1 hover:underline" onClick={() => handleSelectSpotifyArtist(artist)}>
                                                                 <span className="font-medium">{artist.name}</span>
                                                                 {artist.genres && artist.genres.length > 0 && <span className="ml-2 text-xs text-muted-foreground">({artist.genres.join(', ')})</span>}

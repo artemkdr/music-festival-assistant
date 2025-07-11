@@ -4,9 +4,11 @@
  */
 'use client';
 
-import { artistsApi, festivalsApi, spotifyApi } from '@/app/lib/api';
-import { Artist } from '@/lib/schemas';
-import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
+import { artistsApi } from '@/app/lib/api-client/artists-api';
+import { festivalsApi } from '@/app/lib/api-client/festivals-api';
+import { spotifyApi } from '@/app/lib/api-client/spotify-api';
+import { type Artist } from '@/lib/schemas';
+import { type SpotifyArtist } from '@/lib/services/spotify/spotify-service';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';

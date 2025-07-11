@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { artistsApi } from '@/app/lib/api';
+import { artistsApi } from '@/app/lib/api-client/artists-api';
 import { Artist, FestivalAct } from '@/lib/schemas';
 import Link from 'next/link';
 import React, { Usable, useEffect, useState } from 'react';

@@ -1,9 +1,9 @@
+import { type ApiResponse } from '@/app/lib/api-client/client';
+import { apiClient } from './client';
 import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
-import { apiClient, ApiClient } from './api-client';
-import type { ApiResponse } from './types';
 
 export class SpotifyApi {
-    constructor(private client: ApiClient) {}
+    constructor(private client = apiClient) {}
 
     /**
      * Admin: Search artists on Spotify
@@ -13,4 +13,4 @@ export class SpotifyApi {
     }
 }
 
-export const spotifyApi = new SpotifyApi(apiClient);
+export const spotifyApi = new SpotifyApi();

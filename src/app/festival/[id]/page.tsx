@@ -7,8 +7,8 @@
 import { FestivalDay } from '@/app/festival/[id]/components/festival-day';
 import { FestivalFilter } from '@/app/festival/[id]/components/festival-filter';
 import { FestivalHero } from '@/app/festival/[id]/components/festival-hero';
-import { artistsApi } from '@/app/lib/api';
-import { discoverApi } from '@/app/lib/api/discover-api';
+import { artistsApi } from '@/app/lib/api-client/artists-api';
+import { festivalsApi } from '@/app/lib/api-client/festivals-api';
 import { Artist, Festival } from '@/lib/schemas';
 import { groupFestivalActsByDate } from '@/lib/utils/festival-util';
 import { normalizeForSearch } from '@/lib/utils/normalize-name';
@@ -94,7 +94,7 @@ export default function FestivalPage({ params }: FestivalPageProps): React.React
                 const resolvedParams = await params;
 
                 // Fetch festival details from public API
-                const response = await discoverApi.getPublicFestival(resolvedParams.id);
+                const response = await festivalsApi.getFestivalPublic(resolvedParams.id);
                 if (response.data) {
                     setFestival(response.data as Festival);
                 } else {

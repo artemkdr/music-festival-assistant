@@ -1,8 +1,10 @@
-import type { ApiResponse, LoginRequest, RegisterRequest, AuthResponse } from './types';
-import { apiClient, ApiClient } from './api-client';
+import type { LoginRequest, RegisterRequest } from '@/lib/services/auth';
+import { apiClient } from './client';
+import { type AuthResponse } from '@/app/lib/api-client/types/auth-types';
+import { type ApiResponse } from '@/app/lib/api-client/client';
 
 class AuthApi {
-    constructor(private client: ApiClient) {}
+    constructor(private client = apiClient) {}
 
     async getToken(): Promise<string | null> {
         return this.client.getToken();
@@ -50,4 +52,4 @@ class AuthApi {
     }
 }
 
-export const authApi = new AuthApi(apiClient);
+export const authApi = new AuthApi();

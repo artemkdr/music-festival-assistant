@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { artistsApi } from '@/app/lib/api';
+import { artistsApi } from '@/app/lib/api-client/artists-api';
 import { Artist } from '@/lib/schemas';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';

@@ -1,5 +1,5 @@
 'use client';
-import { localeApi } from '@/app/lib/api/locale-api';
+import { localeApi } from '@/app/lib/api-client/locale-api';
 import { locales } from '@/i18n/config';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

@@ -1,12 +1,12 @@
 'use client';
 
-import { ApiResponse } from '@/app/lib/api';
-import { discoverApi, FestivalDiscoveryResponse } from '@/app/lib/api/discover-api';
-import { FestivalDiscoveryForm } from '@/app/components/festival-discovery-form';
 import { Logo } from '@/app/components/logos/logo';
-import { RecommendationsList } from '@/app/components/recommendations-list';
-import { RecommendationsLoadingSpinner } from '@/app/components/recommendations-loading-spinner';
-import { UserPreferences } from '@/lib/schemas';
+import { discoverApi, type FestivalDiscoveryResponse } from '@/app/discover/api-client/discover-api';
+import { FestivalDiscoveryForm } from '@/app/discover/components/festival-discovery-form';
+import { RecommendationsList } from '@/app/discover/components/recommendations-list';
+import { RecommendationsLoadingSpinner } from '@/app/discover/components/recommendations-loading-spinner';
+import { type ApiResponse } from '@/app/lib/api-client/client';
+import { type UserPreferences } from '@/lib/schemas';
 import { toError } from '@/lib/utils/error-handler';
 import { useTranslations } from 'next-intl';
 import type { ReactElement } from 'react';

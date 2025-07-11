@@ -1,10 +1,10 @@
-import { Festival } from '@/lib/schemas';
-import { SpotifyArtist } from '@/lib/services/spotify/spotify-service';
-import { apiClient, ApiClient } from './api-client';
-import type { ApiResponse } from './types';
+import { type Festival } from '@/lib/schemas';
+import { type SpotifyArtist } from '@/lib/services/spotify/spotify-service';
+import { apiClient } from './client';
+import { type ApiResponse } from '@/app/lib/api-client/client';
 
 class FestivalsApi {
-    constructor(private client: ApiClient) {}
+    constructor(private client = apiClient) {}
 
     async getFestivals(): Promise<ApiResponse<Festival[]>> {
         return this.client.request('/admin/festivals', {
@@ -84,6 +84,18 @@ class FestivalsApi {
             body: JSON.stringify(data),
         });
     }
+
+    /**
+     * Public: Get festival by ID (public endpoint, no admin required)
+     */
+    async getFestivalPublic(id: string): Promise<ApiResponse<Festival>> {
+        return this.client.request<Festival>(`/discover/festivals/${id}`, {
+            cache: 'force-cache', // IMPORTANT: this cache is a client only cache, not a server cache
+            next: {
+                revalidate: 3 * 24 * 60, // Revalidate every 3 days
+            },
+        });
+    }
 }
 
-export const festivalsApi = new FestivalsApi(apiClient);
+export const festivalsApi = new FestivalsApi();
