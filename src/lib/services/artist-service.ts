@@ -1,7 +1,7 @@
 import { IArtistRepository } from '@/lib/repositories/interfaces';
 import { Artist } from '@/lib/schemas';
 import { IArtistCrawlerService } from '@/lib/services/crawler/interfaces';
-import { CreateArtistData, IArtistService } from '@/lib/services/interfaces';
+import { CreateArtistData, IArtistService, ServiceReadOptions } from '@/lib/services/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { generateArtistId } from '@/lib/utils/id-generator';
 
@@ -12,24 +12,24 @@ export class ArtistService implements IArtistService {
         private readonly logger: ILogger
     ) {}
 
-    async getArtistById(id: string): Promise<Artist | null> {
+    async getArtistById(id: string, options?: ServiceReadOptions): Promise<Artist | null> {
         this.logger.info(`Fetching artist with ID: ${id}`);
-        return this.repository.getArtistById(id);
+        return this.repository.getArtistById(id, options);
     }
 
-    async getArtistsByIds(ids: string[]): Promise<Artist[]> {
+    async getArtistsByIds(ids: string[], options?: ServiceReadOptions): Promise<Artist[]> {
         this.logger.info(`Fetching artists by IDs: ${ids.join(', ')}`);
-        return this.repository.getArtistsByIds(ids);
+        return this.repository.getArtistsByIds(ids, options);
     }
 
-    async searchArtistByName(name: string): Promise<Artist | null> {
+    async searchArtistByName(name: string, options?: ServiceReadOptions): Promise<Artist | null> {
         this.logger.info(`Searching artists by name: ${name}`);
-        return this.repository.searchArtistByName(name);
+        return this.repository.searchArtistByName(name, options);
     }
 
-    async searchArtistsByName(name: string): Promise<Artist[]> {
+    async searchArtistsByName(name: string, options?: ServiceReadOptions): Promise<Artist[]> {
         this.logger.info(`Searching artists by name: ${name}`);
-        return this.repository.searchArtistsByName(name);
+        return this.repository.searchArtistsByName(name, options);
     }
 
     async saveArtist(artist: Artist): Promise<void> {
@@ -110,8 +110,8 @@ export class ArtistService implements IArtistService {
         await this.repository.deleteArtist(id);
     }
 
-    async getAllArtists(): Promise<Artist[]> {
+    async getAllArtists(options?: ServiceReadOptions): Promise<Artist[]> {
         this.logger.info(`Fetching all artists`);
-        return this.repository.getAllArtists();
+        return this.repository.getAllArtists(options);
     }
 }

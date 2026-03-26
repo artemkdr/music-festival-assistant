@@ -8,19 +8,13 @@ class FestivalsApi {
 
     async getFestivals(): Promise<ApiResponse<Festival[]>> {
         return this.client.request('/admin/festivals', {
-            cache: 'force-cache', // Force cache for this request
-            next: {
-                tags: ['festivals'], // Tag for cache invalidation
-            },
+            cache: 'no-store',
         });
     }
 
     async getFestival(id: string): Promise<ApiResponse<Festival>> {
         return this.client.request(`/admin/festivals/${id}`, {
-            cache: 'force-cache', // Force cache for this request
-            next: {
-                tags: ['festivals'], // Tag for cache invalidation
-            },
+            cache: 'no-store',
         });
     }
 

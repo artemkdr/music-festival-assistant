@@ -9,6 +9,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { toError } from '@/lib/utils/error-handler';
 
+const adminReadOptions = { useCache: false } as const;
+
 const CrawlArtistsRequestSchema = z.object({
     festivalId: z.string().optional(),
     artistNames: z.array(z.string()).optional(),
@@ -29,7 +31,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         let artistNames: string[] = [];
         let festival: Festival | null = null;
         if (validated.festivalId) {
-            festival = await festivalService.getFestivalById(validated.festivalId);
+            festival = await festivalService.getFestivalById(validated.festivalId, adminReadOptions);
             if (!festival) {
                 return NextResponse.json(
                     {
@@ -56,7 +58,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         const results: { name: string; status: 'crawled' | 'exists' | 'error'; error?: string }[] = [];
         for (const name of artistNames) {
             try {
-                const existing = await artistService.searchArtistByName(name);
+                const existing = await artistService.searchArtistByName(name, adminReadOptions);
                 if (existing) {
                     const artistId = existing.id; // Use the first existing artist's ID
                     results.push({ name, status: 'exists' });
@@ -74,10 +76,6 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                             : undefined,
                     });
                     await artistService.saveArtist(populatedArtist);
-
-                    // Invalidate cache for this artist
-                    // do not await this call, it will be handled by the cache service in the background
-                    container.getCacheService().invalidatePattern(`artist:${artistId}`);
 
                     continue;
                 } else {

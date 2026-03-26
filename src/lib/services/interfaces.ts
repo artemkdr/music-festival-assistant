@@ -4,6 +4,10 @@
  */
 import type { Artist, CalendarEvent, Festival, Recommendation, UserPreferences } from '@/lib/schemas';
 
+export interface ServiceReadOptions {
+    useCache?: boolean;
+}
+
 /**
  * Data structure for creating a new artist
  */
@@ -22,10 +26,10 @@ export interface CreateArtistData {
  * Provides methods for managing artists, including CRUD operations and AI-enhanced data enrichment
  */
 export interface IArtistService {
-    getArtistById(id: string): Promise<Artist | null>;
-    getArtistsByIds(ids: string[]): Promise<Artist[]>;
-    searchArtistByName(name: string): Promise<Artist | null>;
-    searchArtistsByName(name: string): Promise<Artist[]>;
+    getArtistById(id: string, options?: ServiceReadOptions): Promise<Artist | null>;
+    getArtistsByIds(ids: string[], options?: ServiceReadOptions): Promise<Artist[]>;
+    searchArtistByName(name: string, options?: ServiceReadOptions): Promise<Artist | null>;
+    searchArtistsByName(name: string, options?: ServiceReadOptions): Promise<Artist[]>;
     saveArtist(artist: Artist): Promise<void>;
     createArtist(artistData: CreateArtistData): Promise<Artist>;
     crawlArtistDetails(
@@ -37,7 +41,7 @@ export interface IArtistService {
         }
     ): Promise<Artist>;
     deleteArtist(id: string): Promise<void>;
-    getAllArtists(): Promise<Artist[]>;
+    getAllArtists(options?: ServiceReadOptions): Promise<Artist[]>;
 }
 
 /**
@@ -63,11 +67,11 @@ export interface GrabFestivalData {
 export interface IFestivalService {
     grabFestivalData(data: GrabFestivalData): Promise<{ cacheId: string; festival: Festival }>;
     getCachedData(cacheId: string): Promise<Festival | null>;
-    getFestivalById(id: string): Promise<Festival | null>;
+    getFestivalById(id: string, options?: ServiceReadOptions): Promise<Festival | null>;
     createFestival(festival: Festival): Promise<string>;
     saveFestival(festival: Festival): Promise<void>;
     deleteFestival(id: string): Promise<void>;
-    getAllFestivals(): Promise<Festival[]>;
+    getAllFestivals(options?: ServiceReadOptions): Promise<Festival[]>;
     updateFestivalAct(festivalId: string, actId: string, updates: { artistId?: string }): Promise<void>;
 }
 

@@ -1,4 +1,4 @@
-import { IArtistRepository } from '@/lib/repositories/interfaces';
+import { IArtistRepository, RepositoryReadOptions } from '@/lib/repositories/interfaces';
 import { Artist } from '@/lib/schemas';
 import type { ILogger } from '@/lib/types/logger';
 import { mockArtists } from '@/tests/mock-data';
@@ -40,7 +40,7 @@ export class MockArtistRepository implements IArtistRepository {
         return matchingArtists;
     }
 
-    async searchArtistsByName(name: string, exact: boolean = true): Promise<Artist[]> {
+    async searchArtistsByName(name: string, _options?: RepositoryReadOptions, exact: boolean = true): Promise<Artist[]> {
         this.logger.debug('Searching artists by name in local storage', { name });
         const searchTerm = name.toLowerCase();
         const matchingArtists = this.artists.filter(artist => (exact ? artist.name.toLowerCase() === searchTerm : artist.name.toLowerCase().includes(searchTerm)));
@@ -69,8 +69,8 @@ export class MockArtistRepository implements IArtistRepository {
         return matchingArtists;
     }
 
-    async searchArtistByName(name: string): Promise<Artist | null> {
-        const artist = await this.searchArtistsByName(name, true);
+    async searchArtistByName(name: string, options?: RepositoryReadOptions): Promise<Artist | null> {
+        const artist = await this.searchArtistsByName(name, options, true);
         if (artist.length > 0 && artist[0]) {
             return artist[0];
         }

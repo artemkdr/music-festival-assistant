@@ -7,6 +7,8 @@ import { requireAdmin } from '@/lib/utils/auth-utils';
 import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 
+const adminReadOptions = { useCache: false } as const;
+
 export const GET = requireAdmin(async (request: NextRequest): Promise<Response> => {
     const container = DIContainer.getInstance();
     const artistService = container.getArtistService();
@@ -24,7 +26,7 @@ export const GET = requireAdmin(async (request: NextRequest): Promise<Response> 
         }
 
         logger.info(`Searching database artists with query: ${query}`);
-        const artists = await artistService.searchArtistsByName(query);
+        const artists = await artistService.searchArtistsByName(query, adminReadOptions);
 
         // Limit to 10 results for UI performance
         const limitedResults = artists.slice(0, 10);

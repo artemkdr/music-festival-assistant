@@ -9,6 +9,8 @@ import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+const adminReadOptions = { useCache: false } as const;
+
 const LinkActRequestSchema = z.object({
     actId: z.string().min(1),
     artistName: z.string(),
@@ -52,7 +54,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         const validated = LinkActRequestSchema.parse(body);
 
         // Get the festival
-        const festival = (await festivalService.getFestivalById(id)) ?? (await festivalService.getCachedData(id));
+        const festival = (await festivalService.getFestivalById(id, adminReadOptions)) ?? (await festivalService.getCachedData(id));
         if (!festival) {
             return NextResponse.json(
                 {
@@ -77,7 +79,7 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
 
         if (validated.artistId) {
             // Verify the artist exists
-            const existingArtist = await artistService.getArtistById(validated.artistId);
+            const existingArtist = await artistService.getArtistById(validated.artistId, adminReadOptions);
             if (!existingArtist) {
                 return NextResponse.json(
                     {
@@ -121,10 +123,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User, contex
         await festivalService.updateFestivalAct(id, validated.actId, {
             artistId: artistId,
         });
-
-        // invalidate cache for this festival
-        // do not await this call, it will be handled by the cache service in the background
-        DIContainer.getInstance().getCacheService().invalidatePattern(`festivals`);
 
         return NextResponse.json({
             status: 'success',

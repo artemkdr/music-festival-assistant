@@ -1,7 +1,14 @@
 import { prisma } from '@/lib/repositories/providers/prisma/client';
+import { RepositoryReadOptions } from '@/lib/repositories/interfaces';
 import { ICacheService } from '@/lib/services/cache/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { PrismaClient } from '@prisma/client';
+
+interface ExecuteOperationOptions {
+    cacheKey?: string | undefined;
+    cacheTtlSeconds?: number | undefined;
+    readOptions?: RepositoryReadOptions | undefined;
+}
 
 /**
  * Base Prisma repository class
@@ -26,13 +33,14 @@ export abstract class BasePrismaRepository {
      * Execute a Prisma operation with error handling, logging, and caching
      * @param operation Function that returns a Promise
      * @param operationName Description of the operation for logging
-     * @param cacheKey Optional cache key for caching results
-     * @param cacheTtl Cache TTL in milliseconds (optional, uses default if not provided)
+     * @param options Cache and read behavior options
      */
-    protected async executeOperation<T>(operation: () => Promise<T>, operationName: string, cacheKey?: string, cacheTtl?: number): Promise<T> {
+    protected async executeOperation<T>(operation: () => Promise<T>, operationName: string, options: ExecuteOperationOptions = {}): Promise<T> {
+        const useCache = options.readOptions?.useCache !== false;
+
         // Try to get from cache first
-        if (cacheKey) {
-            const cachedResult = await this.getFromCache<T>(cacheKey);
+        if (useCache && options.cacheKey) {
+            const cachedResult = await this.getFromCache<T>(options.cacheKey);
             if (cachedResult) {
                 this.logger.debug(`Using cached result for ${this.context} operation: ${operationName}`);
                 return cachedResult;
@@ -41,18 +49,20 @@ export abstract class BasePrismaRepository {
 
         try {
             this.logger.debug(`Executing ${this.context} operation: ${operationName}`, {
-                cached: !!cacheKey,
+                cached: useCache && !!options.cacheKey,
+                useCache,
             });
 
             const result = await operation();
 
             this.logger.info(`${this.context} operation completed: ${operationName}`, {
                 cached: false,
+                useCache,
             });
 
             // Cache the result if cache key is provided
-            if (cacheKey) {
-                this.setCache(cacheKey, result, cacheTtl);
+            if (useCache && options.cacheKey) {
+                await this.setCache(options.cacheKey, result, options.cacheTtlSeconds);
             }
 
             return result;
@@ -123,14 +133,14 @@ export abstract class BasePrismaRepository {
      * Store data in cache
      * @param cacheKey Cache key
      * @param data Data to cache
-     * @param ttl Time to live in milliseconds (optional, uses default if not provided)
+     * @param ttlSeconds Time to live in seconds (optional, uses default if not provided)
      */
-    private setCache<T>(cacheKey: string, data: T, ttl: number = 7 * 24 * 60): void {
+    private async setCache<T>(cacheKey: string, data: T, ttlSeconds: number = 7 * 24 * 60 * 60): Promise<void> {
         if (!this.cacheService) {
             return; // No cache service available
         }
-        this.cacheService.set(cacheKey, data, ttl);
-        this.logger.debug(`Cache set for ${this.context}`, { cacheKey, ttl: ttl });
+        await this.cacheService.set(cacheKey, data, ttlSeconds);
+        this.logger.debug(`Cache set for ${this.context}`, { cacheKey, ttlSeconds: ttlSeconds });
     }
 
     /**

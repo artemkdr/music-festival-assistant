@@ -2,12 +2,12 @@ import { IFestivalRepository } from '@/lib/repositories/interfaces';
 import { Festival } from '@/lib/schemas';
 import { ICacheService } from '@/lib/services/cache/interfaces';
 import { IFestivalCrawlerService } from '@/lib/services/crawler/interfaces';
-import { GrabFestivalData, IFestivalService } from '@/lib/services/interfaces';
+import { GrabFestivalData, IFestivalService, ServiceReadOptions } from '@/lib/services/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { generateFestivalActId, generateFestivalId } from '@/lib/utils/id-generator';
 
 export class FestivalService implements IFestivalService {
-    private readonly CACHE_TTL_HOURS = 24; // Cache expires after 24 hours
+    private readonly TEMPORARY_CACHE_TTL_SECONDS = 10 * 60;
 
     constructor(
         private festivalRepository: IFestivalRepository,
@@ -16,14 +16,14 @@ export class FestivalService implements IFestivalService {
         private logger: ILogger
     ) {}
 
-    async getFestivalById(id: string): Promise<Festival | null> {
+    async getFestivalById(id: string, options?: ServiceReadOptions): Promise<Festival | null> {
         this.logger.info(`Fetching festival with ID: ${id}`);
-        return this.festivalRepository.getFestivalById(id);
+        return this.festivalRepository.getFestivalById(id, options);
     }
 
-    async getAllFestivals(): Promise<Festival[]> {
+    async getAllFestivals(options?: ServiceReadOptions): Promise<Festival[]> {
         this.logger.info(`Fetching all festivals`);
-        return this.festivalRepository.getAllFestivals();
+        return this.festivalRepository.getAllFestivals(options);
     }
 
     async createFestival(data: Festival): Promise<string> {
@@ -60,7 +60,7 @@ export class FestivalService implements IFestivalService {
         // Generate cache ID and store in cache
         const cacheId = this.generateCacheId();
 
-        await this.cacheService.set(cacheId, newFestival, this.CACHE_TTL_HOURS * 60 * 60); // Store in cache for 24 hours
+        await this.cacheService.set(cacheId, newFestival, this.TEMPORARY_CACHE_TTL_SECONDS);
 
         this.logger.info(`Festival data parsed and cached with ID: ${cacheId}`, {
             festivalName: newFestival.name,

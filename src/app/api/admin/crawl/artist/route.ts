@@ -7,6 +7,8 @@ import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+const adminReadOptions = { useCache: false } as const;
+
 /**
  * Route for (re) crawling an existing artist by ID.
  * If you need to crawl a new artist, use the POST /api/admin/crawl/artists endpoint instead.
@@ -31,7 +33,7 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
         let artistName = validated.name;
 
         if (validated.id) {
-            const existing = await artistService.getArtistById(validated.id);
+            const existing = await artistService.getArtistById(validated.id, adminReadOptions);
             if (!existing) {
                 return NextResponse.json(
                     {

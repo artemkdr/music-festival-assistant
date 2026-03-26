@@ -1,4 +1,4 @@
-import { IArtistRepository } from '@/lib/repositories/interfaces';
+import { IArtistRepository, RepositoryReadOptions } from '@/lib/repositories/interfaces';
 import { BaseJsonRepository } from '@/lib/repositories/providers/local/base-json-repository';
 import { Artist } from '@/lib/schemas';
 import type { ILogger } from '@/lib/types/logger';
@@ -45,7 +45,7 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         return matchingArtists;
     }
 
-    async searchArtistsByName(name: string, exact: boolean = true): Promise<Artist[]> {
+    async searchArtistsByName(name: string, _options?: RepositoryReadOptions, exact: boolean = true): Promise<Artist[]> {
         this.logger.debug('Searching artists by name in local storage', { name });
         const searchTerm = name.toLowerCase();
         const artists = await this.readJsonFile<Artist>(this.filename);
@@ -75,9 +75,9 @@ export class LocalJsonArtistRepository extends BaseJsonRepository implements IAr
         return matchingArtists;
     }
 
-    async searchArtistByName(name: string): Promise<Artist | null> {
+    async searchArtistByName(name: string, options?: RepositoryReadOptions): Promise<Artist | null> {
         this.logger.debug('Searching artist by name in local storage', { name });
-        const artists = await this.searchArtistsByName(name, true);
+        const artists = await this.searchArtistsByName(name, options, true);
         if (artists.length > 0 && artists[0]) {
             return artists[0];
         }

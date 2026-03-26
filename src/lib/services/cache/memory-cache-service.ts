@@ -41,8 +41,10 @@ export class MemoryCacheService implements ICacheService {
     }
 
     async invalidatePattern(pattern: string): Promise<void> {
-        const keysToDelete = Array.from(this.cache.keys()).filter(key => key.includes(pattern));
-        this.logger.info(`Invalidating cache keys matching pattern "${pattern}": ${keysToDelete.join(', ')}`);
+        const normalizedPattern = this.normalizePattern(pattern);
+        const patternRegex = new RegExp(`^${normalizedPattern.split('*').map(this.escapeRegex).join('.*')}$`);
+        const keysToDelete = Array.from(this.cache.keys()).filter(key => patternRegex.test(key));
+        this.logger.info(`Invalidating cache keys matching pattern "${normalizedPattern}": ${keysToDelete.join(', ')}`);
         for (const key of keysToDelete) {
             this.cache.delete(key);
         }
@@ -50,5 +52,13 @@ export class MemoryCacheService implements ICacheService {
 
     async clear(): Promise<void> {
         this.cache.clear();
+    }
+
+    private normalizePattern(pattern: string): string {
+        return pattern.includes('*') ? pattern : `*${pattern}*`;
+    }
+
+    private escapeRegex(value: string): string {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 }

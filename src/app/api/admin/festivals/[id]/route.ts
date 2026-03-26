@@ -12,6 +12,8 @@ import { generateFestivalId } from '@/lib/utils/id-generator';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
+const adminReadOptions = { useCache: false } as const;
+
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
 }
@@ -35,7 +37,7 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         logger.info('Admin festival detail request received', { festivalId: id });
 
         // search festival in the database or use cached data (parsed but not saved)
-        const festival = (await festivalService.getFestivalById(id)) ?? (await festivalService.getCachedData(id));
+        const festival = (await festivalService.getFestivalById(id, adminReadOptions)) ?? (await festivalService.getCachedData(id));
 
         if (!festival) {
             return NextResponse.json(
@@ -130,7 +132,7 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         const validatedData = UpdateFestivalSchema.parse(body);
 
         // Check if festival exists
-        const existingFestival = await festivalService.getFestivalById(id);
+        const existingFestival = await festivalService.getFestivalById(id, adminReadOptions);
 
         const updatedFestival: Festival = {
             id:
@@ -148,10 +150,6 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         };
 
         await festivalService.saveFestival(updatedFestival);
-
-        // invalidate cache
-        // do not await this call, it will be handled by the cache service in the background
-        DIContainer.getInstance().getCacheService().invalidatePattern(`festivals`);
 
         return NextResponse.json({
             status: 'success',

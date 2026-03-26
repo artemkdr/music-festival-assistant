@@ -112,7 +112,7 @@ describe('FestivalService', () => {
 
             // Assert
             expect(result).toEqual(testFestival);
-            expect(mockFestivalRepository.getFestivalById).toHaveBeenCalledWith('festival-123');
+            expect(mockFestivalRepository.getFestivalById).toHaveBeenCalledWith('festival-123', undefined);
             expect(mockLogger.info).toHaveBeenCalledWith('Fetching festival with ID: festival-123');
         });
 
@@ -125,7 +125,7 @@ describe('FestivalService', () => {
 
             // Assert
             expect(result).toBeNull();
-            expect(mockFestivalRepository.getFestivalById).toHaveBeenCalledWith('non-existent');
+            expect(mockFestivalRepository.getFestivalById).toHaveBeenCalledWith('non-existent', undefined);
         });
     });
 
@@ -184,11 +184,7 @@ describe('FestivalService', () => {
             expect(result.cacheId).toBeTruthy();
 
             expect(mockFestivalCrawlerService.crawlFestival).toHaveBeenCalledWith(['https://festival.com/lineup']);
-            expect(mockCacheService.set).toHaveBeenCalledWith(
-                result.cacheId,
-                result.festival,
-                24 * 60 * 60 // 24 hours in seconds
-            );
+            expect(mockCacheService.set).toHaveBeenCalledWith(result.cacheId, result.festival, 10 * 60);
             expect(mockLogger.info).toHaveBeenCalledWith('Parsing festival data...');
         });
 
@@ -323,7 +319,7 @@ describe('FestivalService', () => {
             await service.updateFestivalAct('festival-123', 'act-1', updates);
 
             // Assert
-            expect(mockFestivalRepository.getFestivalById).toHaveBeenCalledWith('festival-123');
+            expect(mockFestivalRepository.getFestivalById).toHaveBeenCalledWith('festival-123', undefined);
             expect(mockFestivalRepository.saveFestival).toHaveBeenCalledWith(
                 expect.objectContaining({
                     lineup: expect.arrayContaining([

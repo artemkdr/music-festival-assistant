@@ -4,6 +4,10 @@
  */
 import type { Artist, Festival } from '@/lib/schemas';
 
+export interface RepositoryReadOptions {
+    useCache?: boolean;
+}
+
 /**
  * Festival repository interface
  */
@@ -13,20 +17,20 @@ export interface IFestivalRepository {
      * @param id Festival identifier
      * @returns Promise resolving to festival or null if not found
      */
-    getFestivalById(id: string): Promise<Festival | null>;
+    getFestivalById(id: string, options?: RepositoryReadOptions): Promise<Festival | null>;
 
     /**
      * Get festival by URL (for web scraping scenarios)
      * @param url Festival website URL
      * @returns Promise resolving to festival or null if not found
      */
-    getFestivalByUrl(url: string): Promise<Festival | null>;
+    getFestivalByUrl(url: string, options?: RepositoryReadOptions): Promise<Festival | null>;
 
     /**
      * Get all available festivals
      * @returns Promise resolving to array of festivals
      */
-    getAllFestivals(): Promise<Festival[]>;
+    getAllFestivals(options?: RepositoryReadOptions): Promise<Festival[]>;
 
     /**
      * Save festival data
@@ -45,41 +49,41 @@ export interface IArtistRepository {
      * @param id Artist identifier
      * @returns Promise resolving to artist or null if not found
      */
-    getArtistById(id: string): Promise<Artist | null>;
+    getArtistById(id: string, options?: RepositoryReadOptions): Promise<Artist | null>;
 
     /**
      * Get artists by multiple IDs
      * @param ids Array of artist identifiers
      * @returns Promise resolving to array of artists
      */
-    getArtistsByIds(ids: string[]): Promise<Artist[]>;
+    getArtistsByIds(ids: string[], options?: RepositoryReadOptions): Promise<Artist[]>;
 
     /**
      * Get artists by genre
      * @param genres Array of genre strings
      * @returns Promise resolving to array of matching artists
      */
-    getArtistsByGenres(genres: string[]): Promise<Artist[]>;
+    getArtistsByGenres(genres: string[], options?: RepositoryReadOptions): Promise<Artist[]>;
 
     /**
      * Search artists by name
      * @param name Artist name to search for
      * @returns Promise resolving to array of matching artists
      */
-    searchArtistsByName(name: string): Promise<Artist[]>;
+    searchArtistsByName(name: string, options?: RepositoryReadOptions): Promise<Artist[]>;
 
     /**
      * Search artists by name
      * @param name Artist name to search for
      * @returns Promise resolving to array of matching artists
      */
-    searchArtistByName(name: string): Promise<Artist | null>;
+    searchArtistByName(name: string, options?: RepositoryReadOptions): Promise<Artist | null>;
 
     /**
      * Get all artists
      * @returns Promise resolving to array of all artists
      */
-    getAllArtists(): Promise<Artist[]>;
+    getAllArtists(options?: RepositoryReadOptions): Promise<Artist[]>;
 
     /**
      * Save artist data

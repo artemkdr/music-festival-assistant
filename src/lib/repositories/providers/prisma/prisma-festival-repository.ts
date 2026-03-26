@@ -1,4 +1,4 @@
-import { IFestivalRepository } from '@/lib/repositories/interfaces';
+import { IFestivalRepository, RepositoryReadOptions } from '@/lib/repositories/interfaces';
 import { BasePrismaRepository } from '@/lib/repositories/providers/prisma/base-prisma-repository';
 import { Festival } from '@/lib/schemas';
 import { ICacheService } from '@/lib/services/cache/interfaces';
@@ -33,7 +33,7 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
         };
     }
 
-    async getFestivalById(id: string): Promise<Festival | null> {
+    async getFestivalById(id: string, options?: RepositoryReadOptions): Promise<Festival | null> {
         return this.executeOperation(
             async () => {
                 const festival = await this.prisma.festival.findUnique({
@@ -49,11 +49,14 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
                 return festival as unknown as Festival;
             },
             'getFestivalById',
-            this.generateCacheKey('getFestivalById', { id })
+            {
+                cacheKey: this.generateCacheKey('getFestivalById', { id }),
+                readOptions: options,
+            }
         );
     }
 
-    async getFestivalByUrl(url: string): Promise<Festival | null> {
+    async getFestivalByUrl(url: string, options?: RepositoryReadOptions): Promise<Festival | null> {
         return this.executeOperation(
             async () => {
                 const festival = await this.prisma.festival.findFirst({
@@ -69,11 +72,14 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
                 return festival as unknown as Festival;
             },
             'getFestivalByUrl',
-            this.generateCacheKey('getFestivalByUrl', { url })
+            {
+                cacheKey: this.generateCacheKey('getFestivalByUrl', { url }),
+                readOptions: options,
+            }
         );
     }
 
-    async getAllFestivals(): Promise<Festival[]> {
+    async getAllFestivals(options?: RepositoryReadOptions): Promise<Festival[]> {
         return this.executeOperation(
             async () => {
                 const festivals = await this.prisma.festival.findMany({
@@ -84,7 +90,10 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
                 return festivals as unknown as Festival[];
             },
             'getAllFestivals',
-            this.generateCacheKey('getAllFestivals')
+            {
+                cacheKey: this.generateCacheKey('getAllFestivals'),
+                readOptions: options,
+            }
         );
     }
 
@@ -105,9 +114,7 @@ export class PrismaFestivalRepository extends BasePrismaRepository implements IF
                 create: prismaData,
             });
 
-            // Invalidate cache for this festival
-            this.invalidateCachePattern(`festivals:`);
-            this.invalidateCachePattern(festival.id);
+            await this.invalidateCachePattern('festivals:*');
 
             this.logger.info('Saved festival to database', { festivalId: festival.id });
             return savedFestival as unknown as Festival;

@@ -11,6 +11,8 @@ import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
+const adminReadOptions = { useCache: false } as const;
+
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
 }
@@ -34,7 +36,7 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
     try {
         logger.info('Admin artist detail request received', { artistId: id });
 
-        const artist = await artistService.getArtistById(id);
+        const artist = await artistService.getArtistById(id, adminReadOptions);
 
         if (!artist) {
             return NextResponse.json(
@@ -84,7 +86,7 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         const validatedData = UpdateArtistSchema.parse(body);
 
         // Check if artist exists
-        const existingArtist = await artistService.getArtistById(id);
+        const existingArtist = await artistService.getArtistById(id, adminReadOptions);
         if (!existingArtist) {
             return NextResponse.json(
                 {
@@ -106,10 +108,6 @@ export const PUT = requireAdmin(async (request: NextRequest, user: User, context
         };
 
         const savedArtist = await artistService.saveArtist(updatedArtist);
-
-        // Invalidate cache for this artist
-        // do not await this call, it will be handled by the cache service in the background
-        DIContainer.getInstance().getCacheService().invalidatePattern(`artist:${id}`);
 
         return NextResponse.json({
             status: 'success',
@@ -156,7 +154,7 @@ export const DELETE = requireAdmin(async (request: NextRequest, user: User, cont
         logger.info('Admin artist delete request received', { artistId: id });
 
         // Check if artist exists
-        const existingArtist = await artistService.getArtistById(id);
+        const existingArtist = await artistService.getArtistById(id, adminReadOptions);
         if (!existingArtist) {
             return NextResponse.json(
                 {

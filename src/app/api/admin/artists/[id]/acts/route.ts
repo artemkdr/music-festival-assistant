@@ -10,6 +10,8 @@ import { User } from '@/lib/services/auth';
 import { getActsByArtistId, getActsByArtistName, isFestivalFinished } from '@/lib/utils/festival-util';
 import { NextRequest, NextResponse } from 'next/server';
 
+const adminReadOptions = { useCache: false } as const;
+
 interface RouteParams {
     params: Promise<{ [key: string]: string }>;
 }
@@ -34,7 +36,7 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
     try {
         logger.info('Artist acts request received', { artistId: id });
 
-        const artist = await artistService.getArtistById(id);
+        const artist = await artistService.getArtistById(id, adminReadOptions);
         if (!artist) {
             return NextResponse.json(
                 {
@@ -45,7 +47,7 @@ export const GET = requireAdmin(async (request: NextRequest, user: User, context
         }
 
         // Get all festivals and filter for ones that include this artist
-        const allFestivals = await festivalService.getAllFestivals();
+        const allFestivals = await festivalService.getAllFestivals(adminReadOptions);
         const acts: FestivalAct[] = [];
         for (const festival of allFestivals) {
             if (!isFestivalFinished(festival)) {

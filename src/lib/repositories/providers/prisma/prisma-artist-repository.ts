@@ -1,4 +1,4 @@
-import { IArtistRepository } from '@/lib/repositories/interfaces';
+import { IArtistRepository, RepositoryReadOptions } from '@/lib/repositories/interfaces';
 import { BasePrismaRepository } from '@/lib/repositories/providers/prisma/base-prisma-repository';
 import { Artist } from '@/lib/schemas';
 import { ICacheService } from '@/lib/services/cache/interfaces';
@@ -17,7 +17,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
         });
     }
 
-    async getArtistById(id: string): Promise<Artist | null> {
+    async getArtistById(id: string, options?: RepositoryReadOptions): Promise<Artist | null> {
         return this.executeOperation(
             async () => {
                 const artist = await this.prisma.artist.findUnique({
@@ -33,11 +33,14 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 return artist as unknown as Artist;
             },
             'getArtistById',
-            this.generateCacheKey('getArtistById', { id })
+            {
+                cacheKey: this.generateCacheKey('getArtistById', { id }),
+                readOptions: options,
+            }
         );
     }
 
-    async getArtistsByGenres(genres: string[]): Promise<Artist[]> {
+    async getArtistsByGenres(genres: string[], options?: RepositoryReadOptions): Promise<Artist[]> {
         return this.executeOperation(
             async () => {
                 // For PostgreSQL, we need to use jsonb operations to search in JSON arrays
@@ -61,11 +64,14 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 return artists as unknown as Artist[];
             },
             'getArtistsByGenres',
-            this.generateCacheKey('getArtistsByGenres', { genres })
+            {
+                cacheKey: this.generateCacheKey('getArtistsByGenres', { genres }),
+                readOptions: options,
+            }
         );
     }
 
-    async searchArtistsByName(name: string, exact: boolean = true): Promise<Artist[]> {
+    async searchArtistsByName(name: string, options?: RepositoryReadOptions, exact: boolean = true): Promise<Artist[]> {
         return this.executeOperation(
             async () => {
                 const whereClause = exact ? { name: { equals: name, mode: 'insensitive' as const } } : { name: { contains: name, mode: 'insensitive' as const } };
@@ -84,12 +90,15 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 return artists as unknown as Artist[];
             },
             'searchArtistsByName',
-            this.generateCacheKey('searchArtistsByName', { name, exact })
+            {
+                cacheKey: this.generateCacheKey('searchArtistsByName', { name, exact }),
+                readOptions: options,
+            }
         );
     }
 
-    async searchArtistByName(name: string): Promise<Artist | null> {
-        const artists = await this.searchArtistsByName(name, true);
+    async searchArtistByName(name: string, options?: RepositoryReadOptions): Promise<Artist | null> {
+        const artists = await this.searchArtistsByName(name, options, true);
         if (artists.length > 0 && artists[0]) {
             this.logger.info('Artist found by exact name', { name, artistId: artists[0].id });
             return artists[0] as unknown as Artist;
@@ -99,7 +108,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
         return null;
     }
 
-    async getAllArtists(): Promise<Artist[]> {
+    async getAllArtists(options?: RepositoryReadOptions): Promise<Artist[]> {
         return this.executeOperation(
             async () => {
                 const artists = await this.prisma.artist.findMany({
@@ -110,11 +119,14 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 return artists as unknown as Artist[];
             },
             'getAllArtists',
-            this.generateCacheKey('getAllArtists')
+            {
+                cacheKey: this.generateCacheKey('getAllArtists'),
+                readOptions: options,
+            }
         );
     }
 
-    async getArtistsByIds(ids: string[]): Promise<Artist[]> {
+    async getArtistsByIds(ids: string[], options?: RepositoryReadOptions): Promise<Artist[]> {
         return this.executeOperation(
             async () => {
                 const artists = await this.prisma.artist.findMany({
@@ -127,7 +139,10 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 return artists as unknown as Artist[];
             },
             'getArtistsByIds',
-            this.generateCacheKey('getArtistsByIds', { ids })
+            {
+                cacheKey: this.generateCacheKey('getArtistsByIds', { ids }),
+                readOptions: options,
+            }
         );
     }
 
@@ -167,10 +182,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 },
             });
 
-            // Invalidate cache for this artist
-            this.invalidateCachePattern(`artists:`);
-            this.invalidateCachePattern(artist.id);
-            this.invalidateCachePattern(artist.name.toLowerCase());
+            await this.invalidateCachePattern('artists:*');
 
             this.logger.info('Saved artist to database', { artistId: artist.id });
             return savedArtist as unknown as Artist;
@@ -185,9 +197,7 @@ export class PrismaArtistRepository extends BasePrismaRepository implements IArt
                 where: { id },
             });
 
-            // Invalidate cache entries for this artist
-            this.invalidateCachePattern(`artists:`);
-            this.invalidateCachePattern(id);
+            await this.invalidateCachePattern('artists:*');
 
             this.logger.info('Deleted artist from database', { artistId: id });
         } catch (error) {

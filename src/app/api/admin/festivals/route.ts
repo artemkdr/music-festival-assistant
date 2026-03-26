@@ -11,6 +11,8 @@ import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
+const adminReadOptions = { useCache: false } as const;
+
 /**
  * GET /api/admin/festivals
  * Get all festivals (Admin only)
@@ -23,7 +25,7 @@ export const GET = requireAdmin(async (): Promise<Response> => {
     try {
         logger.info('Admin festivals list request received');
 
-        const festivals = await festivalService.getAllFestivals();
+        const festivals = await festivalService.getAllFestivals(adminReadOptions);
         return NextResponse.json({
             status: 'success',
             message: 'Festivals retrieved successfully',
@@ -63,10 +65,6 @@ export const POST = requireAdmin(async (request: NextRequest, user: User): Promi
 
         // Save the festival data
         const festivalId = await festivalService.saveFestival(validatedFestival);
-
-        // Invalidate cache for festivals
-        // do not await this call, it will be handled by the cache service in the background
-        DIContainer.getInstance().getCacheService().invalidatePattern('festivals');
 
         logger.info('Festival saved successfully', {
             festivalId: validatedFestival.id,

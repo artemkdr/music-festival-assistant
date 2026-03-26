@@ -7,6 +7,8 @@ import { requireAdmin } from '@/lib/utils/auth-utils';
 import { toError } from '@/lib/utils/error-handler';
 import { NextResponse } from 'next/server';
 
+const adminReadOptions = { useCache: false } as const;
+
 export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
@@ -17,7 +19,7 @@ export const GET = requireAdmin(async (): Promise<Response> => {
         logger.info('Admin stats request received');
 
         // Get all data to calculate statistics
-        const [festivals, artists] = await Promise.all([festivalService.getAllFestivals(), artistService.getAllArtists()]);
+        const [festivals, artists] = await Promise.all([festivalService.getAllFestivals(adminReadOptions), artistService.getAllArtists(adminReadOptions)]);
 
         // Calculate total acts across all festivals
         const totalActs = festivals.reduce((total, festival) => total + festival.lineup.length, 0);

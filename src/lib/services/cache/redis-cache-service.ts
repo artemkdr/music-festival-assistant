@@ -54,9 +54,10 @@ export class RedisCacheService implements ICacheService {
     }
 
     async invalidatePattern(pattern: string): Promise<void> {
-        const keys = await this.client.keys(pattern);
+        const normalizedPattern = this.normalizePattern(pattern);
+        const keys = await this.client.keys(normalizedPattern);
         if (keys.length > 0) {
-            this.logger.info(`Invalidating cache keys matching pattern "${pattern}": ${keys.join(', ')}`);
+            this.logger.info(`Invalidating cache keys matching pattern "${normalizedPattern}": ${keys.join(', ')}`);
             await this.client.del(keys);
         }
     }
@@ -66,5 +67,9 @@ export class RedisCacheService implements ICacheService {
         if (keys.length > 0) {
             await this.client.del(keys);
         }
+    }
+
+    private normalizePattern(pattern: string): string {
+        return pattern.includes('*') ? pattern : `*${pattern}*`;
     }
 }

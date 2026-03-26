@@ -7,6 +7,8 @@ import { requireAdmin } from '@/lib/utils/auth-utils';
 import { toError } from '@/lib/utils/error-handler';
 import { NextResponse } from 'next/server';
 
+const adminReadOptions = { useCache: false } as const;
+
 export const GET = requireAdmin(async (): Promise<Response> => {
     const container = DIContainer.getInstance();
     const logger = container.getLogger();
@@ -15,7 +17,7 @@ export const GET = requireAdmin(async (): Promise<Response> => {
     try {
         logger.info('Admin artists list request received');
 
-        const artists = await artistService.getAllArtists();
+        const artists = await artistService.getAllArtists(adminReadOptions);
 
         return NextResponse.json({
             status: 'success',
