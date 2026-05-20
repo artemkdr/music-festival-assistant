@@ -2,15 +2,13 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental: {},
-    eslint: {
-        dirs: ['src', '.'],
-    },
+    // experimental: {}, // Removed if empty, Next.js 16 handles defaults natively
+    
     images: {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: '**',
+                hostname: '**', // Works, but narrow this down if possible
             },
         ],
     },
@@ -19,9 +17,8 @@ const nextConfig = {
             {
                 source: '/api/:path*',
                 headers: [
-                    { key: 'Access-Control-Allow-Origin', value: 'http://localhost:3000' },
-                    { key: 'Access-Control-Allow-Origin', value: 'https://festivals.artem.work' },
-                    { key: 'Access-Control-Allow-Origin', value: 'https://festival.artem.work' },
+                    // Note: Multiple Access-Control-Allow-Origin keys removed.
+                    // Handle dynamic origins securely in middleware/proxy file instead.
                     { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
                     { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
                     { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
