@@ -1,6 +1,11 @@
-{  "compilerOptions": {
+{
+  "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "ES2022"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "ES2022"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -10,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -19,16 +24,36 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["src/components/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/services/*": ["src/lib/services/*"],
-      "@/repositories/*": ["src/lib/repositories/*"],
-      "@/controllers/*": ["./src/controllers/*"],
-      "@/schemas/*": ["src/lib/schemas/*"],
-      "@/utils/*": ["src/lib/utils/*"],
-      "@/config/*": ["./src/config/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/components/*": [
+        "src/components/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
+      ],
+      "@/services/*": [
+        "src/lib/services/*"
+      ],
+      "@/repositories/*": [
+        "src/lib/repositories/*"
+      ],
+      "@/controllers/*": [
+        "./src/controllers/*"
+      ],
+      "@/schemas/*": [
+        "src/lib/schemas/*"
+      ],
+      "@/utils/*": [
+        "src/lib/utils/*"
+      ],
+      "@/config/*": [
+        "./src/config/*"
+      ]
     },
     "strictNullChecks": true,
     "noUncheckedIndexedAccess": true,
@@ -37,6 +62,16 @@
     "noFallthroughCasesInSwitch": true,
     "exactOptionalPropertyTypes": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", ".next", "./data"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "./data"
+  ]
 }
