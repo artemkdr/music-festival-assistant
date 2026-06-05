@@ -36,8 +36,8 @@ Your task is to generate detailed music festival information based on the provid
 - Festival lineup is normally a list/table of performances or the list/table of artists:
     - If you parse the website, then look for the HTML elements like <table>, <ul>, <ol> or repeating elements like <div>, <p> or similar that contain artist names and related information.
     - Look for the patterns like "lineup", "program", "performances", "shows", "acts", "artists", "stages", "timetable" or similar in English or in the language detected earlier.
-    - Be aware of the dates and times format and convert them to ISO format.
-    - If you find the lineup, then extract it as a list of acts with stage, artists names and their act time (if available).
+    - Be aware of the dates and times format and convert them to ISO format. If year is not specified, then use the current year.
+    - If you find the lineup, then extract it as a list of acts with stage name, artists names and their act time (if available).
 - Festival description must be max 500 characters and focused on the festival's atmosphere, history, and unique features.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
 - Respond in English.
