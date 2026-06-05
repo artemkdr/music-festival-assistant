@@ -36,19 +36,20 @@ Your task is to generate detailed music festival information based on the provid
 - Festival lineup is normally a list/table of performances or the list/table of artists:
     - If you parse the website, then look for the HTML elements like <table>, <ul>, <ol> or repeating elements like <div>, <p> or similar that contain artist names and related information.
     - Look for the patterns like "lineup", "program", "performances", "shows", "acts", "artists", "stages", "timetable" or similar in English or in the language detected earlier.
+    - Be aware of the dates and times format and convert them to ISO format.
     - If you find the lineup, then extract it as a list of acts with stage, artists names and their act time (if available).
 - Festival description must be max 500 characters and focused on the festival's atmosphere, history, and unique features.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
 - Respond in English.
 
-DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.
+DO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.
 `,
             prompt: `Scrape the lineup of the festival from the provided data:`,
             temperature: 0.8, // risky to use lower temperature as it could be stuck in a loop
         };
         this.addFileContentToRequest(aiRequest, inputs);
         // add the most important instructions to the end of the prompt
-        aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
+        aiRequest.prompt += `\n\nDO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.`;
 
         const result = await this.aiService.generateStreamObject<z.infer<typeof ParserFestivalSchema>>({
             ...aiRequest,
@@ -90,7 +91,7 @@ You are an expert in music and artists and in searching for detailed information
 Your task is to generate detailed artist information based on the provided artist name and any additional data. 
 
 # Instructions
-- Do not invent description, genres, urls and any other information, provide only real and verified information.
+- Do not invent description, genres, urls and any other information, provide only real and factual information.
 - If you don't have enough information, then put the default empty value depending on the field type in the JSON schema.
 - Artist description must be max 1000 characters and focused on his live performance and music style, but ONLY if you found one. 
 - If you have multiple arists with the same name and you are not sure which one to choose:    
@@ -102,7 +103,7 @@ Your task is to generate detailed artist information based on the provided artis
 - Provide sources for the information you provide, if available.
 - Respond in English.
 
-DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.
+DO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.
 `,
             prompt: 'Provide detailed information about the artist: ',
             temperature: 0.8,
@@ -122,7 +123,7 @@ DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VER
         });
 
         // add the most important instructions to the end of the prompt
-        aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
+        aiRequest.prompt += `\n\nDO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.`;
 
         const result = await this.aiService.generateObject<z.infer<typeof looseArtistSchema>>({
             ...aiRequest,
@@ -199,14 +200,14 @@ You are an expert music recommender. You help users choose an artist from a list
 
 # Instructions
 - Focus on the user's comment provided in the prompt and his favorite genres.
-- It's about a music festival, so focus on live performances, but do not invent any details, use only real information, reviews or articles about how the artist performs live.
+- It's about a music festival, so focus on live performances, but do not generate any details, use only real information, reviews or articles about how the artist performs live.
 - Provide at least 2 recommendations.
 - If the user preferences are too vague for you to make a decision, then provide at least 1 recommendation based on the available artists.
 - If the user preferences contains a list of preferred artists, then try to recommend them first, if they are in the lineup.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
 - Generate recommendations in ${language} language.
 
-DO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.
+DO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.
 `,
             prompt: `
 Generate music recommendations based on the provided user preferences:
@@ -215,7 +216,7 @@ Generate music recommendations based on the provided user preferences:
         this.addFileContentToRequest(aiRequest, [`User preferences: ${JSON.stringify(mappedUserPreferences)}`, `Available artists: ${JSON.stringify(availableArtists)}`]);
 
         // add the most important instructions to the end of the prompt
-        aiRequest.prompt += `\n\nDO NOT INVENT ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND VERIFIED INFORMATION.`;
+        aiRequest.prompt += `\n\nDO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.`;
         aiRequest.useStorageCache = true; // Use local/remote cache for responses
 
         const result = await this.aiSimpleService.generateStreamObject<z.infer<typeof RecommentationsAIResponseSchema>>({

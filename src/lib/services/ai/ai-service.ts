@@ -5,15 +5,15 @@ import { toError } from '@/lib/utils/error-handler';
 import { createVertex } from '@ai-sdk/google-vertex/edge';
 import { groq } from '@ai-sdk/groq';
 import { openai } from '@ai-sdk/openai';
-import { LanguageModelV1 } from '@ai-sdk/provider';
-import { generateObject, generateText, streamObject } from 'ai';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { generateText, Output, streamText } from 'ai';
 import { hash } from 'ohash';
 
 export class AIService implements IAIService {
     private readonly maxTokens: number;
     private readonly maxRetries: number = 3; // Default retry count
     private readonly temperature: number;
-    private readonly model: LanguageModelV1;
+    private readonly model: ReturnType<typeof openai>;
 
     /**
      * Default cache TTL in seconds
@@ -26,14 +26,14 @@ export class AIService implements IAIService {
         private readonly logger: ILogger
     ) {
         switch (config.provider) {
+            case 'openrouter':
+                this.model = createOpenRouter({
+                    apiKey: config.apiKey,
+                    ...(config.baseUrl ? { baseURL: config.baseUrl } : {}),
+                } as const)(config.model);
+                break;
             case 'openai':
-                // openai and structured outputs are not well supported yet
-                // read here https://ai-sdk.dev/providers/ai-sdk-providers/openai
-                // and you have to adapt zod schemas (f.e. .optional() is not supported)
-                // you can enabled structured outputs only for reasoning models: gpt-4o, gtp-3o, etc...
-                this.model = openai(config.model, {
-                    structuredOutputs: config.model?.includes('o3') || config.model?.includes('o4') || config.model?.includes('o1'), // Enable structured outputs for reasoning models
-                });
+                this.model = openai(config.model);
                 break;
             case 'groq':
                 this.model = groq(config.model);
@@ -53,9 +53,7 @@ export class AIService implements IAIService {
                         privateKey: config.privateKey,
                         privateKeyId: config.privateKeyId,
                     },
-                })(config.model, {
-                    structuredOutputs: true,
-                }); // Initialize Vertex AI model
+                })(config.model); // Initialize Vertex AI model
         }
         this.maxTokens = config.maxTokens || 30000;
         this.temperature = config.temperature || 0.8; // Initialize VertexAI with service account credentials
@@ -85,32 +83,40 @@ export class AIService implements IAIService {
             }
             const response = await generateText({
                 model: this.model,
+                ...(request.systemPrompt ? { system: request.systemPrompt } : {}),
                 messages: [
-                    ...(request.systemPrompt ? [{ role: 'system' as const, content: request.systemPrompt }] : []),
                     {
                         role: 'user',
-                        content: request.prompt,
+                        content: [
+                            {
+                                type: 'text',
+                                text: request.prompt,
+                            },
+                            ...(request.files
+                                ? request.files
+                                      .filter(file => !!file.uri || !!file.data)
+                                      .map(file => ({
+                                          type: 'file' as const,
+                                          mediaType: file.mimeType,
+                                          data: (file.uri ?? file.data)!,
+                                      }))
+                                : []),
+                        ],
                     },
-                    ...(request.files
-                        ? request.files
-                              .filter(file => !!file.uri || !!file.data)
-                              .map(file => ({
-                                  role: 'data' as const,
-                                  content: (file.uri ?? file.data)!,
-                              }))
-                        : []),
                 ],
-                maxTokens: this.maxTokens,
+                maxOutputTokens: this.maxTokens,
                 temperature: this.temperature,
                 maxRetries: this.maxRetries,
             });
+            const promptTokens = response.usage?.inputTokens ?? 0;
+            const completionTokens = response.usage?.outputTokens ?? 0;
             const result: AIResponse = {
                 model: this.model.modelId,
                 content: response.text,
                 usage: {
-                    promptTokens: response.usage?.promptTokens || 0,
-                    completionTokens: response.usage?.completionTokens || 0,
-                    totalTokens: response.usage?.totalTokens || 0,
+                    promptTokens,
+                    completionTokens,
+                    totalTokens: promptTokens + completionTokens,
                 },
             };
             this.cache.set(cacheKey, result, this.DEFAULT_CACHE_TTL);
@@ -136,13 +142,10 @@ export class AIService implements IAIService {
                     this.logger.warn(`Cache hit for request ${cacheKey} but no data found`);
                 }
             }
-            const result = await generateObject<T>({
+            const result = await generateText({
                 model: this.model,
+                system: request.systemPrompt || 'You are an AI assistant that extracts structured data.',
                 messages: [
-                    {
-                        role: 'system',
-                        content: request.systemPrompt || 'You are an AI assistant that extracts structured data.',
-                    },
                     {
                         role: 'user',
                         content: [
@@ -155,22 +158,23 @@ export class AIService implements IAIService {
                                       .filter(file => !!file.uri || !!file.data)
                                       .map(file => ({
                                           type: 'file' as const,
-                                          mimeType: file.mimeType,
+                                          mediaType: file.mimeType,
                                           data: (file.uri ?? file.data)!,
                                       }))
                                 : []),
                         ],
                     },
                 ],
-                schema: request.schema,
-                maxTokens: this.maxTokens,
+                output: Output.object({ schema: request.schema }),
+                maxOutputTokens: this.maxTokens,
                 temperature: this.temperature,
                 maxRetries: this.maxRetries,
             });
-            if (!!result.object) {
-                this.cache.set(cacheKey, result.object as T, this.DEFAULT_CACHE_TTL);
+            const generatedObject = result.output as T;
+            if (!!generatedObject) {
+                this.cache.set(cacheKey, generatedObject, this.DEFAULT_CACHE_TTL);
             }
-            return result.object as T;
+            return generatedObject;
         } catch (error) {
             this.logger.error('AI object generation failed', error instanceof Error ? error : new Error(String(error)));
             throw new Error(`AI object generation failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -185,20 +189,17 @@ export class AIService implements IAIService {
             const cacheKey = AIService.generateCacheKey(request);
             if (request.useStorageCache === true && (await this.cache.has(cacheKey))) {
                 this.logger.info(`Cache hit for request ${cacheKey}`);
-                const cacheResponse = this.cache.get(cacheKey) as T;
+                const cacheResponse = (await this.cache.get(cacheKey)) as T;
                 if (cacheResponse) {
                     return cacheResponse;
                 } else {
                     this.logger.warn(`Cache hit for request ${cacheKey} but no data found`);
                 }
             }
-            const result = streamObject<T>({
+            const result = streamText({
                 model: this.model,
+                system: request.systemPrompt || 'You are an AI assistant that extracts structured data.',
                 messages: [
-                    {
-                        role: 'system',
-                        content: request.systemPrompt || 'You are an AI assistant that extracts structured data.',
-                    },
                     {
                         role: 'user',
                         content: [
@@ -211,32 +212,27 @@ export class AIService implements IAIService {
                                       .filter(file => !!file.uri || !!file.data)
                                       .map(file => ({
                                           type: 'file' as const,
-                                          mimeType: file.mimeType,
+                                          mediaType: file.mimeType,
                                           data: (file.uri ?? file.data)!,
                                       }))
                                 : []),
                         ],
                     },
                 ],
-                schema: request.schema,
-                maxTokens: this.maxTokens,
+                output: Output.object({ schema: request.schema }),
+                maxOutputTokens: this.maxTokens,
                 temperature: this.temperature,
                 maxRetries: this.maxRetries,
             });
             let chunkCount = 0;
             let chunkSize = 0;
-            // @TODO handle partial object stream properly
-            // currently we just count chunks and return final object
-            for await (const chunk of result.partialObjectStream) {
-                if (chunk.type === 'text') {
-                    chunkSize += chunk.text.length;
-                } else if (chunk.type === 'file') {
-                    chunkSize += chunk.data.length;
-                }
+            // We consume partial structured output updates and log stream volume.
+            for await (const partialObject of result.partialOutputStream) {
+                chunkSize += JSON.stringify(partialObject).length;
                 chunkCount++;
             }
             this.logger.info(`Streamed ${chunkCount} chunks with total size ${chunkSize} bytes for request ${cacheKey}`);
-            const finalResult = (await result.object) as T;
+            const finalResult = (await result.output) as T;
             if (!!finalResult) {
                 this.cache.set(cacheKey, finalResult, this.DEFAULT_CACHE_TTL);
             }

@@ -14,7 +14,7 @@ export interface AIConfig {
 /**
  * Get AI service configuration from environment variables
  */
-export function getAIConfig(provider: AIProvider = 'vertex', type: 'default' | 'simple' = 'default'): AIConfig {
+export function getAIConfig(provider: AIProvider = 'openrouter', type: 'default' | 'simple' = 'default'): AIConfig {
     // Base configuration
     const config: AIProviderConfig = {
         apiKey: '',
@@ -26,6 +26,14 @@ export function getAIConfig(provider: AIProvider = 'vertex', type: 'default' | '
 
     // Provider-specific configuration
     switch (provider) {
+        case 'openrouter':
+            config.apiKey = process.env['OPENROUTER_API_KEY'] || '';
+            config.model = process.env[`OPENROUTER_${modelSuffix}MODEL`] || 'openai/gpt-4.1-mini';
+            config.baseUrl = process.env['OPENROUTER_BASE_URL'] || 'https://openrouter.ai/api/v1';
+            config.maxTokens = process.env['OPENROUTER_MAX_TOKENS'] ? parseInt(process.env['OPENROUTER_MAX_TOKENS']!, 10) : 4000;
+            config.temperature = process.env['OPENROUTER_TEMPERATURE'] ? parseFloat(process.env['OPENROUTER_TEMPERATURE']!) : 0.7;
+            break;
+
         case 'openai':
             config.apiKey = process.env['OPENAI_API_KEY'] || '';
             config.model = process.env[`OPENAI_${modelSuffix}MODEL`] || 'gpt-4.1';
@@ -77,6 +85,15 @@ export function validateAIConfig(aiConfig: AIConfig): void {
 
     // Provider-specific validation
     switch (aiConfig.provider) {
+        case 'openrouter':
+            if (!aiConfig.config.apiKey) {
+                throw new Error(`AI service API key is required for provider: ${aiConfig.provider}`);
+            }
+            if (aiConfig.config.baseUrl && !/^https?:\/\/.+/.test(aiConfig.config.baseUrl)) {
+                throw new Error('OpenRouter base URL must be a valid URL');
+            }
+            break;
+
         case 'azure':
             if (!aiConfig.config.apiKey) {
                 throw new Error(`AI service API key is required for provider: ${aiConfig.provider}`);
@@ -111,7 +128,7 @@ export function getAIConfigStatus(): {
     location?: string;
 } {
     try {
-        const aiConfig = getAIConfig((process.env['AI_PROVIDER'] as AIProvider) || 'vertex', (process.env['AI_TYPE'] as 'default' | 'simple') || 'default');
+        const aiConfig = getAIConfig((process.env['AI_PROVIDER'] as AIProvider) || 'openrouter', (process.env['AI_TYPE'] as 'default' | 'simple') || 'default');
         validateAIConfig(aiConfig);
 
         return {

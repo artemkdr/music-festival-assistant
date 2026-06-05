@@ -122,7 +122,7 @@ export interface IAIService {
 /**
  * AI provider types
  */
-export type AIProvider = 'openai' | 'anthropic' | 'google' | 'vertex' | 'azure' | 'groq' | 'custom';
+export type AIProvider = 'openrouter' | 'openai' | 'anthropic' | 'google' | 'vertex' | 'azure' | 'groq' | 'custom';
 
 /**
  * AI service factory interface

@@ -25,7 +25,7 @@ export class AIServiceFactory implements IAIServiceFactory {
      * Get list of supported providers
      */
     getSupportedProviders(): AIProvider[] {
-        return ['openai', 'vertex', 'google']; // OpenAI and Vertex AI are implemented
+        return ['openrouter', 'openai', 'vertex', 'google']; // OpenRouter, OpenAI, and Vertex AI are implemented
     }
 
     /**
@@ -41,6 +41,9 @@ export class AIServiceFactory implements IAIServiceFactory {
         }
 
         switch (provider) {
+            case 'openrouter':
+                this.validateOpenRouterConfig(config);
+                break;
             case 'openai':
                 this.validateOpenAIConfig(config);
                 break;
@@ -49,6 +52,15 @@ export class AIServiceFactory implements IAIServiceFactory {
                 this.validateVertexAIConfig(config);
                 break;
             // Add other provider validations as they are implemented
+        }
+    }
+
+    /**
+     * Validate OpenRouter specific configuration
+     */
+    private validateOpenRouterConfig(config: AIProviderConfig): void {
+        if (config.baseUrl && !/^https?:\/\/.+/.test(config.baseUrl)) {
+            throw new Error('baseUrl must be a valid URL');
         }
     }
 
