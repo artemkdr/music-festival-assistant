@@ -10,7 +10,7 @@
 import { IMusicalAIService } from '@/lib/services/ai/interfaces';
 import type { ILogger } from '@/lib/types/logger';
 import { IErrorHandler, IRetryHandler, toError } from '@/lib/utils/error-handler';
-import { Browser, BrowserContext, chromium, Page } from 'playwright';
+import type { Browser, BrowserContext, Page } from 'playwright';
 import { z } from 'zod';
 
 export interface IFestivalHtmlParser<TSchema extends z.ZodTypeAny = z.ZodTypeAny> {
@@ -77,6 +77,7 @@ export class FestivalHtmlParser<TSchema extends z.ZodTypeAny = z.ZodTypeAny> imp
         let page: Page | null = null;
 
         try {
+            const { chromium } = await import('playwright');
             browser = await chromium.launch();
             context = await browser.newContext({
                 userAgent: this.options.userAgent || 'scraper/1.0',
