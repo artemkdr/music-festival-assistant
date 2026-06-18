@@ -66,6 +66,7 @@ export class BraveWebSearchService implements IWebSearchService {
                 method: 'GET',
                 headers: {
                     Accept: 'application/json',
+                    'Accept-Encoding': 'gzip',
                     'X-Subscription-Token': this.config.apiKey,
                 },
                 signal: controller.signal,
@@ -109,7 +110,9 @@ export class BraveWebSearchService implements IWebSearchService {
     }
 
     private buildUrl(params: { query: string; count: number; country?: string; searchLang?: string }): string {
-        const url = new URL('/v1/llm/context', this.config.baseUrl);
+        // to correclt build the url the baseUrl must end with a slash, 
+        // and the end point must not start with a slash
+        const url = new URL('v1/llm/context', this.config.baseUrl.endsWith('/') ? this.config.baseUrl : `${this.config.baseUrl}/`);
         url.searchParams.set('q', params.query);
         url.searchParams.set('count', String(Math.min(Math.max(params.count, 1), 50)));
         if (params.country) {

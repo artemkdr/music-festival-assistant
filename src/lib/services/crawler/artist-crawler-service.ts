@@ -40,7 +40,17 @@ export class ArtistCrawlerService implements IArtistCrawlerService {
             this.logger.error('Spotify search failed', err instanceof Error ? err : new Error(String(err)));
         }
 
-        const searchQuery = this.buildSearchQuery(spotifyArtist?.name || name, data?.context);
+        let spotifyContext = '';
+        if (spotifyArtist) {
+            spotifyContext = `Spotify ID: ${spotifyArtist.id}, Spotify genres: ${spotifyArtist.genres.join(', ')}`;
+        }
+
+        const context = [data?.context, spotifyContext].filter(Boolean);
+
+        const searchQuery = this.buildSearchQuery(
+            spotifyArtist?.name || name, 
+            context.join(', ')
+        );
         let webSearchResults: Awaited<ReturnType<IWebSearchService['search']>>;
         try {
             webSearchResults = await this.webSearchService.search({
@@ -97,8 +107,8 @@ export class ArtistCrawlerService implements IArtistCrawlerService {
     private buildSearchQuery(name: string, context?: string): string {
         const normalizedContext = context?.trim();
         if (!normalizedContext) {
-            return `${name} artist biography live performance`;
+            return `"${name}" music artist biography`;
         }
-        return `${name} artist biography live performance ${normalizedContext}`.slice(0, 400);
+        return `"${name}" music artist biography, ${normalizedContext}`.slice(0, 400);
     }
 }

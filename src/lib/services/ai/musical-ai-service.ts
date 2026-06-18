@@ -108,7 +108,7 @@ Your task is to polish and summarize artist information only from the evidence p
 DO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.
 `,
             prompt: 'Provide detailed information about the artist: ',
-            temperature: 0.8,
+            temperature: 0.3,
         };
         this.addFileContentToRequest(aiRequest, inputs);
 
@@ -126,7 +126,6 @@ DO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND F
 
         // add the most important instructions to the end of the prompt
         aiRequest.prompt += `\n\nDO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.`;
-
         const result = await this.aiService.generateObject<z.infer<typeof looseArtistSchema>>({
             ...aiRequest,
             schema: looseArtistSchema,
