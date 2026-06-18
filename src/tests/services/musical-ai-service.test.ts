@@ -132,7 +132,7 @@ describe('MusicalAIService', () => {
                 expect.objectContaining({
                     systemPrompt: expect.stringContaining('expert music editor'),
                     prompt: expect.stringContaining('Provide detailed information about the artist'),
-                    temperature: 0.8,
+                    temperature: 0.3,
                     schema: expect.any(z.ZodObject),
                 })
             );
