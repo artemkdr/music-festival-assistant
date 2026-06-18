@@ -137,6 +137,7 @@ npm run type-check   # TypeScript validation
 - **Local Storage**: Possibility to store everything locally in json files
 - **Neon Database + Prisma ORM**: Neon Postgres + Prisma schema
 - **Spotify API**: Artist search and profile linking (admin features)
+- **Brave Search API (LLM Context)**: Grounding context for artist enrichment
 - **LLM Providers (Vertex, OpenAI, Groq..)**: Recommendation engine integration
 
 

@@ -38,6 +38,11 @@ export interface IArtistService {
             name?: string;
             context?: string | undefined;
             spotifyId?: string | undefined;
+            webSearch?: {
+                country?: string | undefined;
+                searchLang?: string | undefined;
+                count?: number | undefined;
+            };
         }
     ): Promise<Artist>;
     deleteArtist(id: string): Promise<void>;

@@ -78,6 +78,11 @@ export class ArtistService implements IArtistService {
             name?: string;
             context?: string | undefined;
             spotifyId?: string | undefined;
+            webSearch?: {
+                country?: string | undefined;
+                searchLang?: string | undefined;
+                count?: number | undefined;
+            };
         }
     ): Promise<Artist> {
         let artistName = data?.name;
@@ -94,8 +99,9 @@ export class ArtistService implements IArtistService {
             throw new Error('Artist name is required to crawl details');
         }
         const enrichedArtist = await this.crawler.crawlArtistByName(artistName, {
-            spotifyId: data?.spotifyId,
-            context: data?.context,
+            ...(data?.spotifyId ? { spotifyId: data.spotifyId } : {}),
+            ...(data?.context ? { context: data.context } : {}),
+            ...(data?.webSearch ? { webSearch: data.webSearch } : {}),
         });
         enrichedArtist.name = artistName; // Ensure we keep the original name
         // if id is provided, we should keep it

@@ -2,6 +2,7 @@
  * Admin endpoint for crawling artist data
  */
 import { DIContainer } from '@/lib/di-container';
+import { WebSearchError } from '@/lib/services/web-search';
 import { requireAdmin } from '@/lib/utils/auth-utils';
 import { toError } from '@/lib/utils/error-handler';
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,6 +20,13 @@ const CrawlArtistRequestSchema = z.object({
     name: z.string().optional(),
     spotifyId: z.string().optional(),
     context: z.string().optional(),
+    webSearch: z
+        .object({
+            country: z.string().optional(),
+            searchLang: z.string().optional(),
+            count: z.number().int().min(1).max(50).optional(),
+        })
+        .optional(),
 });
 
 export const POST = requireAdmin(async (request: NextRequest): Promise<Response> => {
@@ -54,8 +62,9 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
 
         const result = await artistService.crawlArtistDetails(validated.id, {
             name: artistName,
-            context: validated.context,
-            spotifyId: validated.spotifyId,
+            ...(validated.context ? { context: validated.context } : {}),
+            ...(validated.spotifyId ? { spotifyId: validated.spotifyId } : {}),
+            ...(validated.webSearch ? { webSearch: validated.webSearch } : {}),
         });
 
         return NextResponse.json({
@@ -75,6 +84,15 @@ export const POST = requireAdmin(async (request: NextRequest): Promise<Response>
                     })),
                 },
                 { status: 400 }
+            );
+        }
+        if (error instanceof WebSearchError) {
+            return NextResponse.json(
+                {
+                    message: `Artist crawl failed: ${error.message}`,
+                    errorCode: error.code,
+                },
+                { status: error.statusCode || 502 }
             );
         }
         return NextResponse.json(
