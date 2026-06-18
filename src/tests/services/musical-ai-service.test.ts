@@ -130,7 +130,7 @@ describe('MusicalAIService', () => {
             expect(result.id).toBeTruthy(); // ID should be generated
             expect(aiService.generateObject).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    systemPrompt: expect.stringContaining('expert in music and artists'),
+                    systemPrompt: expect.stringContaining('expert music editor'),
                     prompt: expect.stringContaining('Provide detailed information about the artist'),
                     temperature: 0.8,
                     schema: expect.any(z.ZodObject),

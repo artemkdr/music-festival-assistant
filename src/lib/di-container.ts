@@ -3,6 +3,7 @@
  * Central place to configure and wire up all services following SOLID principles
  */
 import { getAIConfig, validateAIConfig } from '@/config/ai-config';
+import { getWebSearchConfig, validateWebSearchConfig } from '@/config/web-search-config';
 import type { IArtistRepository, IFestivalRepository } from '@/lib/repositories/interfaces';
 import { PrismaArtistRepository, PrismaFestivalRepository } from '@/lib/repositories/providers/prisma';
 import type { AIProvider, IAIService } from '@/lib/services/ai';
@@ -22,6 +23,7 @@ import { FestivalService } from '@/lib/services/festival-service';
 import type { IArtistService, IFestivalService, IRecommendationService } from '@/lib/services/interfaces';
 import { RecommendationService } from '@/lib/services/recommendation-service';
 import { SpotifyService } from '@/lib/services/spotify/spotify-service';
+import { IWebSearchService, WebSearchFactory } from '@/lib/services/web-search';
 import type { ILogger } from '@/lib/types/logger';
 import { ErrorHandler, IErrorHandler, IRetryHandler, RetryHandler } from '@/lib/utils/error-handler';
 import { createAppLogger, logLevelMap } from '@/lib/utils/logger';
@@ -46,6 +48,7 @@ export class DIContainer {
     private _artistCrawlerService: ArtistCrawlerService | null = null;
     private _authService: IAuthService | null = null;
     private _cacheService: ICacheService | null = null;
+    private _webSearchService: IWebSearchService | null = null;
 
     /**
      * Get singleton instance
@@ -243,10 +246,23 @@ export class DIContainer {
             }
             const spotifyApi = new SpotifyService(logger, process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
             const aiService = this.getMusicalAIService();
-            this._artistCrawlerService = new ArtistCrawlerService(logger, spotifyApi, aiService!);
+            this._artistCrawlerService = new ArtistCrawlerService(logger, spotifyApi, aiService!, this.getWebSearchService());
             logger.info('Artist crawler service initialized');
         }
         return this._artistCrawlerService;
+    }
+
+    /**
+     * Get web search service
+     */
+    public getWebSearchService(): IWebSearchService {
+        if (!this._webSearchService) {
+            const config = getWebSearchConfig();
+            validateWebSearchConfig(config);
+            this._webSearchService = new WebSearchFactory(this.getLogger()).create(config);
+            this.getLogger().info('Web search service initialized', { provider: config.provider });
+        }
+        return this._webSearchService;
     }
 
     /**
@@ -305,6 +321,7 @@ export class DIContainer {
         this._aiSimpleService = null;
         this._musicalAIService = null;
         this._cacheService = null;
+        this._webSearchService = null;
     }
 }
 

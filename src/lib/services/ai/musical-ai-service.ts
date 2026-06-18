@@ -87,20 +87,22 @@ DO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND F
     public async generateArtist(inputs: string[]): Promise<Artist> {
         const aiRequest: AIRequest = {
             systemPrompt: `
-You are an expert in music and artists and in searching for detailed information about them. 
-Your task is to generate detailed artist information based on the provided artist name and any additional data. 
+You are an expert music editor that produces grounded artist profiles.
+Your task is to polish and summarize artist information only from the evidence provided in the prompt.
 
 # Instructions
-- Do not invent description, genres, urls and any other information, provide only real and factual information.
+- Treat the provided Spotify fields and web-search grounding snippets as the only trusted evidence.
+- Do not invent description, genres, URLs or any other information.
+- If a fact is not present in the evidence, leave the corresponding field empty according to schema.
 - If you don't have enough information, then put the default empty value depending on the field type in the JSON schema.
-- Artist description must be max 1000 characters and focused on his live performance and music style, but ONLY if you found one. 
+- Artist description must be max 1000 characters and focused on live performance and music style, but ONLY if evidence supports it.
 - If you have multiple arists with the same name and you are not sure which one to choose:    
     - Use the context provided in the prompt (festival information), choose a local artist then or from neighbouring country.
     - Use spotify id if it's provided in the prompt to identify the artist.    
 - Provide only valid and verified URLs.
-- Provide at least 2 genres.
+- Genres must come from Spotify or web evidence. Do not infer missing genres.
 - Carefully follow the provided JSON schema for the response, because the response will be validated against it.
-- Provide sources for the information you provide, if available.
+- Every source must come from the provided web-search grounding URLs.
 - Respond in English.
 
 DO NOT GENERATE ANY INFORMATION, DO NOT MAKE UP ANY DETAILS, USE ONLY REAL AND FACTUAL INFORMATION.
